@@ -1,8 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const agendamentoController = require('../controllers/agendamentoController');
 
-router.get('/', agendamentoController.getAgendamentos);
-router.post('/', agendamentoController.postAgendamento);
+const {
+  listarAgendamentos,
+  criarAgendamento,
+  deletarAgendamento,
+} = require('../controllers/agendamentoController');
+
+router.get('/', listarAgendamentos);
+router.post('/', criarAgendamento);
+router.delete('/:id', deletarAgendamento);
 
 module.exports = router;
