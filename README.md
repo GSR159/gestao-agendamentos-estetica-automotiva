@@ -117,7 +117,7 @@ npm install
 DB_HOST=localhost
 DB_USER=postgres
 DB_PASSWORD=sua_senha
-DB_NAME=estetica_automotiva
+DB_NAME=Estetica_automotiva
 DB_PORT=5432
 PORT=3000
 ```
