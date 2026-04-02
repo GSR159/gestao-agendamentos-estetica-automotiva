@@ -34,30 +34,63 @@ const criarAgendamento = async (req, res) => {
   }
 
   try {
-    const conflito = await pool.query(
-      'SELECT * FROM agendamentos WHERE data = $1',
-      [data]
+    // 🔍 Buscar o serviço
+    const servicoResult = await pool.query(
+      'SELECT duracao_minutos FROM servicos WHERE id = $1',
+      [servico_id]
     );
 
-    if (conflito.rows.length > 0) {
-      return res.status(400).json({
-        erro: 'Já existe um agendamento para este horário'
-      });
+    if (servicoResult.rows.length === 0) {
+      return res.status(404).json({ erro: 'Serviço não encontrado' });
     }
 
+    const duracaoMinutos = servicoResult.rows[0].duracao_minutos;
+
+    // 🧠 Calcular intervalo do novo agendamento
+    const inicioNovo = new Date(data);
+    const fimNovo = new Date(inicioNovo);
+    fimNovo.setMinutes(fimNovo.getMinutes() + duracaoMinutos);
+
+    // 🔍 Buscar agendamentos existentes
+    const agendamentosExistentes = await pool.query(
+      'SELECT * FROM agendamentos'
+    );
+
+    // 🚫 Verificar conflito
+    for (const agendamento of agendamentosExistentes.rows) {
+      const inicioExistente = new Date(agendamento.data);
+
+      const fimExistente = new Date(inicioExistente);
+      fimExistente.setMinutes(
+        fimExistente.getMinutes() + agendamento.duracao_minutos
+      );
+
+      const conflito =
+        inicioNovo < fimExistente && fimNovo > inicioExistente;
+
+      if (conflito) {
+        return res.status(400).json({
+          erro: 'Já existe um agendamento nesse intervalo de horário'
+        });
+      }
+    }
+
+    // ✅ Criar agendamento
     const resultado = await pool.query(
-      `INSERT INTO agendamentos (cliente_id, veiculo_id, servico_id, data, status)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING *`,
-      [cliente_id, veiculo_id, servico_id, data, status]
+      `INSERT INTO agendamentos 
+      (cliente_id, veiculo_id, servico_id, data, duracao_minutos, status)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *`,
+      [cliente_id, veiculo_id, servico_id, data, duracaoMinutos, status]
     );
 
     res.status(201).json(resultado.rows[0]);
   } catch (error) {
     console.error('Erro ao criar agendamento:', error);
-    res.status(500).json({ erro: 'Erro ao criar agendamento' });
+    res.status(500).json({ erro: error.message });;
   }
 };
+
 const deletarAgendamento = async (req, res) => {
   const { id } = req.params;
 

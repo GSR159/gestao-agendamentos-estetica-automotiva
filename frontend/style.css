@@ -1,0 +1,121 @@
+/* RESET */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+}
+
+/* LAYOUT */
+.app {
+  display: flex;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background: #0f172a;
+  color: white;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+.sidebar a {
+  display: block;
+  color: #cbd5e1;
+  text-decoration: none;
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.sidebar a:hover {
+  background: #1e293b;
+  color: white;
+}
+
+/* CONTEÚDO */
+.content {
+  flex: 1;
+  padding: 20px;
+}
+
+/* TABELA */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  background: #1e293b;
+  color: white;
+}
+
+tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+tr:hover {
+  background: #e2e8f0;
+}
+
+/* BOTÕES */
+button {
+  margin-right: 5px;
+  padding: 6px 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+/* CORES DOS BOTÕES */
+button:nth-child(1) {
+  background: #22c55e; /* verde */
+  color: white;
+}
+
+button:nth-child(2) {
+  background: #ef4444; /* vermelho */
+  color: white;
+}
+
+button:nth-child(3) {
+  background: #64748b; /* cinza */
+  color: white;
+}
+
+/* STATUS */
+.status {
+  padding: 5px 10px;
+  border-radius: 10px;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.status.pendente {
+  background: #f59e0b;
+}
+
+.status.aprovado {
+  background: #22c55e;
+}
+
+.status.recusado {
+  background: #ef4444;
+}
+.status.agendado {
+  background: #3b82f6; /* azul */
+}
