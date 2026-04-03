@@ -16,7 +16,7 @@ async function carregarAgendamentos() {
       <td>${a.servico}</td>
       <td>${new Date(a.data).toLocaleString()}</td>
       <td><span class="status ${a.status}">${a.status}</span></td>
-      <td>
+      <td> class="admin-only">
         <button onclick="atualizarStatus(${a.id}, 'aprovado')">✔</button>
         <button onclick="atualizarStatus(${a.id}, 'recusado')">❌</button>
         <button onclick="deletar(${a.id})">🗑</button>

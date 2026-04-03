@@ -119,3 +119,25 @@ button:nth-child(3) {
 .status.agendado {
   background: #3b82f6; /* azul */
 }
+.cards {
+  display: flex;
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  flex: 1;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.card p {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+canvas {
+  max-height: 300px;
+}
