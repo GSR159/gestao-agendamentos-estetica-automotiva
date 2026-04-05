@@ -1,8 +1,18 @@
 const pool = require('../config/db');
 
+// 🔹 LISTAR SERVIÇOS
 const listarServicos = async (req, res) => {
   try {
-    const resultado = await pool.query('SELECT * FROM servicos ORDER BY id ASC');
+    const resultado = await pool.query(`
+      SELECT 
+        id,
+        nome,
+        duracao_minutos AS tempo,
+        preco
+      FROM servicos
+      ORDER BY id ASC
+    `);
+
     res.status(200).json(resultado.rows);
   } catch (error) {
     console.error('Erro ao listar serviços:', error);
@@ -10,11 +20,20 @@ const listarServicos = async (req, res) => {
   }
 };
 
+// 🔹 BUSCAR POR ID
 const buscarServicoPorId = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const resultado = await pool.query('SELECT * FROM servicos WHERE id = $1', [id]);
+    const resultado = await pool.query(`
+      SELECT 
+        id,
+        nome,
+        tempo_execucao AS tempo,
+        preco
+      FROM servicos
+      WHERE id = $1
+    `, [id]);
 
     if (resultado.rows.length === 0) {
       return res.status(404).json({ erro: 'Serviço não encontrado' });
@@ -27,15 +46,16 @@ const buscarServicoPorId = async (req, res) => {
   }
 };
 
+// 🔹 CRIAR SERVIÇO
 const criarServico = async (req, res) => {
-  const { nome, descricao, preco, duracao_minutos } = req.body;
+  const { nome, tempo_execucao, preco } = req.body;
 
   try {
     const resultado = await pool.query(
-      `INSERT INTO servicos (nome, descricao, preco, duracao_minutos)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO servicos (nome, tempo_execucao, preco)
+       VALUES ($1, $2, $3)
        RETURNING *`,
-      [nome, descricao, preco, duracao_minutos]
+      [nome, tempo_execucao, preco]
     );
 
     res.status(201).json(resultado.rows[0]);
@@ -45,17 +65,18 @@ const criarServico = async (req, res) => {
   }
 };
 
+// 🔹 ATUALIZAR SERVIÇO
 const atualizarServico = async (req, res) => {
   const { id } = req.params;
-  const { nome, descricao, preco, duracao_minutos } = req.body;
+  const { nome, tempo_execucao, preco } = req.body;
 
   try {
     const resultado = await pool.query(
       `UPDATE servicos
-       SET nome = $1, descricao = $2, preco = $3, duracao_minutos = $4
-       WHERE id = $5
+       SET nome = $1, tempo_execucao = $2, preco = $3
+       WHERE id = $4
        RETURNING *`,
-      [nome, descricao, preco, duracao_minutos, id]
+      [nome, tempo_execucao, preco, id]
     );
 
     if (resultado.rows.length === 0) {
@@ -69,6 +90,7 @@ const atualizarServico = async (req, res) => {
   }
 };
 
+// 🔹 DELETAR SERVIÇO
 const deletarServico = async (req, res) => {
   const { id } = req.params;
 

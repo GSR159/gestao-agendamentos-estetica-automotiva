@@ -18,6 +18,9 @@
     <a href="clientes.html">Clientes</a>
     <a href="veiculos.html">Veículos</a>
     <a href="servicos.html">Serviços</a>
+
+    <!-- 🔥 BOTÃO SAIR -->
+    <button onclick="logout()">Sair</button>
   </aside>
 
   <!-- CONTEÚDO -->
@@ -43,20 +46,17 @@
 
 </div>
 
-<script src="agendamentos.js"></script>
-</body>
-</html>
+<!-- 🔐 AUTH PRIMEIRO -->
 <script src="auth.js"></script>
+
+<!-- ⚙️ SCRIPT DA PÁGINA -->
 <script src="agendamentos.js"></script>
 
-<script>
-  verificarAdmin();
-</script>
-
-<script src="auth.js"></script>
-<script src="agendamentos.js"></script>
-
+<!-- 🚀 EXECUÇÃO -->
 <script>
   verificarLogin();
   ocultarParaCliente();
 </script>
+
+</body>
+</html>

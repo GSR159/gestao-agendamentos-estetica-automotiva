@@ -1,6 +1,10 @@
 const pool = require('../config/db');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
+const SECRET = "segredo_super_forte"; // depois vamos pro .env
+
+// 🔹 LOGIN
 const login = async (req, res) => {
   const { email, senha } = req.body;
 
@@ -16,23 +20,32 @@ const login = async (req, res) => {
 
     const usuario = resultado.rows[0];
 
-    // 🔥 COMPARAÇÃO CORRETA
     const senhaValida = await bcrypt.compare(senha, usuario.senha);
 
     if (!senhaValida) {
       return res.status(401).json({ erro: 'Senha inválida' });
     }
 
-    res.status(200).json({
-      id: usuario.id,
-      email: usuario.email,
-      tipo: usuario.tipo
+    const token = jwt.sign(
+      {
+        id: usuario.id,
+        tipo: usuario.tipo
+      },
+      SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.json({
+      success: true,
+      token
     });
 
   } catch (error) {
-    console.error(error);
+    console.error('Erro no login:', error);
     res.status(500).json({ erro: 'Erro no login' });
   }
 };
 
-module.exports = { login };
+module.exports = {
+  login
+};

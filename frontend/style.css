@@ -141,3 +141,22 @@ button:nth-child(3) {
 canvas {
   max-height: 300px;
 }
+.usuario-box {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  color: white; /* 🔥 ESSA LINHA RESOLVE */
+  border-top: 1px solid #1e293b; /* opcional (fica bonito) */
+}
+
+.usuario-box span {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.usuario-box button {
+  background: #e5e7eb;
+  color: black;
+}

@@ -18,6 +18,12 @@
     <a href="clientes.html">Clientes</a>
     <a href="veiculos.html">Veículos</a>
     <a href="servicos.html">Serviços</a>
+
+    <!-- 👤 USUÁRIO -->
+    <div class="usuario-box">
+      <span id="usuario-logado">👤</span>
+      <button onclick="logout()">Sair</button>
+    </div>
   </aside>
 
   <!-- CONTEÚDO -->
@@ -43,6 +49,18 @@
 
 </div>
 
+<!-- 🔐 AUTH -->
+<script src="auth.js"></script>
+
+<!-- ⚙️ SCRIPT DA PÁGINA -->
 <script src="agendamentos.js"></script>
+
+<!-- 🚀 EXECUÇÃO -->
+<script>
+  verificarLogin();
+  ocultarParaCliente();
+  mostrarUsuario();
+</script>
+
 </body>
 </html>
