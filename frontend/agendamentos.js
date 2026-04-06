@@ -1,86 +1,197 @@
-// 🔐 token
-const token = localStorage.getItem("token");
-
-if (!token) {
-  window.location.href = "login.html";
-}
-
 const API = "http://localhost:3000";
 
-// 🔥 headers padrão
+// 🔐 headers
 function getHeaders() {
+  const token = localStorage.getItem("token");
+
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`
+    "Authorization": `Bearer ${token}`
   };
 }
 
-// 🚀 carregar agendamentos
-async function carregarAgendamentos() {
-  try {
-    const res = await fetch(`${API}/agendamentos`, {
-      headers: getHeaders()
-    });
+// ================= FORM =================
+window.abrirFormulario = function () {
+  document.getElementById("formAgendamento").style.display = "block";
+};
 
-    if (!res.ok) {
-      throw new Error("Erro na API");
-    }
+window.fecharFormulario = function () {
+  document.getElementById("formAgendamento").style.display = "none";
+};
 
-    const dados = await res.json();
-
-    const tabela = document.getElementById("tabela");
-    tabela.innerHTML = "";
-
-    dados.forEach(a => {
-      const tr = document.createElement("tr");
-
-      tr.innerHTML = `
-        <td>${a.cliente}</td>
-        <td>${a.veiculo}</td>
-        <td>${a.servico}</td>
-        <td>${new Date(a.data).toLocaleString()}</td>
-        <td><span class="status ${a.status}">${a.status}</span></td>
-        <td class="admin-only">
-          <button onclick="atualizarStatus(${a.id}, 'aprovado')">✔</button>
-          <button onclick="atualizarStatus(${a.id}, 'recusado')">❌</button>
-          <button onclick="deletar(${a.id})">🗑</button>
-        </td>
-      `;
-
-      tabela.appendChild(tr);
-    });
-
-  } catch (erro) {
-    console.error("Erro:", erro);
-
-    document.getElementById("tabela").innerHTML = `
-      <tr>
-        <td colspan="6">Erro ao carregar agendamentos</td>
-      </tr>
-    `;
-  }
-}
-
-// 🔄 atualizar status
-async function atualizarStatus(id, status) {
-  await fetch(`${API}/agendamentos/${id}`, {
-    method: "PUT",
-    headers: getHeaders(),
-    body: JSON.stringify({ status })
+// ================= CLIENTES =================
+async function carregarClientes() {
+  const res = await fetch(`${API}/clientes`, {
+    headers: getHeaders()
   });
 
-  carregarAgendamentos();
+  const dados = await res.json();
+
+  const select = document.getElementById("cliente_id");
+
+  select.innerHTML = dados.map(c => `
+    <option value="${c.id}">${c.nome}</option>
+  `).join("");
+
+  carregarVeiculosDoCliente();
 }
 
-// 🗑 deletar
-async function deletar(id) {
+// ================= VEÍCULOS =================
+window.carregarVeiculosDoCliente = async function () {
+  const cliente_id = document.getElementById("cliente_id").value;
+
+  const res = await fetch(`${API}/veiculos`, {
+    headers: getHeaders()
+  });
+
+  const dados = await res.json();
+
+  const filtrados = dados.filter(v => v.cliente_id == cliente_id);
+
+  const select = document.getElementById("veiculo_id");
+
+  select.innerHTML = filtrados.map(v => `
+    <option value="${v.id}">${v.modelo} - ${v.placa}</option>
+  `).join("");
+};
+
+// ================= SERVIÇOS =================
+let listaServicos = [];
+
+async function carregarServicos() {
+  const res = await fetch(`${API}/servicos`, {
+    headers: getHeaders()
+  });
+
+  listaServicos = await res.json();
+
+  const select = document.getElementById("servico_id");
+
+  select.innerHTML = listaServicos.map(s => `
+    <option value="${s.id}">${s.nome}</option>
+  `).join("");
+}
+
+// ================= BLOQUEIO =================
+async function horarioOcupado(dataSelecionada, servico_id) {
+  const res = await fetch(`${API}/agendamentos`, {
+    headers: getHeaders()
+  });
+
+  const agendamentos = await res.json();
+
+  const servico = listaServicos.find(s => s.id == servico_id);
+
+  if (!servico) return false;
+
+  const inicioNovo = new Date(dataSelecionada);
+  const fimNovo = new Date(inicioNovo);
+  fimNovo.setMinutes(fimNovo.getMinutes() + servico.duracao_minutos);
+
+  for (const a of agendamentos) {
+    const inicioExistente = new Date(a.data);
+
+    const servicoExistente = listaServicos.find(s => s.nome === a.servico);
+
+    if (!servicoExistente) continue;
+
+    const fimExistente = new Date(inicioExistente);
+    fimExistente.setMinutes(
+      fimExistente.getMinutes() + servicoExistente.duracao_minutos
+    );
+
+    const conflito =
+      inicioNovo < fimExistente && fimNovo > inicioExistente;
+
+    if (conflito) return true;
+  }
+
+  return false;
+}
+
+// ================= CRIAR =================
+window.criarAgendamento = async function () {
+  const cliente_id = document.getElementById("cliente_id").value;
+  const veiculo_id = document.getElementById("veiculo_id").value;
+  const servico_id = document.getElementById("servico_id").value;
+  const data = document.getElementById("data").value;
+
+  if (!cliente_id || !veiculo_id || !servico_id || !data) {
+    alert("Preencha tudo");
+    return;
+  }
+
+  const ocupado = await horarioOcupado(data, servico_id);
+
+  if (ocupado) {
+    alert("❌ Horário ocupado!");
+    return;
+  }
+
+  const res = await fetch(`${API}/agendamentos`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      cliente_id,
+      veiculo_id,
+      servico_id,
+      data
+    })
+  });
+
+  if (res.ok) {
+    alert("Agendado!");
+    fecharFormulario();
+    carregarAgendamentos();
+  } else {
+    alert("Erro ao agendar");
+  }
+};
+
+// ================= LISTAR =================
+window.carregarAgendamentos = async function () {
+  const res = await fetch(`${API}/agendamentos`, {
+    headers: getHeaders()
+  });
+
+  const dados = await res.json();
+
+  const tabela = document.getElementById("tabela");
+  tabela.innerHTML = "";
+
+  dados.forEach(a => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${a.cliente}</td>
+      <td>${a.veiculo}</td>
+      <td>${a.servico}</td>
+      <td>${new Date(a.data).toLocaleString("pt-BR")}</td>
+      <td>
+     <span class="status ${a.status}">
+      ${a.status.toUpperCase()}
+      </span>
+      </td>
+      <td>
+        <button onclick="deletar(${a.id})">🗑</button>
+      </td>
+    `;
+
+    tabela.appendChild(tr);
+  });
+};
+
+// ================= DELETE =================
+window.deletar = async function (id) {
   await fetch(`${API}/agendamentos/${id}`, {
     method: "DELETE",
     headers: getHeaders()
   });
 
   carregarAgendamentos();
-}
+};
 
-// 🚀 inicia
+// ================= INIT =================
+carregarClientes();
+carregarServicos();
 carregarAgendamentos();

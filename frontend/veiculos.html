@@ -17,17 +17,38 @@
     <a href="clientes.html">Clientes</a>
     <a href="veiculos.html">Veículos</a>
     <a href="servicos.html">Serviços</a>
+
+    <div class="usuario-box">
+      <span id="usuario-logado">👤</span>
+      <button onclick="logout()">Sair</button>
+    </div>
   </aside>
 
   <main class="content">
     <h1>Veículos</h1>
 
+    <button onclick="abrirFormVeiculo()">+ Novo Veículo</button>
+
+    <!-- FORM -->
+    <div id="formVeiculo" style="display:none; margin: 15px 0;">
+      <input id="cliente_id" placeholder="ID Cliente">
+      <input id="marca" placeholder="Marca">
+      <input id="modelo" placeholder="Modelo">
+      <input id="placa" placeholder="Placa">
+      <input id="cor" placeholder="Cor">
+      <input id="ano" placeholder="Ano">
+
+      <button onclick="salvarVeiculo()">Salvar</button>
+      <button onclick="fecharFormVeiculo()">Cancelar</button>
+    </div>
+
     <table>
       <thead>
         <tr>
+          <th>Cliente</th>
           <th>Modelo</th>
           <th>Placa</th>
-          <th>Cliente</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody id="tabela"></tbody>
@@ -39,5 +60,11 @@
 
 <script src="auth.js"></script>
 <script src="veiculos.js"></script>
+
+<script>
+  verificarLogin();
+  mostrarUsuario();
+</script>
+
 </body>
 </html>

@@ -17,17 +17,40 @@
     <a href="clientes.html">Clientes</a>
     <a href="veiculos.html">Veículos</a>
     <a href="servicos.html">Serviços</a>
+
+    <!-- 🔥 PADRÃO -->
+    <div class="usuario-box">
+      <span id="usuario-logado">👤</span>
+      <button onclick="logout()">Sair</button>
+    </div>
   </aside>
 
   <main class="content">
     <h1>Clientes</h1>
 
+    <!-- 🔥 BOTÃO -->
+    <button onclick="abrirFormCliente()" style="margin-bottom: 15px;">
+      + Novo Cliente
+    </button>
+
+    <!-- 🔥 FORM -->
+    <div id="formCliente" style="display:none; margin-bottom:20px;">
+      <input id="nome" placeholder="Nome">
+      <input id="email" placeholder="Email">
+      <input id="telefone" placeholder="Telefone">
+
+      <button onclick="criarCliente()">Salvar</button>
+      <button onclick="fecharFormCliente()">Cancelar</button>
+    </div>
+
+    <!-- 🔥 TABELA -->
     <table>
       <thead>
         <tr>
           <th>Nome</th>
           <th>Email</th>
           <th>Telefone</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody id="tabela"></tbody>
@@ -39,5 +62,11 @@
 
 <script src="auth.js"></script>
 <script src="clientes.js"></script>
+
+<script>
+  verificarLogin();
+  mostrarUsuario();
+</script>
+
 </body>
 </html>

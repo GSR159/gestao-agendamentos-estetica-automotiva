@@ -9,7 +9,6 @@
 
 <div class="app">
 
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <h2>🚗 Smart System</h2>
 
@@ -19,14 +18,35 @@
     <a href="veiculos.html">Veículos</a>
     <a href="servicos.html">Serviços</a>
 
-    <!-- 🔥 BOTÃO SAIR -->
-    <button onclick="logout()">Sair</button>
+    <div class="usuario-box">
+      <span id="usuario-logado">👤</span>
+      <button onclick="logout()">Sair</button>
+    </div>
   </aside>
 
-  <!-- CONTEÚDO -->
   <main class="content">
 
     <h1>Agendamentos</h1>
+
+    <button onclick="abrirFormulario()" style="margin-bottom: 15px;">
+      + Novo Agendamento
+    </button>
+
+    <!-- FORM -->
+    <div id="formAgendamento" style="display:none; margin-bottom:20px;">
+
+      <select id="cliente_id" onchange="carregarVeiculosDoCliente()"></select>
+
+      <select id="veiculo_id"></select>
+
+      <select id="servico_id"></select>
+
+      <input type="datetime-local" id="data">
+
+      <button onclick="criarAgendamento()">Salvar</button>
+      <button onclick="fecharFormulario()">Cancelar</button>
+
+    </div>
 
     <table>
       <thead>
@@ -46,15 +66,12 @@
 
 </div>
 
-<!-- 🔐 AUTH PRIMEIRO -->
 <script src="auth.js"></script>
-
-<!-- ⚙️ SCRIPT DA PÁGINA -->
 <script src="agendamentos.js"></script>
 
-<!-- 🚀 EXECUÇÃO -->
 <script>
   verificarLogin();
+  mostrarUsuario();
   ocultarParaCliente();
 </script>
 

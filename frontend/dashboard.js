@@ -1,4 +1,4 @@
-// 🔐 verifica login
+//  token
 const token = localStorage.getItem("token");
 
 if (!token) {
@@ -7,13 +7,34 @@ if (!token) {
 
 const API = "http://localhost:3000";
 
-// 🚀 carregar dashboard
+//  headers padrão
+function getHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`
+  };
+}
+
+// 🇧🇷 FORMATAÇÃO BR
+function formatarHoraBR(data) {
+  return new Date(data).toLocaleTimeString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function formatarDataISO_BR(data) {
+  return new Date(data).toLocaleDateString("en-CA", {
+    timeZone: "America/Sao_Paulo"
+  });
+}
+
+//  carregar dashboard
 async function carregarDashboard() {
   try {
     const res = await fetch(`${API}/agendamentos`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      headers: getHeaders()
     });
 
     if (!res.ok) {
@@ -22,22 +43,28 @@ async function carregarDashboard() {
 
     const dados = await res.json();
 
-    // 🔥 CARDS
-    document.getElementById("total").innerText = dados.length;
+    //  REMOVE DUPLICADOS 
+    const dadosUnicos = dados.filter(
+      (item, index, self) =>
+        index === self.findIndex(a => a.id === item.id)
+    );
 
-    const pendentes = dados.filter(a => a.status === "pendente").length;
-    const aprovados = dados.filter(a => a.status === "aprovado").length;
-    const recusados = dados.filter(a => a.status === "recusado").length;
+    //  CARDS
+    document.getElementById("total").innerText = dadosUnicos.length;
+
+    const pendentes = dadosUnicos.filter(a => a.status === "pendente").length;
+    const aprovados = dadosUnicos.filter(a => a.status === "aprovado").length;
+    const recusados = dadosUnicos.filter(a => a.status === "recusado").length;
 
     document.getElementById("pendentes").innerText = pendentes;
     document.getElementById("aprovados").innerText = aprovados;
     document.getElementById("recusados").innerText = recusados;
 
-    // 🔥 GRÁFICO
+    //  GRÁFICO (CORRIGIDO)
     const mapa = {};
 
-    dados.forEach(a => {
-      const dia = new Date(a.data).toLocaleDateString();
+    dadosUnicos.forEach(a => {
+      const dia = formatarDataISO_BR(a.data);
 
       if (!mapa[dia]) mapa[dia] = 0;
       mapa[dia]++;
@@ -62,29 +89,38 @@ async function carregarDashboard() {
       options: {
         responsive: true,
         plugins: {
-          legend: {
-            display: false
-          }
+          legend: { display: false }
         }
       }
     });
 
-    // 🔥 AGENDA DE HOJE
-    const hoje = new Date().toLocaleDateString();
+    //  AGENDA DO DIA ()
+    const hoje = formatarDataISO_BR(new Date());
 
-    const agendaHoje = dados.filter(a => {
-      const dataAgendamento = new Date(a.data).toLocaleDateString();
-      return dataAgendamento === hoje;
+    let agendaHoje = dadosUnicos.filter(a => {
+      return formatarDataISO_BR(a.data) === hoje;
     });
+
+    //  ORDENA POR HORÁRIO
+    agendaHoje.sort((a, b) => new Date(a.data) - new Date(b.data));
 
     const tabelaHoje = document.getElementById("agendaHoje");
     tabelaHoje.innerHTML = "";
+
+    if (agendaHoje.length === 0) {
+      tabelaHoje.innerHTML = `
+        <tr>
+          <td colspan="5">Nenhum agendamento hoje</td>
+        </tr>
+      `;
+      return;
+    }
 
     agendaHoje.forEach(a => {
       const tr = document.createElement("tr");
 
       tr.innerHTML = `
-        <td>${new Date(a.data).toLocaleTimeString()}</td>
+        <td>${formatarHoraBR(a.data)}</td>
         <td>${a.cliente}</td>
         <td>${a.veiculo}</td>
         <td>${a.servico}</td>
@@ -96,8 +132,9 @@ async function carregarDashboard() {
 
   } catch (erro) {
     console.error("Erro:", erro);
+    alert("Erro ao carregar dashboard");
   }
 }
 
-// 🚀 inicia
+//  inicia
 carregarDashboard();

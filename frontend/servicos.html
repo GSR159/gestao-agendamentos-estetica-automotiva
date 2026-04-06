@@ -9,6 +9,7 @@
 
 <div class="app">
 
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <h2>🚗 Smart System</h2>
 
@@ -17,17 +18,42 @@
     <a href="clientes.html">Clientes</a>
     <a href="veiculos.html">Veículos</a>
     <a href="servicos.html">Serviços</a>
+
+    <div class="usuario-box">
+      <span id="usuario-logado">👤</span>
+      <button onclick="logout()">Sair</button>
+    </div>
   </aside>
 
+  <!-- CONTEÚDO -->
   <main class="content">
     <h1>Serviços</h1>
 
+    <!-- BOTÃO -->
+    <button onclick="abrirFormServico()" style="margin-bottom: 15px;">
+      + Novo Serviço
+    </button>
+
+    <!-- FORM -->
+    <div id="formServico" style="display:none; margin-bottom:20px;">
+      <input id="nome" placeholder="Nome do serviço">
+
+      <input id="duracao" type="number" placeholder="Duração (min)">
+      
+      <input id="preco" type="number" placeholder="Preço (R$)">
+
+      <button onclick="criarServico()">Salvar</button>
+      <button onclick="fecharFormServico()">Cancelar</button>
+    </div>
+
+    <!-- TABELA -->
     <table>
       <thead>
         <tr>
           <th>Nome</th>
           <th>Tempo</th>
           <th>Preço</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody id="tabela"></tbody>
@@ -39,5 +65,11 @@
 
 <script src="auth.js"></script>
 <script src="servicos.js"></script>
+
+<script>
+  verificarLogin();
+  mostrarUsuario();
+</script>
+
 </body>
 </html>

@@ -7,14 +7,15 @@ function verificarLogin() {
   }
 }
 
-// 👤 pega dados do usuário do token
+// 👤 pega dados do usuário do token (JWT)
 function getUsuario() {
   const token = localStorage.getItem("token");
 
   if (!token) return null;
 
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const base64 = token.split('.')[1];
+    const payload = JSON.parse(atob(base64));
     return payload;
   } catch (error) {
     console.error("Erro ao ler token:", error);
@@ -31,19 +32,32 @@ function mostrarUsuario() {
   const el = document.getElementById("usuario-logado");
 
   if (el) {
-    el.innerText = `👤 ${usuario.tipo.toUpperCase()}`;
+    el.innerText = `👤 ${usuario.tipo?.toUpperCase() || "USUARIO"}`;
   }
 }
 
-// 🚫 esconde elementos de admin para clientes
+// 🔐 controla elementos de admin
 function ocultarParaCliente() {
   const usuario = getUsuario();
 
-  if (!usuario) return;
+  const elementosAdmin = document.querySelectorAll(".admin-only");
 
-  if (usuario.tipo !== 'admin') {
-    document.querySelectorAll('.admin-only').forEach(el => {
-      el.style.display = 'none';
+  if (!usuario) {
+    elementosAdmin.forEach(el => el.style.display = "none");
+    return;
+  }
+
+  if (usuario.tipo === "admin") {
+    elementosAdmin.forEach(el => {
+      if (el.tagName === "TD" || el.tagName === "TH") {
+        el.style.display = "table-cell";
+      } else {
+        el.style.display = "block";
+      }
+    });
+  } else {
+    elementosAdmin.forEach(el => {
+      el.style.display = "none";
     });
   }
 }
@@ -52,4 +66,4 @@ function ocultarParaCliente() {
 function logout() {
   localStorage.removeItem("token");
   window.location.href = "login.html";
-}f
+}
