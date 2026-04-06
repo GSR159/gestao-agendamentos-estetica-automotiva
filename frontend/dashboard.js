@@ -1,36 +1,14 @@
-//  token
-const token = localStorage.getItem("token");
-
-if (!token) {
-  window.location.href = "login.html";
-}
-
 const API = "http://localhost:3000";
 
-//  headers padrão
 function getHeaders() {
+  const token = localStorage.getItem("token");
+
   return {
     "Content-Type": "application/json",
     "Authorization": `Bearer ${token}`
   };
 }
 
-// 🇧🇷 FORMATAÇÃO BR
-function formatarHoraBR(data) {
-  return new Date(data).toLocaleTimeString("pt-BR", {
-    timeZone: "America/Sao_Paulo",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-}
-
-function formatarDataISO_BR(data) {
-  return new Date(data).toLocaleDateString("en-CA", {
-    timeZone: "America/Sao_Paulo"
-  });
-}
-
-//  carregar dashboard
 async function carregarDashboard() {
   try {
     const res = await fetch(`${API}/agendamentos`, {
@@ -38,77 +16,112 @@ async function carregarDashboard() {
     });
 
     if (!res.ok) {
-      throw new Error("Erro na API");
+      throw new Error("Erro ao buscar dados");
     }
 
     const dados = await res.json();
 
-    //  REMOVE DUPLICADOS 
-    const dadosUnicos = dados.filter(
-      (item, index, self) =>
-        index === self.findIndex(a => a.id === item.id)
-    );
+    // ================= CARDS =================
+    document.getElementById("total").innerText = dados.length;
 
-    //  CARDS
-    document.getElementById("total").innerText = dadosUnicos.length;
-
-    const pendentes = dadosUnicos.filter(a => a.status === "pendente").length;
-    const aprovados = dadosUnicos.filter(a => a.status === "aprovado").length;
-    const recusados = dadosUnicos.filter(a => a.status === "recusado").length;
+    const pendentes = dados.filter(a => a.status === "pendente").length;
+    const aprovados = dados.filter(a => a.status === "aprovado").length;
+    const recusados = dados.filter(a => a.status === "recusado").length;
 
     document.getElementById("pendentes").innerText = pendentes;
     document.getElementById("aprovados").innerText = aprovados;
     document.getElementById("recusados").innerText = recusados;
 
-    //  GRÁFICO (CORRIGIDO)
-    const mapa = {};
+    // ================= AGRUPAMENTO =================
+    const dias = {};
 
-    dadosUnicos.forEach(a => {
-      const dia = formatarDataISO_BR(a.data);
+    dados.forEach(a => {
+      const data = new Date(a.data).toLocaleDateString("pt-BR");
 
-      if (!mapa[dia]) mapa[dia] = 0;
-      mapa[dia]++;
+      if (!dias[data]) {
+        dias[data] = {
+          aprovado: 0,
+          pendente: 0,
+          recusado: 0
+        };
+      }
+
+      dias[data][a.status]++;
     });
 
-    const labels = Object.keys(mapa);
-    const valores = Object.values(mapa);
+    const labels = Object.keys(dias);
 
-    const ctx = document.getElementById("grafico");
+    const aprovadosData = labels.map(d => dias[d].aprovado);
+    const pendentesData = labels.map(d => dias[d].pendente);
+    const recusadosData = labels.map(d => dias[d].recusado);
 
-    new Chart(ctx, {
+    // ================= GRÁFICO =================
+    const canvas = document.getElementById("grafico");
+
+    if (!canvas) {
+      console.error("Canvas não encontrado");
+      return;
+    }
+
+    const ctx = canvas.getContext("2d");
+
+    if (window.graficoInstance) {
+      window.graficoInstance.destroy();
+    }
+
+    window.graficoInstance = new Chart(ctx, {
       type: "bar",
       data: {
         labels: labels,
-        datasets: [{
-          label: "Agendamentos",
-          data: valores,
-          backgroundColor: "#22c55e",
-          borderRadius: 10
-        }]
+        datasets: [
+          {
+            label: "Aprovados",
+            data: aprovadosData,
+            backgroundColor: "#22c55e"
+          },
+          {
+            label: "Pendentes",
+            data: pendentesData,
+            backgroundColor: "#f59e0b"
+          },
+          {
+            label: "Recusados",
+            data: recusadosData,
+            backgroundColor: "#ef4444"
+          }
+        ]
       },
       options: {
         responsive: true,
         plugins: {
-          legend: { display: false }
+          legend: {
+            position: "top"
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          }
         }
       }
     });
 
-    //  AGENDA DO DIA ()
-    const hoje = formatarDataISO_BR(new Date());
+    // ================= AGENDA DO DIA =================
+    const hoje = new Date().toLocaleDateString("pt-BR");
 
-    let agendaHoje = dadosUnicos.filter(a => {
-      return formatarDataISO_BR(a.data) === hoje;
+    const agendaHoje = dados.filter(a => {
+      const data = new Date(a.data).toLocaleDateString("pt-BR");
+      return data === hoje;
     });
 
-    //  ORDENA POR HORÁRIO
-    agendaHoje.sort((a, b) => new Date(a.data) - new Date(b.data));
-
-    const tabelaHoje = document.getElementById("agendaHoje");
-    tabelaHoje.innerHTML = "";
+    const tabela = document.getElementById("agendaHoje");
+    tabela.innerHTML = "";
 
     if (agendaHoje.length === 0) {
-      tabelaHoje.innerHTML = `
+      tabela.innerHTML = `
         <tr>
           <td colspan="5">Nenhum agendamento hoje</td>
         </tr>
@@ -119,22 +132,29 @@ async function carregarDashboard() {
     agendaHoje.forEach(a => {
       const tr = document.createElement("tr");
 
+      const hora = new Date(a.data).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
       tr.innerHTML = `
-        <td>${formatarHoraBR(a.data)}</td>
+        <td>${hora}</td>
         <td>${a.cliente}</td>
         <td>${a.veiculo}</td>
         <td>${a.servico}</td>
-        <td><span class="status ${a.status}">${a.status}</span></td>
+        <td>
+          <span class="status ${a.status}">
+            ${a.status}
+          </span>
+        </td>
       `;
 
-      tabelaHoje.appendChild(tr);
+      tabela.appendChild(tr);
     });
 
   } catch (erro) {
-    console.error("Erro:", erro);
-    alert("Erro ao carregar dashboard");
+    console.error("Erro no dashboard:", erro);
   }
 }
 
-//  inicia
 carregarDashboard();

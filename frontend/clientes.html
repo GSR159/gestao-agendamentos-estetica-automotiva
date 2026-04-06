@@ -10,7 +10,7 @@
 <div class="app">
 
   <aside class="sidebar">
-    <h2>🚗 Smart System</h2>
+    <h2>Smart System</h2>
 
     <a href="dashboard.html">Dashboard</a>
     <a href="agendamentos.html">Agendamentos</a>
@@ -18,9 +18,8 @@
     <a href="veiculos.html">Veículos</a>
     <a href="servicos.html">Serviços</a>
 
-    <!-- 🔥 PADRÃO -->
     <div class="usuario-box">
-      <span id="usuario-logado">👤</span>
+      <span id="usuario-logado">Usuário</span>
       <button onclick="logout()">Sair</button>
     </div>
   </aside>
@@ -28,22 +27,21 @@
   <main class="content">
     <h1>Clientes</h1>
 
-    <!-- 🔥 BOTÃO -->
     <button onclick="abrirFormCliente()" style="margin-bottom: 15px;">
       + Novo Cliente
     </button>
 
-    <!-- 🔥 FORM -->
     <div id="formCliente" style="display:none; margin-bottom:20px;">
+      <input type="hidden" id="clienteId">
+
       <input id="nome" placeholder="Nome">
       <input id="email" placeholder="Email">
       <input id="telefone" placeholder="Telefone">
 
-      <button onclick="criarCliente()">Salvar</button>
+      <button onclick="salvarCliente()">Salvar</button>
       <button onclick="fecharFormCliente()">Cancelar</button>
     </div>
 
-    <!-- 🔥 TABELA -->
     <table>
       <thead>
         <tr>

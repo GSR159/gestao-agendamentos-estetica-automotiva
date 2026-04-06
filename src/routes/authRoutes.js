@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { login } = require('../controllers/authController');
 
+const { login, register } = require('../controllers/authController');
+
+// LOGIN
 router.post('/login', login);
+
+// CADASTRO
+router.post('/register', register);
 
 module.exports = router;

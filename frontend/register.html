@@ -2,34 +2,33 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Login</title>
+  <title>Cadastro</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="login-container">
-
   <div class="login-box">
-    <h2>Smart System</h2>
-    <p class="subtitle">Acesse sua conta</p>
 
+    <h2>Criar Conta</h2>
+
+    <input id="nome" placeholder="Nome">
     <input id="email" placeholder="Email">
     <input id="senha" type="password" placeholder="Senha">
 
-    <button onclick="login()">Entrar</button>
-
-    <!-- NOVO -->
-    <p class="cadastro-link">
-      Não possui conta? 
-      <a href="register.html">Cadastre-se</a>
-    </p>
+    <button onclick="cadastrar()">Cadastrar</button>
 
     <p id="erro" class="erro"></p>
-  </div>
 
+    <p style="margin-top:10px;">
+      Já tem conta?
+      <a href="login.html">Entrar</a>
+    </p>
+
+  </div>
 </div>
 
-<script src="auth.js"></script>
+<script src="register.js"></script>
 
 </body>
 </html>

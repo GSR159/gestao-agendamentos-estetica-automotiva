@@ -7,59 +7,98 @@ function verificarLogin() {
   }
 }
 
-// 👤 pega dados do usuário do token (JWT)
-function getUsuario() {
-  const token = localStorage.getItem("token");
+// ================= LOGIN =================
+async function login() {
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
 
-  if (!token) return null;
+  if (!email || !senha) {
+    document.getElementById("erro").innerText = "Preencha todos os campos";
+    return;
+  }
 
   try {
+    const res = await fetch("http://localhost:3000/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, senha })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem("token", data.token);
+      window.location.href = "dashboard.html";
+    } else {
+      document.getElementById("erro").innerText = data.erro;
+    }
+
+  } catch (erro) {
+    console.error(erro);
+    document.getElementById("erro").innerText = "Erro ao conectar com servidor";
+  }
+}
+
+// 🔓 decode seguro do JWT
+function parseJwt(token) {
+  try {
     const base64 = token.split('.')[1];
-    const payload = JSON.parse(atob(base64));
-    return payload;
-  } catch (error) {
-    console.error("Erro ao ler token:", error);
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(json);
+  } catch (e) {
+    console.error("Token inválido:", e);
     return null;
   }
 }
 
-// 👤 mostra usuário logado na tela
+// 👤 pega usuário do token
+function getUsuario() {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+
+  return parseJwt(token);
+}
+
+// 👤 mostra usuário logado
 function mostrarUsuario() {
   const usuario = getUsuario();
-
   if (!usuario) return;
 
   const el = document.getElementById("usuario-logado");
 
   if (el) {
-    el.innerText = `👤 ${usuario.tipo?.toUpperCase() || "USUARIO"}`;
+    el.innerText = usuario.tipo
+      ? usuario.tipo.toUpperCase()
+      : "USUARIO";
   }
 }
 
-// 🔐 controla elementos de admin
+// 🔐 controle de acesso
 function ocultarParaCliente() {
   const usuario = getUsuario();
-
   const elementosAdmin = document.querySelectorAll(".admin-only");
 
-  if (!usuario) {
-    elementosAdmin.forEach(el => el.style.display = "none");
-    return;
-  }
-
-  if (usuario.tipo === "admin") {
-    elementosAdmin.forEach(el => {
-      if (el.tagName === "TD" || el.tagName === "TH") {
-        el.style.display = "table-cell";
-      } else {
-        el.style.display = "block";
-      }
-    });
-  } else {
+  if (!usuario || usuario.tipo !== "admin") {
     elementosAdmin.forEach(el => {
       el.style.display = "none";
     });
+    return;
   }
+
+  elementosAdmin.forEach(el => {
+    if (el.tagName === "TD" || el.tagName === "TH") {
+      el.style.display = "table-cell";
+    } else {
+      el.style.display = "block";
+    }
+  });
 }
 
 // 🚪 logout

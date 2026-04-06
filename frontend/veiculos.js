@@ -15,7 +15,22 @@ function getHeaders() {
   };
 }
 
-// 🚀 LISTAR
+// ================= CLIENTES =================
+async function carregarClientes() {
+  const res = await fetch(`${API}/clientes`, {
+    headers: getHeaders()
+  });
+
+  const dados = await res.json();
+
+  const select = document.getElementById("cliente_id");
+
+  select.innerHTML = dados.map(c => `
+    <option value="${c.id}">${c.nome}</option>
+  `).join("");
+}
+
+// ================= LISTAR =================
 window.carregarVeiculos = async function () {
   try {
     const res = await fetch(`${API}/veiculos`, {
@@ -45,12 +60,12 @@ window.carregarVeiculos = async function () {
   }
 };
 
-// 🔥 abrir form
-window.abrirFormVeiculo = function () {
+// ================= FORM =================
+window.abrirFormVeiculo = async function () {
   document.getElementById("formVeiculo").style.display = "block";
+  await carregarClientes();
 };
 
-// 🔥 fechar form
 window.fecharFormVeiculo = function () {
   document.getElementById("formVeiculo").style.display = "none";
   veiculoEditando = null;
@@ -63,9 +78,11 @@ window.fecharFormVeiculo = function () {
   document.getElementById("ano").value = "";
 };
 
-// ✏️ EDITAR REAL
+// ================= EDITAR =================
 window.editarVeiculo = async function (id) {
   try {
+    await carregarClientes();
+
     const res = await fetch(`${API}/veiculos/${id}`, {
       headers: getHeaders()
     });
@@ -89,7 +106,7 @@ window.editarVeiculo = async function (id) {
   }
 };
 
-// 💾 SALVAR (CREATE + UPDATE)
+// ================= SALVAR =================
 window.salvarVeiculo = async function () {
   const cliente_id = document.getElementById("cliente_id").value;
   const marca = document.getElementById("marca").value;
@@ -137,7 +154,7 @@ window.salvarVeiculo = async function () {
   }
 };
 
-// 🗑 deletar
+// ================= DELETE =================
 window.deletarVeiculo = async function (id) {
   if (!confirm("Deseja deletar este veículo?")) return;
 
@@ -149,5 +166,5 @@ window.deletarVeiculo = async function (id) {
   carregarVeiculos();
 };
 
-// 🚀 inicia
+// ================= INIT =================
 carregarVeiculos();

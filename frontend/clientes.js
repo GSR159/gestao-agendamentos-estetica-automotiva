@@ -6,7 +6,6 @@ if (!token) {
 
 const API = "http://localhost:3000";
 
-// 🔥 headers
 function getHeaders() {
   return {
     "Content-Type": "application/json",
@@ -14,7 +13,6 @@ function getHeaders() {
   };
 }
 
-// 🚀 carregar clientes
 window.carregarClientes = async function () {
   try {
     const res = await fetch(`${API}/clientes`, {
@@ -24,7 +22,6 @@ window.carregarClientes = async function () {
     if (!res.ok) throw new Error("Erro na API");
 
     const dados = await res.json();
-
     const tabela = document.getElementById("tabela");
 
     if (dados.length === 0) {
@@ -42,7 +39,8 @@ window.carregarClientes = async function () {
         <td>${c.email}</td>
         <td>${c.telefone}</td>
         <td>
-          <button onclick="deletarCliente(${c.id})">🗑</button>
+          <button onclick="editarCliente(${c.id})">Editar</button>
+          <button onclick="deletarCliente(${c.id})">Excluir</button>
         </td>
       </tr>
     `).join("");
@@ -54,18 +52,42 @@ window.carregarClientes = async function () {
   }
 };
 
-// 🔥 abrir form
 window.abrirFormCliente = function () {
   document.getElementById("formCliente").style.display = "block";
+
+  document.getElementById("clienteId").value = "";
+  document.getElementById("nome").value = "";
+  document.getElementById("email").value = "";
+  document.getElementById("telefone").value = "";
 };
 
-// 🔥 fechar form
 window.fecharFormCliente = function () {
   document.getElementById("formCliente").style.display = "none";
 };
 
-// 🔥 criar cliente
-window.criarCliente = async function () {
+window.editarCliente = async function (id) {
+  try {
+    const res = await fetch(`${API}/clientes/${id}`, {
+      headers: getHeaders()
+    });
+
+    const cliente = await res.json();
+
+    document.getElementById("formCliente").style.display = "block";
+
+    document.getElementById("clienteId").value = cliente.id;
+    document.getElementById("nome").value = cliente.nome;
+    document.getElementById("email").value = cliente.email;
+    document.getElementById("telefone").value = cliente.telefone;
+
+  } catch (erro) {
+    console.error("Erro ao carregar cliente", erro);
+  }
+};
+
+window.salvarCliente = async function () {
+  const id = document.getElementById("clienteId").value;
+
   const nome = document.getElementById("nome").value;
   const email = document.getElementById("email").value;
   const telefone = document.getElementById("telefone").value;
@@ -75,22 +97,37 @@ window.criarCliente = async function () {
     return;
   }
 
-  const res = await fetch(`${API}/clientes`, {
-    method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify({ nome, email, telefone })
-  });
+  const dados = { nome, email, telefone };
 
-  if (res.ok) {
-    alert("Cliente criado!");
-    fecharFormCliente();
-    carregarClientes();
-  } else {
-    alert("Erro ao criar cliente");
+  try {
+    let res;
+
+    if (id) {
+      res = await fetch(`${API}/clientes/${id}`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(dados)
+      });
+    } else {
+      res = await fetch(`${API}/clientes`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(dados)
+      });
+    }
+
+    if (res.ok) {
+      fecharFormCliente();
+      carregarClientes();
+    } else {
+      alert("Erro ao salvar cliente");
+    }
+
+  } catch (erro) {
+    console.error(erro);
   }
 };
 
-// 🔥 deletar
 window.deletarCliente = async function (id) {
   if (!confirm("Deseja deletar?")) return;
 
@@ -102,5 +139,4 @@ window.deletarCliente = async function (id) {
   carregarClientes();
 };
 
-// 🚀 inicia
 carregarClientes();

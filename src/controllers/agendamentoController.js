@@ -1,21 +1,29 @@
 const pool = require('../config/db');
 
-// 📋 LISTAR AGENDAMENTOS
+// LISTAR AGENDAMENTOS + EXPIRAÇÃO AUTOMÁTICA
 const listarAgendamentos = async (req, res) => {
   try {
+    // expira automaticamente
+    await pool.query(`
+      UPDATE agendamentos
+      SET status = 'recusado'
+      WHERE status = 'pendente'
+      AND criado_em < NOW() - INTERVAL '48 hours'
+    `);
+
     const resultado = await pool.query(`
       SELECT DISTINCT
-  a.id,
-  c.nome AS cliente,
-  v.modelo AS veiculo,
-  s.nome AS servico,
-  a.data,
-  a.status
-FROM agendamentos a
-JOIN clientes c ON a.cliente_id = c.id
-JOIN veiculos v ON a.veiculo_id = v.id
-JOIN servicos s ON a.servico_id = s.id
-ORDER BY a.data ASC
+        a.id,
+        c.nome AS cliente,
+        v.modelo AS veiculo,
+        s.nome AS servico,
+        a.data,
+        a.status
+      FROM agendamentos a
+      JOIN clientes c ON a.cliente_id = c.id
+      JOIN veiculos v ON a.veiculo_id = v.id
+      JOIN servicos s ON a.servico_id = s.id
+      ORDER BY a.data ASC
     `);
 
     res.status(200).json(resultado.rows);
@@ -26,11 +34,10 @@ ORDER BY a.data ASC
   }
 };
 
-// ➕ CRIAR AGENDAMENTO
+// CRIAR AGENDAMENTO
 const criarAgendamento = async (req, res) => {
   const { cliente_id, veiculo_id, servico_id, data } = req.body;
 
-  // 🔴 VALIDAÇÃO
   if (!cliente_id || !veiculo_id || !servico_id || !data) {
     return res.status(400).json({
       erro: 'Todos os campos são obrigatórios'
@@ -40,7 +47,6 @@ const criarAgendamento = async (req, res) => {
   const status = 'pendente';
 
   try {
-    // 🔍 VERIFICA SERVIÇO
     const servicoResult = await pool.query(
       'SELECT duracao_minutos FROM servicos WHERE id = $1',
       [servico_id]
@@ -52,13 +58,6 @@ const criarAgendamento = async (req, res) => {
 
     const duracaoMinutos = servicoResult.rows[0].duracao_minutos;
 
-    if (!duracaoMinutos) {
-      return res.status(400).json({
-        erro: 'Serviço sem duração definida'
-      });
-    }
-
-    // 🔍 VERIFICA VEÍCULO DO CLIENTE
     const veiculoCheck = await pool.query(
       'SELECT * FROM veiculos WHERE id = $1 AND cliente_id = $2',
       [veiculo_id, cliente_id]
@@ -70,19 +69,21 @@ const criarAgendamento = async (req, res) => {
       });
     }
 
-    // 🧠 INTERVALO NOVO
     const inicioNovo = new Date(data);
     const fimNovo = new Date(inicioNovo);
     fimNovo.setMinutes(fimNovo.getMinutes() + duracaoMinutos);
 
-    // 🔍 AGENDAMENTOS EXISTENTES
     const agendamentosExistentes = await pool.query(`
       SELECT a.data, s.duracao_minutos
       FROM agendamentos a
       JOIN servicos s ON a.servico_id = s.id
-    `);
+      WHERE a.status != 'recusado'
+      AND a.data BETWEEN $1 AND $2
+    `, [
+      new Date(inicioNovo.getTime() - 24 * 60 * 60 * 1000),
+      new Date(fimNovo.getTime() + 24 * 60 * 60 * 1000)
+    ]);
 
-    // 🚫 VERIFICAR CONFLITO
     for (const agendamento of agendamentosExistentes.rows) {
       const inicioExistente = new Date(agendamento.data);
 
@@ -101,7 +102,6 @@ const criarAgendamento = async (req, res) => {
       }
     }
 
-    // ✅ INSERT
     const resultado = await pool.query(
       `INSERT INTO agendamentos 
       (cliente_id, veiculo_id, servico_id, data, duracao_minutos, status)
@@ -113,12 +113,43 @@ const criarAgendamento = async (req, res) => {
     res.status(201).json(resultado.rows[0]);
 
   } catch (error) {
-    console.error('ERRO AO CRIAR:', error);
+    console.error('Erro ao criar agendamento:', error);
     res.status(500).json({ erro: error.message });
   }
 };
 
-// 🗑 DELETAR
+// ATUALIZAR STATUS
+const atualizarStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const statusValidos = ['pendente', 'aprovado', 'recusado'];
+
+  if (!statusValidos.includes(status)) {
+    return res.status(400).json({ erro: 'Status inválido' });
+  }
+
+  try {
+    const resultado = await pool.query(
+      'UPDATE agendamentos SET status = $1 WHERE id = $2 RETURNING *',
+      [status, id]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({
+        erro: 'Agendamento não encontrado'
+      });
+    }
+
+    res.status(200).json(resultado.rows[0]);
+
+  } catch (error) {
+    console.error('Erro ao atualizar status:', error);
+    res.status(500).json({ erro: 'Erro ao atualizar status' });
+  }
+};
+
+// DELETAR
 const deletarAgendamento = async (req, res) => {
   const { id } = req.params;
 
@@ -143,5 +174,6 @@ const deletarAgendamento = async (req, res) => {
 module.exports = {
   listarAgendamentos,
   criarAgendamento,
+  atualizarStatus,
   deletarAgendamento,
 };

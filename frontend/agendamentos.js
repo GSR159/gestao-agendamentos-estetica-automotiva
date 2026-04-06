@@ -1,6 +1,6 @@
 const API = "http://localhost:3000";
 
-// 🔐 headers
+// headers
 function getHeaders() {
   const token = localStorage.getItem("token");
 
@@ -81,7 +81,6 @@ async function horarioOcupado(dataSelecionada, servico_id) {
   const agendamentos = await res.json();
 
   const servico = listaServicos.find(s => s.id == servico_id);
-
   if (!servico) return false;
 
   const inicioNovo = new Date(dataSelecionada);
@@ -89,10 +88,11 @@ async function horarioOcupado(dataSelecionada, servico_id) {
   fimNovo.setMinutes(fimNovo.getMinutes() + servico.duracao_minutos);
 
   for (const a of agendamentos) {
+    if (a.status === "recusado") continue;
+
     const inicioExistente = new Date(a.data);
 
     const servicoExistente = listaServicos.find(s => s.nome === a.servico);
-
     if (!servicoExistente) continue;
 
     const fimExistente = new Date(inicioExistente);
@@ -124,7 +124,7 @@ window.criarAgendamento = async function () {
   const ocupado = await horarioOcupado(data, servico_id);
 
   if (ocupado) {
-    alert("❌ Horário ocupado!");
+    alert("Horário ocupado");
     return;
   }
 
@@ -140,11 +140,32 @@ window.criarAgendamento = async function () {
   });
 
   if (res.ok) {
-    alert("Agendado!");
     fecharFormulario();
     carregarAgendamentos();
   } else {
-    alert("Erro ao agendar");
+    const erro = await res.json();
+    alert(erro.erro || "Erro ao agendar");
+  }
+};
+
+// ================= STATUS =================
+window.atualizarStatus = async function (id, status) {
+  try {
+    const res = await fetch(`${API}/agendamentos/${id}`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify({ status })
+    });
+
+    if (res.ok) {
+      carregarAgendamentos();
+    } else {
+      const erro = await res.json();
+      alert(erro.erro || "Erro ao atualizar status");
+    }
+
+  } catch (erro) {
+    console.error("Erro no update:", erro);
   }
 };
 
@@ -168,12 +189,17 @@ window.carregarAgendamentos = async function () {
       <td>${a.servico}</td>
       <td>${new Date(a.data).toLocaleString("pt-BR")}</td>
       <td>
-     <span class="status ${a.status}">
-      ${a.status.toUpperCase()}
-      </span>
+        <span class="status ${a.status}">
+          ${a.status.toUpperCase()}
+        </span>
       </td>
       <td>
-        <button onclick="deletar(${a.id})">🗑</button>
+        ${a.status === "pendente" ? `
+          <button onclick="atualizarStatus(${a.id}, 'aprovado')">Aprovar</button>
+          <button onclick="atualizarStatus(${a.id}, 'recusado')">Recusar</button>
+        ` : ""}
+
+        <button onclick="deletar(${a.id})">Excluir</button>
       </td>
     `;
 
@@ -191,7 +217,7 @@ window.deletar = async function (id) {
   carregarAgendamentos();
 };
 
-// ================= INIT =================
+// ================= INICIAR =================
 carregarClientes();
 carregarServicos();
 carregarAgendamentos();
