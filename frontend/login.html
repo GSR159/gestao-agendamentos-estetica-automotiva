@@ -2,34 +2,252 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Login</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart System - Login</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --bg-deep: #020617;
+      --bg-surface: #0f172a;
+      --bg-card: #1e293b;
+      --border: #334155;
+      --primary: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Fundo decorativo sutil */
+    .bg-glow {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(2, 6, 23, 0) 70%);
+      border-radius: 50%;
+      z-index: -1;
+      filter: blur(60px);
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 1rem;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      padding: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    input {
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text-main) !important;
+      padding: 0.75rem 1rem 0.75rem 2.75rem;
+      border-radius: 0.75rem;
+      outline: none;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn-login {
+      background: var(--primary);
+      color: white;
+      width: 100%;
+      padding: 0.875rem;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .btn-login:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+    }
+
+    .cadastro-link {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .cadastro-link a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .cadastro-link a:hover {
+      color: #60a5fa;
+      text-decoration: underline;
+    }
+
+    .erro {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      text-align: center;
+      margin-top: 1.5rem;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
-<div class="login-container">
+  <!-- Elementos de brilho de fundo -->
+  <div class="bg-glow" style="top: -100px; left: -100px;"></div>
+  <div class="bg-glow" style="bottom: -100px; right: -100px; opacity: 0.5;"></div>
 
-  <div class="login-box">
-    <h2>Smart System</h2>
-    <p class="subtitle">Acesse sua conta</p>
+  <div class="login-container">
+    
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-900/20 mb-4">
+        <i data-lucide="car" class="w-8 h-8 text-white"></i>
+      </div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-white mb-1">Smart System</h1>
+      <p class="text-slate-400 text-sm">Bem-vindo de volta! Faça login para continuar.</p>
+    </div>
 
-    <input id="email" placeholder="Email">
-    <input id="senha" type="password" placeholder="Senha">
+    <div class="login-box">
+      <!-- FORMULÁRIO DE LOGIN -->
+      <div class="input-group">
+        <label class="input-label" for="email">Endereço de Email</label>
+        <div class="input-wrapper">
+          <i data-lucide="mail" class="w-5 h-5 input-icon"></i>
+          <input id="email" type="email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+      </div>
 
-    <button onclick="login()">Entrar</button>
+      <div class="input-group">
+        <label class="input-label" for="senha">Palavra-passe</label>
+        <div class="input-wrapper">
+          <i data-lucide="lock" class="w-5 h-5 input-icon"></i>
+          <input id="senha" type="password" placeholder="••••••••">
+        </div>
+      </div>
 
-    <!-- NOVO -->
-    <p class="cadastro-link">
-      Não possui conta? 
-      <a href="register.html">Cadastre-se</a>
-    </p>
+      <button class="btn-login" onclick="executarLogin()">
+        <span>Aceder à Conta</span>
+        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+      </button>
 
-    <p id="erro" class="erro"></p>
+      <!-- MENSAGEM DE ERRO -->
+      <div id="erro" class="erro"></div>
+
+      <!-- LINK PARA CADASTRO -->
+      <div class="cadastro-link">
+        Ainda não tem conta? 
+        <a href="register.html">Registe-se aqui</a>
+      </div>
+    </div>
+
   </div>
 
-</div>
+  <script src="auth.js"></script>
 
-<script src="auth.js"></script>
+  <script>
+    // Inicializar ícones Lucide
+    lucide.createIcons();
+
+    /**
+     * Função para gerir o clique de login com feedback visual simples
+     */
+    function executarLogin() {
+      const btn = document.querySelector('.btn-login');
+      const erroDiv = document.getElementById('erro');
+      
+      // Limpar erro anterior
+      erroDiv.style.display = 'none';
+
+      // Chamar a função original do auth.js
+      if (typeof login === 'function') {
+        login();
+      } else {
+        console.error("Função 'login' não encontrada no auth.js");
+        erroDiv.innerText = "Erro interno do sistema. Tente novamente.";
+        erroDiv.style.display = 'block';
+      }
+    }
+
+    // Permitir login ao pressionar a tecla Enter
+    document.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        executarLogin();
+      }
+    });
+  </script>
 
 </body>
 </html>

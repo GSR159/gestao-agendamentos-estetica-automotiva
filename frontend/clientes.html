@@ -2,68 +2,376 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Clientes</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart System - Clientes</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --bg-deep: #020617;
+      --bg-surface: #0f172a;
+      --bg-card: #1e293b;
+      --border: #334155;
+      --primary: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    /* Layout Principal */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      position: fixed;
+      height: 100vh;
+      z-index: 40;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 2.5rem;
+    }
+
+    .nav-links {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    }
+
+    /* Conteúdo */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2.5rem;
+    }
+
+    /* Formulário */
+    .form-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      display: none;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .input-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input {
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text-main) !important;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--primary) !important;
+    }
+
+    /* Tabela */
+    .data-card {
+      background: var(--bg-surface);
+      border-radius: 1rem;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      background: rgba(30, 41, 59, 0.5);
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Footer Usuário */
+    .user-footer {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+
+    /* Responsividade */
+    @media (max-width: 1024px) {
+      .sidebar { width: 80px; padding: 1.5rem 0.75rem; }
+      .sidebar span, .logo span { display: none; }
+      .main-content { margin-left: 80px; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="app">
+<div class="app-container">
 
+  <!-- SIDEBAR -->
   <aside class="sidebar">
-    <h2>Smart System</h2>
+    <div class="logo">
+      <i data-lucide="car"></i>
+      <span>Smart System</span>
+    </div>
 
-    <a href="dashboard.html">Dashboard</a>
-    <a href="agendamentos.html">Agendamentos</a>
-    <a href="clientes.html">Clientes</a>
-    <a href="veiculos.html">Veículos</a>
-    <a href="servicos.html">Serviços</a>
-
-    <div class="usuario-box">
-      <span id="usuario-logado">Usuário</span>
-      <button onclick="logout()">Sair</button>
+    <nav class="nav-links">
+      <a href="dashboard.html" class="nav-item">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="agendamentos.html" class="nav-item">
+        <i data-lucide="calendar-check"></i>
+        <span>Agendamentos</span>
+      </a>
+      <a href="clientes.html" class="nav-item active">
+        <i data-lucide="users"></i>
+        <span>Clientes</span>
+      </a>
+      <a href="veiculos.html" class="nav-item">
+        <i data-lucide="car-front"></i>
+        <span>Veículos</span>
+      </a>
+      <a href="servicos.html" class="nav-item">
+        <i data-lucide="wrench"></i>
+        <span>Serviços</span>
+      </a>
+      <a href="relatorios.html" class="nav-item">
+      <i data-lucide="bar-chart-3"></i>
+      <span>Relatórios</span>
+      </a>
+    </nav>
+    
+    <div class="user-footer">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="avatar" id="user-initial">U</div>
+        <span id="usuario-logado" class="text-sm font-bold truncate w-24">Usuário</span>
+      </div>
+      <button onclick="efetuarLogout()" class="text-slate-500 hover:text-red-500 transition-colors">
+        <i data-lucide="log-out" class="w-5 h-5"></i>
+      </button>
     </div>
   </aside>
 
-  <main class="content">
-    <h1>Clientes</h1>
+  <!-- CONTEÚDO -->
+  <main class="main-content">
+    <header class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight">Clientes</h1>
+        <p class="text-slate-400 text-sm">Base de dados e contactos dos seus clientes.</p>
+      </div>
+      
+      <button onclick="abrirFormCliente()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-blue-900/20 transition-all active:scale-95">
+        <i data-lucide="user-plus" class="w-5 h-5"></i> Novo Cliente
+      </button>
+    </header>
 
-    <button onclick="abrirFormCliente()" style="margin-bottom: 15px;">
-      + Novo Cliente
-    </button>
-
-    <div id="formCliente" style="display:none; margin-bottom:20px;">
+    <!-- FORMULÁRIO DE CLIENTE -->
+    <div id="formCliente" class="form-card">
+      <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+        <i data-lucide="user-cog" class="text-blue-500"></i> Informações do Cliente
+      </h2>
+      
       <input type="hidden" id="clienteId">
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="input-group">
+          <label class="input-label">Nome Completo</label>
+          <input id="nome" placeholder="Ex: João Silva">
+        </div>
 
-      <input id="nome" placeholder="Nome">
-      <input id="email" placeholder="Email">
-      <input id="telefone" placeholder="Telefone">
+        <div class="input-group">
+          <label class="input-label">Endereço de Email</label>
+          <input id="email" type="email" placeholder="exemplo@email.com">
+        </div>
 
-      <button onclick="salvarCliente()">Salvar</button>
-      <button onclick="fecharFormCliente()">Cancelar</button>
+        <div class="input-group">
+          <label class="input-label">Telemóvel / Telefone</label>
+          <input id="telefone" placeholder="(00) 00000-0000">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 border-t border-slate-800 pt-6">
+        <button onclick="fecharFormCliente()" class="px-5 py-2 text-slate-400 font-bold hover:text-white transition-colors">
+          Cancelar
+        </button>
+        <button onclick="salvarCliente()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold transition-all">
+          Guardar Dados
+        </button>
+      </div>
     </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Email</th>
-          <th>Telefone</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="tabela"></tbody>
-    </table>
-
+    <!-- TABELA DE CLIENTES -->
+    <div class="data-card shadow-2xl">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th class="text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela">
+          <tr>
+            <td colspan="4" class="py-20 text-center text-slate-500">
+              <div class="flex flex-col items-center gap-3">
+                <i data-lucide="database" class="w-10 h-10 opacity-10"></i>
+                <p>A carregar base de dados...</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
 
 </div>
 
+<!-- SCRIPTS -->
 <script src="auth.js"></script>
 <script src="clientes.js"></script>
 
 <script>
-  verificarLogin();
-  mostrarUsuario();
+  // Inicialização
+  lucide.createIcons();
+
+  /**
+   * Controla a visibilidade do formulário
+   */
+  function abrirFormCliente() {
+    document.getElementById('formCliente').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Limpar campos se for um novo cadastro
+    if(!document.getElementById('clienteId').value) {
+       document.getElementById('nome').value = '';
+       document.getElementById('email').value = '';
+       document.getElementById('telefone').value = '';
+    }
+  }
+
+  function fecharFormCliente() {
+    document.getElementById('formCliente').style.display = 'none';
+    document.getElementById('clienteId').value = ''; // Reset ID
+  }
+
+  function efetuarLogout() {
+    if (confirm("Deseja encerrar a sessão?")) {
+      if (typeof logout === 'function') logout();
+      else window.location.href = 'login.html';
+    }
+  }
+
+  // Verificações de login e UI
+  window.onload = () => {
+    try {
+      if(typeof verificarLogin === "function") verificarLogin();
+      if(typeof mostrarUsuario === "function") {
+        mostrarUsuario();
+        setTimeout(() => {
+          const nameSpan = document.getElementById('usuario-logado');
+          if(nameSpan) {
+            const name = nameSpan.innerText;
+            if(name && name !== 'Usuário') {
+              document.getElementById('user-initial').innerText = name.charAt(0).toUpperCase();
+            }
+          }
+        }, 300);
+      }
+    } catch(e) { console.error(e); }
+  };
 </script>
 
 </body>

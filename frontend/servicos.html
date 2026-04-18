@@ -2,73 +2,382 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Serviços</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart System - Serviços</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --bg-deep: #020617;
+      --bg-surface: #0f172a;
+      --bg-card: #1e293b;
+      --border: #334155;
+      --primary: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    /* Layout Principal */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      position: fixed;
+      height: 100vh;
+      z-index: 40;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 2.5rem;
+    }
+
+    .nav-links {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    }
+
+    /* Conteúdo */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2.5rem;
+    }
+
+    /* Formulário */
+    .form-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      display: none;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .input-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input {
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text-main) !important;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--primary) !important;
+    }
+
+    /* Tabela */
+    .data-card {
+      background: var(--bg-surface);
+      border-radius: 1rem;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      background: rgba(30, 41, 59, 0.5);
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Footer Usuário */
+    .user-footer {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+
+    /* Responsividade */
+    @media (max-width: 1024px) {
+      .sidebar { width: 80px; padding: 1.5rem 0.75rem; }
+      .sidebar span, .logo span { display: none; }
+      .main-content { margin-left: 80px; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="app">
+<div class="app-container">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <h2>🚗 Smart System</h2>
+    <div class="logo">
+      <i data-lucide="car"></i>
+      <span>Smart System</span>
+    </div>
 
-    <a href="dashboard.html">Dashboard</a>
-    <a href="agendamentos.html">Agendamentos</a>
-    <a href="clientes.html">Clientes</a>
-    <a href="veiculos.html">Veículos</a>
-    <a href="servicos.html">Serviços</a>
+    <nav class="nav-links">
+      <a href="dashboard.html" class="nav-item">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="agendamentos.html" class="nav-item">
+        <i data-lucide="calendar-check"></i>
+        <span>Agendamentos</span>
+      </a>
+      <a href="clientes.html" class="nav-item">
+        <i data-lucide="users"></i>
+        <span>Clientes</span>
+      </a>
+      <a href="veiculos.html" class="nav-item">
+        <i data-lucide="car-front"></i>
+        <span>Veículos</span>
+      </a>
+      <a href="servicos.html" class="nav-item active">
+        <i data-lucide="wrench"></i>
+        <span>Serviços</span>
+      </a>
+      <a href="relatorios.html" class="nav-item">
+      <i data-lucide="bar-chart-3"></i>
+      <span>Relatórios</span>
+      </a>
+    </nav>
 
-    <div class="usuario-box">
-      <span id="usuario-logado">👤</span>
-      <button onclick="logout()">Sair</button>
+    <div class="user-footer">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="avatar" id="user-initial">U</div>
+        <span id="usuario-logado" class="text-sm font-bold truncate w-24">Usuário</span>
+      </div>
+      <button onclick="efetuarLogout()" class="text-slate-500 hover:text-red-500 transition-colors">
+        <i data-lucide="log-out" class="w-5 h-5"></i>
+      </button>
     </div>
   </aside>
 
-  <!-- CONTEÚDO -->
-  <main class="content">
-    <h1>Serviços</h1>
-
-    <!-- BOTÃO -->
-    <button onclick="abrirFormServico()" style="margin-bottom: 15px;">
-      + Novo Serviço
-    </button>
-
-    <!-- FORM -->
-    <div id="formServico" style="display:none; margin-bottom:20px;">
-      <input id="nome" placeholder="Nome do serviço">
-
-      <input id="duracao" type="number" placeholder="Duração (min)">
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="main-content">
+    <header class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight">Serviços</h1>
+        <p class="text-slate-400 text-sm">Defina o menu de serviços e preços da sua estética.</p>
+      </div>
       
-      <input id="preco" type="number" placeholder="Preço (R$)">
+      <button onclick="abrirFormServico()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-blue-900/20 transition-all active:scale-95">
+        <i data-lucide="plus-circle" class="w-5 h-5"></i> Novo Serviço
+      </button>
+    </header>
 
-      <button onclick="criarServico()">Salvar</button>
-      <button onclick="fecharFormServico()">Cancelar</button>
+    <!-- FORMULÁRIO DE SERVIÇO (Inclusão e Edição) -->
+    <div id="formServico" class="form-card">
+      <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+        <i data-lucide="settings-2" class="text-blue-500"></i> Configuração do Serviço
+      </h2>
+      
+      <!-- Campo oculto para ID (essencial para edição) -->
+      <input type="hidden" id="servicoId">
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="input-group">
+          <label class="input-label" for="nome">Nome do Serviço</label>
+          <input id="nome" placeholder="Ex: Lavagem Detalhada">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="duracao">Duração Estipulada (min)</label>
+          <input id="duracao" type="number" placeholder="Ex: 60">
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="preco">Preço Base (R$)</label>
+          <input id="preco" type="number" step="0.01" placeholder="Ex: 150,00">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 border-t border-slate-800 pt-6">
+        <button onclick="fecharFormServico()" class="px-5 py-2 text-slate-400 font-bold hover:text-white transition-colors">
+          Cancelar
+        </button>
+        <button onclick="criarServico()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20">
+          Guardar Serviço
+        </button>
+      </div>
     </div>
 
-    <!-- TABELA -->
-    <table>
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Tempo</th>
-          <th>Preço</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="tabela"></tbody>
-    </table>
-
+    <!-- TABELA DE SERVIÇOS -->
+    <div class="data-card shadow-2xl">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome do Serviço</th>
+            <th>Tempo Estimado</th>
+            <th>Preço</th>
+            <th class="text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela">
+          <tr>
+            <td colspan="4" class="py-20 text-center text-slate-500">
+              <div class="flex flex-col items-center gap-3">
+                <i data-lucide="loader-2" class="w-10 h-10 animate-spin opacity-20"></i>
+                <p>A carregar catálogo de serviços...</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
 
 </div>
 
+<!-- SCRIPTS DE INFRAESTRUTURA -->
 <script src="auth.js"></script>
 <script src="servicos.js"></script>
 
 <script>
-  verificarLogin();
-  mostrarUsuario();
+  // Inicialização de Ícones
+  lucide.createIcons();
+
+  /**
+   * Abre o formulário e foca no primeiro campo
+   */
+  function abrirFormServico() {
+    document.getElementById('formServico').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('nome').focus();
+  }
+
+  /**
+   * Fecha o formulário e limpa o ID de edição
+   */
+  function fecharFormServico() {
+    document.getElementById('formServico').style.display = 'none';
+    document.getElementById('servicoId').value = ''; // Limpa ID de edição
+    // Limpar campos
+    document.getElementById('nome').value = '';
+    document.getElementById('duracao').value = '';
+    document.getElementById('preco').value = '';
+  }
+
+  /**
+   * Gerir Logout
+   */
+  function efetuarLogout() {
+    if (confirm("Deseja encerrar a sessão?")) {
+      if (typeof logout === 'function') logout();
+      else window.location.href = 'login.html';
+    }
+  }
+
+  // Verificações automáticas ao carregar
+  window.onload = () => {
+    try {
+      if(typeof verificarLogin === "function") verificarLogin();
+      if(typeof mostrarUsuario === "function") {
+        mostrarUsuario();
+        setTimeout(() => {
+          const nameSpan = document.getElementById('usuario-logado');
+          if(nameSpan) {
+            const name = nameSpan.innerText;
+            if(name && name !== 'Usuário' && name !== '👤') {
+              document.getElementById('user-initial').innerText = name.charAt(0).toUpperCase();
+            }
+          }
+        }, 300);
+      }
+    } catch(e) { console.error("Erro na inicialização:", e); }
+  };
 </script>
 
 </body>

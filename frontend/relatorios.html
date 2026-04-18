@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart System - Relatórios e Performance</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    :root {
+      --bg-deep: #020617;
+      --bg-surface: #0f172a;
+      --bg-card: #1e293b;
+      --border: #334155;
+      --primary: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    /* Layout Principal */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      position: fixed;
+      height: 100vh;
+      z-index: 40;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 2.5rem;
+    }
+
+    .nav-links {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    }
+
+    /* Conteúdo */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2.5rem;
+    }
+
+    /* Cards de BI */
+    .bi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+
+    .data-table-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      background: rgba(30, 41, 59, 0.5);
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+
+    /* Estilos de Impressão para PDF */
+    @media print {
+      .sidebar, .export-controls, header button, .nav-links, .user-footer { display: none !important; }
+      .main-content { margin-left: 0 !important; padding: 0 !important; }
+      .bi-card, .data-table-card { border: 1px solid #ccc !important; color: black !important; background: white !important; }
+      body { background: white !important; color: black !important; }
+      h1, h2, h3, p, span { color: black !important; }
+      canvas { max-width: 100% !important; height: auto !important; }
+    }
+
+    .user-footer {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar { width: 80px; padding: 1.5rem 0.75rem; }
+      .sidebar span, .logo span { display: none; }
+      .main-content { margin-left: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i data-lucide="car"></i>
+      <span>Smart System</span>
+    </div>
+
+    <nav class="nav-links">
+      <a href="dashboard.html" class="nav-item">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="agendamentos.html" class="nav-item">
+        <i data-lucide="calendar-check"></i>
+        <span>Agendamentos</span>
+      </a>
+      <a href="clientes.html" class="nav-item">
+        <i data-lucide="users"></i>
+        <span>Clientes</span>
+      </a>
+      <a href="veiculos.html" class="nav-item">
+        <i data-lucide="car-front"></i>
+        <span>Veículos</span>
+      </a>
+      <a href="servicos.html" class="nav-item">
+        <i data-lucide="wrench"></i>
+        <span>Serviços</span>
+      </a>
+      <a href="relatorios.html" class="nav-item active">
+        <i data-lucide="bar-chart-3"></i>
+        <span>Relatórios</span>
+      </a>
+    </nav>
+
+    <div class="user-footer">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="avatar" id="user-initial">U</div>
+        <span id="usuario-logado" class="text-sm font-bold truncate w-24">Carregando...</span>
+      </div>
+      <button onclick="efetuarLogout()" class="text-slate-500 hover:text-red-500 transition-colors">
+        <i data-lucide="log-out" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="main-content" id="report-content">
+    <header class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight">Relatórios e Performance</h1>
+        <p class="text-slate-400 text-sm">Dados analíticos sincronizados com a Cloud.</p>
+      </div>
+      
+      <div class="flex gap-2 export-controls">
+        <button onclick="exportarExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all font-bold">
+          <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+          <span class="hidden sm:inline">Exportar CSV</span>
+        </button>
+        <button onclick="exportarPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all font-bold">
+          <i data-lucide="file-text" class="w-5 h-5"></i>
+          <span class="hidden sm:inline">Gerar PDF</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CARDS BI (VALORES DINÂMICOS) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bi-card border border-border">
+        <p class="text-xs font-bold text-slate-500 uppercase mb-2 tracking-widest">Ticket Médio</p>
+        <h3 class="text-2xl font-black text-white" id="val-ticket">--</h3>
+      </div>
+      <div class="bi-card border border-border">
+        <p class="text-xs font-bold text-slate-500 uppercase mb-2 tracking-widest">Receita Total</p>
+        <h3 class="text-2xl font-black text-white" id="val-receita">--</h3>
+      </div>
+      <div class="bi-card border border-border">
+        <p class="text-xs font-bold text-slate-500 uppercase mb-2 tracking-widest">Fidelização</p>
+        <h3 class="text-2xl font-black text-white" id="val-fidelizacao">--</h3>
+      </div>
+    </div>
+
+    <!-- GRÁFICOS (PREPARADOS PARA JS) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <div class="bi-card border border-border">
+        <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+          <i data-lucide="trending-up" class="w-5 h-5 text-blue-500"></i> Evolução Temporal
+        </h2>
+        <canvas id="receitaChart" height="150"></canvas>
+      </div>
+      <div class="bi-card border border-border">
+        <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+          <i data-lucide="pie-chart" class="w-5 h-5 text-blue-500"></i> Mix de Serviços
+        </h2>
+        <canvas id="servicosChart" height="150"></canvas>
+      </div>
+    </div>
+
+    <!-- RANKING TABELAS (SEM DADOS FIXOS) -->
+    <div class="data-table-card border border-border">
+      <div class="p-4 border-b border-border bg-slate-800/30 flex justify-between items-center">
+        <h3 class="font-bold flex items-center gap-2">
+          <i data-lucide="list" class="w-4 h-4 text-blue-400"></i> Resumo Analítico de Clientes
+        </h3>
+      </div>
+      <table id="tabela-ranking">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Qtd. Serviços</th>
+            <th class="text-right">Investimento Total</th>
+          </tr>
+        </thead>
+        <tbody id="rankingClientesBody">
+          <!-- O JS preencherá aqui -->
+          <tr>
+            <td colspan="3" class="py-10 text-center text-slate-500">
+              Aguardando sincronização de dados...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- SCRIPTS DE LÓGICA -->
+<script src="auth.js"></script>
+<script src="relatorios.js"></script>
+<script>
+  lucide.createIcons();
+
+  // Variáveis globais para os gráficos
+  let chartReceita = null;
+  let chartServicos = null;
+
+  /**
+   * Função para inicializar/atualizar gráficos com dados dinâmicos
+   */
+  function inicializarGraficos(labelsReceita = [], dadosReceita = [], labelsServicos = [], dadosServicos = []) {
+    const ctxReceita = document.getElementById('receitaChart').getContext('2d');
+    const ctxServicos = document.getElementById('servicosChart').getContext('2d');
+
+    if (chartReceita) chartReceita.destroy();
+    if (chartServicos) chartServicos.destroy();
+
+    chartReceita = new Chart(ctxReceita, {
+      type: 'line',
+      data: {
+        labels: labelsReceita,
+        datasets: [{
+          label: 'Facturação',
+          data: dadosReceita,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          fill: true, tension: 0.4, borderWidth: 3
+        }]
+      },
+      options: { 
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+          x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+        }
+      }
+    });
+
+    chartServicos = new Chart(ctxServicos, {
+      type: 'doughnut',
+      data: {
+        labels: labelsServicos,
+        datasets: [{
+          data: dadosServicos,
+          backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#8b5cf6'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { 
+          legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 20 } } 
+        }
+      }
+    });
+  }
+
+  /**
+   * EXPORTAÇÃO CSV (Excel)
+   */
+  function exportarExcel() {
+    const table = document.getElementById("tabela-ranking");
+    const rows = table.querySelectorAll("tr");
+    let csv = [];
+    
+    for (const row of rows) {
+        const cols = row.querySelectorAll("td, th");
+        const rowData = [];
+        for (const col of cols) {
+            // Limpa vírgulas e aspas para não quebrar o CSV
+            let text = col.innerText.replace(/,/g, ".").replace(/"/g, "'");
+            rowData.push('"' + text + '"');
+        }
+        csv.push(rowData.join(";"));
+    }
+
+    const csvContent = "\uFEFF" + csv.join("\n"); 
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Relatorio_SmartSystem_${new Date().toLocaleDateString()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  /**
+   * EXPORTAÇÃO PDF (Modo Impressão Profissional)
+   */
+  function exportarPDF() {
+    window.print();
+  }
+
+  /**
+   * Logout
+   */
+  function efetuarLogout() {
+    if (confirm("Deseja encerrar a sessão?")) {
+      if (typeof logout === 'function') logout();
+      else window.location.href = 'login.html';
+    }
+  }
+
+  // Hook para carregar dados (Você deve chamar suas funções do Firebase aqui)
+  window.onload = () => {
+  try {
+    if(typeof verificarLogin === "function") verificarLogin();
+    if(typeof mostrarUsuario === "function") {
+      mostrarUsuario();
+      setTimeout(() => {
+        const nameSpan = document.getElementById('usuario-logado');
+        if(nameSpan) {
+          const name = nameSpan.innerText;
+          if(name && name !== 'Carregando...') {
+            document.getElementById('user-initial').innerText = name.charAt(0).toUpperCase();
+          }
+        }
+      }, 500);
+    }
+
+    carregarRelatorios(); // 
+
+  } catch(e) { 
+    console.error("Erro ao carregar relatórios:", e); 
+  }
+};
+</script>
+
+</body>
+</html>

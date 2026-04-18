@@ -2,33 +2,253 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Cadastro</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart System - Criar Conta</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --bg-deep: #020617;
+      --bg-surface: #0f172a;
+      --bg-card: #1e293b;
+      --border: #334155;
+      --primary: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Fundo decorativo sutil */
+    .bg-glow {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(2, 6, 23, 0) 70%);
+      border-radius: 50%;
+      z-index: -1;
+      filter: blur(60px);
+    }
+
+    .register-container {
+      width: 100%;
+      max-width: 420px;
+      padding: 1.5rem;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .register-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      padding: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .input-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    input {
+      background: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text-main) !important;
+      padding: 0.75rem 1rem 0.75rem 2.75rem;
+      border-radius: 0.75rem;
+      outline: none;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn-register {
+      background: var(--primary);
+      color: white;
+      width: 100%;
+      padding: 0.875rem;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn-register:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .login-link {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .login-link a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+
+    .erro {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      text-align: center;
+      margin-top: 1.5rem;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
-<div class="login-container">
-  <div class="login-box">
+  <!-- Elementos de brilho de fundo -->
+  <div class="bg-glow" style="top: -100px; right: -100px;"></div>
+  <div class="bg-glow" style="bottom: -100px; left: -100px; opacity: 0.5;"></div>
 
-    <h2>Criar Conta</h2>
+  <div class="register-container">
+    
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-900/20 mb-4">
+        <i data-lucide="user-plus" class="w-8 h-8 text-white"></i>
+      </div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-white mb-1">Criar Conta</h1>
+      <p class="text-slate-400 text-sm">Registe-se para começar a gerir a sua estética.</p>
+    </div>
 
-    <input id="nome" placeholder="Nome">
-    <input id="email" placeholder="Email">
-    <input id="senha" type="password" placeholder="Senha">
+    <div class="register-box">
+      <!-- NOME -->
+      <div class="input-group">
+        <label class="input-label" for="nome">Nome Completo</label>
+        <div class="input-wrapper">
+          <i data-lucide="user" class="w-5 h-5 input-icon"></i>
+          <input id="nome" type="text" placeholder="Como devemos chamá-lo?">
+        </div>
+      </div>
 
-    <button onclick="cadastrar()">Cadastrar</button>
+      <!-- EMAIL -->
+      <div class="input-group">
+        <label class="input-label" for="email">Endereço de Email</label>
+        <div class="input-wrapper">
+          <i data-lucide="mail" class="w-5 h-5 input-icon"></i>
+          <input id="email" type="email" placeholder="exemplo@email.com">
+        </div>
+      </div>
 
-    <p id="erro" class="erro"></p>
+      <!-- SENHA -->
+      <div class="input-group">
+        <label class="input-label" for="senha">Defina uma Palavra-passe</label>
+        <div class="input-wrapper">
+          <i data-lucide="lock" class="w-5 h-5 input-icon"></i>
+          <input id="senha" type="password" placeholder="No mínimo 6 caracteres">
+        </div>
+      </div>
 
-    <p style="margin-top:10px;">
-      Já tem conta?
-      <a href="login.html">Entrar</a>
-    </p>
+      <button class="btn-register" onclick="executarCadastro()">
+        <span>Criar Minha Conta</span>
+        <i data-lucide="check" class="w-5 h-5"></i>
+      </button>
+
+      <!-- MENSAGEM DE ERRO -->
+      <div id="erro" class="erro"></div>
+
+      <!-- LINK PARA LOGIN -->
+      <div class="login-link">
+        Já possui uma conta? 
+        <a href="login.html">Faça login agora</a>
+      </div>
+    </div>
 
   </div>
-</div>
 
-<script src="register.js"></script>
+  <script src="register.js"></script>
+
+  <script>
+    // Inicializar ícones Lucide
+    lucide.createIcons();
+
+    /**
+     * Função para gerir o clique de registo com feedback visual
+     */
+    function executarCadastro() {
+      const erroDiv = document.getElementById('erro');
+      erroDiv.style.display = 'none';
+
+      // Chamar a função original do seu register.js
+      if (typeof cadastrar === 'function') {
+        cadastrar();
+      } else {
+        console.error("Função 'cadastrar' não encontrada no register.js");
+        erroDiv.innerText = "Erro ao processar registo. Tente novamente.";
+        erroDiv.style.display = 'block';
+      }
+    }
+
+    // Permitir registo ao pressionar Enter
+    document.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        executarCadastro();
+      }
+    });
+  </script>
 
 </body>
 </html>

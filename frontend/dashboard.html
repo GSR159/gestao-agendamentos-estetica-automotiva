@@ -2,82 +2,317 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart System - Dashboard</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    :root {
+      --bg-deep: #020617;
+      --bg-surface: #0f172a;
+      --bg-card: #1e293b;
+      --border: #334155;
+      --primary: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
 
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    /* Layout Principal */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      position: fixed;
+      height: 100vh;
+      z-index: 40;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 2.5rem;
+    }
+
+    .nav-links {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    }
+
+    /* Conteúdo */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2.5rem;
+    }
+
+    /* Cards de Estatísticas */
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+    }
+
+    .stat-icon {
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      width: fit-content;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+
+    /* Gráfico e Tabelas */
+    .chart-container, .table-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      background: rgba(30, 41, 59, 0.5);
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+    }
+
+    /* Footer Usuário */
+    .user-footer {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+
+    /* Responsividade */
+    @media (max-width: 1024px) {
+      .sidebar { width: 80px; padding: 1.5rem 0.75rem; }
+      .sidebar span, .logo span { display: none; }
+      .main-content { margin-left: 80px; }
+    }
+  </style>
+</head>
 <body>
 
-<div class="app">
+<div class="app-container">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <h2>Smart System</h2>
+    <div class="logo">
+      <i data-lucide="car"></i>
+      <span>Smart System</span>
+    </div>
 
-    <a href="dashboard.html">Dashboard</a>
-    <a href="agendamentos.html">Agendamentos</a>
-    <a href="clientes.html">Clientes</a>
-    <a href="veiculos.html">Veículos</a>
-    <a href="servicos.html">Serviços</a>
+    <nav class="nav-links">
+      <a href="dashboard.html" class="nav-item active">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="agendamentos.html" class="nav-item">
+        <i data-lucide="calendar-check"></i>
+        <span>Agendamentos</span>
+      </a>
+      <a href="clientes.html" class="nav-item">
+        <i data-lucide="users"></i>
+        <span>Clientes</span>
+      </a>
+      <a href="veiculos.html" class="nav-item">
+        <i data-lucide="car-front"></i>
+        <span>Veículos</span>
+      </a>
+      <a href="servicos.html" class="nav-item">
+        <i data-lucide="wrench"></i>
+        <span>Serviços</span>
+      </a>
+      <a href="relatorios.html" class="nav-item">
+      <i data-lucide="bar-chart-3"></i>
+      <span>Relatórios</span>
+        </a>
+    </nav>
 
-    <div class="usuario-box">
-      <span id="usuario-logado">Usuário</span>
-      <button onclick="logout()">Sair</button>
+    <div class="user-footer">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="avatar" id="user-initial">U</div>
+        <span id="usuario-logado" class="text-sm font-bold truncate w-24 text-white">Usuário</span>
+      </div>
+      <button onclick="efetuarLogout()" class="text-slate-500 hover:text-red-500 transition-colors">
+        <i data-lucide="log-out" class="w-5 h-5"></i>
+      </button>
     </div>
   </aside>
 
   <!-- CONTEÚDO -->
-  <main class="content">
+  <main class="main-content">
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
+      <p class="text-slate-400 text-sm">Bem-vindo de volta! Aqui está o resumo da sua operação.</p>
+    </header>
 
-    <h1>Dashboard</h1>
-
-    <!-- CARDS -->
-    <div class="cards">
-      <div class="card">
-        <h3>Total</h3>
-        <p id="total">0</p>
+    <!-- METRICS GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="stat-card">
+        <div class="stat-icon bg-blue-500/10 text-blue-500">
+          <i data-lucide="layers"></i>
+        </div>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total</span>
+        <div class="stat-value" id="total">0</div>
       </div>
 
-      <div class="card">
-        <h3>Pendentes</h3>
-        <p id="pendentes">0</p>
+      <div class="stat-card">
+        <div class="stat-icon bg-amber-500/10 text-amber-500">
+          <i data-lucide="clock"></i>
+        </div>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pendentes</span>
+        <div class="stat-value" id="pendentes">0</div>
       </div>
 
-      <div class="card">
-        <h3>Aprovados</h3>
-        <p id="aprovados">0</p>
+      <div class="stat-card">
+        <div class="stat-icon bg-green-500/10 text-green-500">
+          <i data-lucide="check-circle"></i>
+        </div>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Aprovados</span>
+        <div class="stat-value" id="aprovados">0</div>
       </div>
 
-      <div class="card">
-        <h3>Recusados</h3>
-        <p id="recusados">0</p>
+      <div class="stat-card">
+        <div class="stat-icon bg-red-500/10 text-red-500">
+          <i data-lucide="x-circle"></i>
+        </div>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Recusados</span>
+        <div class="stat-value" id="recusados">0</div>
       </div>
     </div>
 
-    <!-- GRÁFICO -->
-    <h2>Agendamentos por dia</h2>
-    <div class="card">
-      <canvas id="grafico"></canvas>
+    <!-- MAIN DASHBOARD CONTENT -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- GRÁFICO (COL 2/3) -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="chart-container shadow-2xl">
+          <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+            <i data-lucide="trending-up" class="text-blue-500 w-5 h-5"></i> Agendamentos por dia
+          </h2>
+          <canvas id="grafico" height="150"></canvas>
+        </div>
+      </div>
+
+      <!-- AGENDA DO DIA (COL 1/3) -->
+      <div class="lg:col-span-1">
+        <div class="table-card shadow-2xl h-full">
+          <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+            <i data-lucide="calendar" class="text-blue-500 w-5 h-5"></i> Agenda de Hoje
+          </h2>
+          <div class="overflow-x-auto">
+            <table>
+              <thead class="bg-slate-800/50">
+                <tr>
+                  <th class="px-4 py-3">Hora</th>
+                  <th class="px-4 py-3">Cliente</th>
+                  <th class="px-4 py-3">Serviço</th>
+                </tr>
+              </thead>
+              <tbody id="agendaHoje">
+                <tr>
+                  <td colspan="3" class="py-10 text-center text-slate-500 italic">
+                    Nenhum serviço para hoje.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <button onclick="window.location.href='agendamentos.html'" class="w-full mt-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-bold transition-all">
+            Ver Agenda Completa
+          </button>
+        </div>
+      </div>
+
     </div>
-
-    <!-- AGENDA DO DIA -->
-    <h2>Agenda do Dia</h2>
-
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Horário</th>
-            <th>Cliente</th>
-            <th>Veículo</th>
-            <th>Serviço</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="agendaHoje"></tbody>
-      </table>
-    </div>
-
   </main>
 
 </div>
@@ -88,9 +323,48 @@
 <script src="dashboard.js"></script>
 
 <script>
-  verificarLogin();
-  mostrarUsuario();
-  ocultarParaCliente();
+  // Inicialização de Ícones
+  lucide.createIcons();
+
+  /**
+   * Navegação segura
+   */
+  function navegarPara(url) {
+    if (url) window.location.href = url;
+  }
+
+  /**
+   * Efetuar Logout com confirmação
+   */
+  function efetuarLogout() {
+    if (confirm("Deseja mesmo sair do sistema?")) {
+      if (typeof logout === 'function') logout();
+      else {
+        localStorage.clear();
+        window.location.href = 'login.html';
+      }
+    }
+  }
+
+  // Verificações de login e UI
+  window.onload = () => {
+    try {
+      if(typeof verificarLogin === "function") verificarLogin();
+      if(typeof mostrarUsuario === "function") {
+        mostrarUsuario();
+        setTimeout(() => {
+          const nameSpan = document.getElementById('usuario-logado');
+          if(nameSpan) {
+            const name = nameSpan.innerText;
+            if(name && name !== 'Usuário') {
+              document.getElementById('user-initial').innerText = name.charAt(0).toUpperCase();
+            }
+          }
+        }, 300);
+      }
+      if(typeof ocultarParaCliente === "function") ocultarParaCliente();
+    } catch(e) { console.error(e); }
+  };
 </script>
 
 </body>
