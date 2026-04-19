@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart System - Área do Cliente</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-slate-900 text-white">
+
+<div class="flex">
+
+  <!-- SIDEBAR -->
+  <aside class="w-64 h-screen bg-slate-800 p-5 fixed">
+    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+      <i data-lucide="user"></i> Cliente
+    </h2>
+
+    <nav class="flex flex-col gap-3">
+      <button onclick="trocarTela('agendamentos')" class="text-left">Meus Agendamentos</button>
+      <button onclick="trocarTela('veiculos')" class="text-left">Meus Veículos</button>
+      <button onclick="trocarTela('conta')" class="text-left">Minha Conta</button>
+    </nav>
+
+    <div class="mt-10">
+      <button onclick="logout()" class="text-red-400">Sair</button>
+    </div>
+  </aside>
+
+  <!-- CONTEÚDO -->
+  <main class="ml-64 p-6 w-full">
+
+    <!-- AGENDAMENTOS -->
+    <div id="agendamentos">
+      <h1 class="text-2xl mb-4">Meus Agendamentos</h1>
+
+      <table class="w-full">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Serviço</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="listaAgendamentos"></tbody>
+      </table>
+    </div>
+
+    <!-- VEÍCULOS -->
+    <div id="veiculos" class="hidden">
+      <h1 class="text-2xl mb-4">Meus Veículos</h1>
+
+      <div class="flex gap-2 mb-4">
+        <input id="modelo" placeholder="Modelo" class="text-black p-2">
+        <input id="placa" placeholder="Placa" class="text-black p-2">
+        <button onclick="criarVeiculo()" class="bg-blue-500 px-4">Adicionar</button>
+      </div>
+
+      <ul id="listaVeiculos"></ul>
+    </div>
+
+    <!-- CONTA -->
+    <div id="conta" class="hidden">
+      <h1 class="text-2xl mb-4">Minha Conta</h1>
+
+      <button onclick="excluirConta()" class="bg-red-600 px-4 py-2">
+        Excluir Conta Permanentemente
+      </button>
+    </div>
+
+  </main>
+
+</div>
+
+<script src="auth.js"></script>
+<script src="cliente-dashboard.js"></script>
+
+<script>
+lucide.createIcons();
+</script>
+
+</body>
+</html>

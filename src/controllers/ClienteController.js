@@ -28,7 +28,8 @@ const buscarClientePorId = async (req, res) => {
 };
 
 const criarCliente = async (req, res) => {
-  const { nome, telefone, email } = req.body;
+  let { nome, telefone, email } = req.body;
+  email = email.toLowerCase().trim();
 
   try {
     const resultado = await pool.query(
@@ -45,7 +46,8 @@ const criarCliente = async (req, res) => {
 
 const atualizarCliente = async (req, res) => {
   const { id } = req.params;
-  const { nome, telefone, email } = req.body;
+  let { nome, telefone, email } = req.body;
+  email = email.toLowerCase().trim();
 
   try {
     const resultado = await pool.query(

@@ -30,11 +30,18 @@ async function login() {
 
     if (res.ok) {
       localStorage.setItem("token", data.token);
-      window.location.href = "dashboard.html";
-    } else {
-      document.getElementById("erro").innerText = data.erro;
-    }
 
+      const usuario = parseJwt(data.token);
+      
+      if(usuario.tipo === "admin" || usuario.tipo === "superadmin")
+        {
+        window.location.href = "dashboard.html";
+      }
+      else {
+        window.location.href = "tela_cliente.html";
+      }
+    }
+    
   } catch (erro) {
     console.error(erro);
     document.getElementById("erro").innerText = "Erro ao conectar com servidor";
@@ -99,6 +106,15 @@ function ocultarParaCliente() {
       el.style.display = "block";
     }
   });
+}
+
+function getHeaders() {
+  const token = localStorage.getItem("token");
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`
+  };
 }
 
 // 🚪 logout

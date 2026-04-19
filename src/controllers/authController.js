@@ -2,11 +2,15 @@ const pool = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const { normalizarEmail } = require('../utils/normalizar');
+
 const SECRET = "segredo_super_forte";
 
 // ================= LOGIN =================
 const login = async (req, res) => {
-  const { email, senha } = req.body;
+  let { email, senha } = req.body;
+
+  email = normalizarEmail(email); // 🔥 aqui
 
   try {
     const resultado = await pool.query(
@@ -48,7 +52,9 @@ const login = async (req, res) => {
 
 // ================= CADASTRO =================
 const register = async (req, res) => {
-  const { nome, email, senha } = req.body;
+  let { nome, email, senha, telefone } = req.body;
+
+  email = normalizarEmail(email); // 🔥 aqui
 
   if (!nome || !email || !senha) {
     return res.status(400).json({
@@ -56,33 +62,57 @@ const register = async (req, res) => {
     });
   }
 
+  const client = await pool.connect();
+
   try {
-    // verifica se já existe
-    const existe = await pool.query(
+    await client.query('BEGIN');
+
+    // 🔍 verifica se já existe
+    const existe = await client.query(
       'SELECT * FROM usuarios WHERE email = $1',
       [email]
     );
 
     if (existe.rows.length > 0) {
+      await client.query('ROLLBACK');
       return res.status(400).json({
         erro: 'Email já cadastrado'
       });
     }
 
+    // 🔐 hash senha
     const senhaHash = await bcrypt.hash(senha, 10);
 
-    const resultado = await pool.query(
+    // 👤 cria usuário
+    const usuario = await client.query(
       `INSERT INTO usuarios (nome, email, senha, tipo)
        VALUES ($1, $2, $3, 'cliente')
-       RETURNING id, nome, email`,
+       RETURNING id`,
       [nome, email, senhaHash]
     );
 
-    res.status(201).json(resultado.rows[0]);
+    const usuarioId = usuario.rows[0].id;
+
+    // 🔗 cria cliente vinculado
+    await client.query(
+      `INSERT INTO clientes (nome, email, telefone, usuario_id)
+       VALUES ($1, $2, $3, $4)`,
+      [nome, email, telefone || '', usuarioId]
+    );
+
+    await client.query('COMMIT');
+
+    res.status(201).json({
+      success: true,
+      message: "Usuário cadastrado com sucesso"
+    });
 
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Erro no cadastro:', error);
     res.status(500).json({ erro: 'Erro ao cadastrar usuário' });
+  } finally {
+    client.release();
   }
 };
 
