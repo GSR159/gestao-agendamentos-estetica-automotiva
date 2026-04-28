@@ -1,5 +1,3 @@
-const API = "http://localhost:3000";
-
 async function carregarRelatorios() {
   try {
     const res = await fetch(`${API}/relatorios`);

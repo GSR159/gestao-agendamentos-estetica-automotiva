@@ -1,14 +1,3 @@
-const API = "http://localhost:3000";
-
-function getHeaders() {
-  const token = localStorage.getItem("token");
-
-  return {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${token}`
-  };
-}
-
 async function carregarDashboard() {
   try {
     const res = await fetch(`${API}/agendamentos`, {

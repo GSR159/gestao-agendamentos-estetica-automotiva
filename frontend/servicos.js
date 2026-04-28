@@ -1,20 +1,4 @@
-const token = localStorage.getItem("token");
-
-if (!token) {
-  window.location.href = "login.html";
-}
-
-const API = "http://localhost:3000";
-
 let servicoEditando = null;
-
-// 🔥 headers
-function getHeaders() {
-  return {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${token}`
-  };
-}
 
 // 🚀 carregar serviços
 window.carregarServicos = async function () {
