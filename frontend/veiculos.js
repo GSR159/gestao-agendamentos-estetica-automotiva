@@ -48,21 +48,21 @@ window.carregarVeiculos = async function () {
 
     tabela.innerHTML = "";
 
-dados.forEach(v => {
-  const tr = document.createElement("tr");
+    dados.forEach(v => {
+      const tr = document.createElement("tr");
 
-  tr.innerHTML = `
-    <td>${v.cliente_id}</td>
-    <td>${v.marca} ${v.modelo}</td>
-    <td>${v.placa}</td>
-    <td>
-      <button onclick="editarVeiculo(${v.id})">✏️</button>
-      <button onclick="deletarVeiculo(${v.id})">🗑</button>
-    </td>
-  `;
+      tr.innerHTML = `
+        <td>${v.cliente || 'Sem proprietário'}</td>
+        <td>${v.marca} ${v.modelo}</td>
+        <td>${v.placa}</td>
+        <td>
+          <button onclick="editarVeiculo(${v.id})">✏️</button>
+          <button onclick="deletarVeiculo(${v.id})">🗑</button>
+        </td>
+      `;
 
-  tabela.appendChild(tr);
-});
+      tabela.appendChild(tr);
+    });
 
   } catch (erro) {
     console.error(erro);
@@ -81,12 +81,11 @@ window.fecharFormVeiculo = function () {
   document.getElementById("formVeiculo").style.display = "none";
   veiculoEditando = null;
 
-  document.getElementById("cliente_id").value = "";
-  document.getElementById("marca").value = "";
-  document.getElementById("modelo").value = "";
-  document.getElementById("placa").value = "";
-  document.getElementById("cor").value = "";
-  document.getElementById("ano").value = "";
+  const campos = ['marca', 'modelo', 'placa', 'cor', 'ano', 'cliente_id'];
+  campos.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
 };
 
 // ================= EDITAR =================
@@ -180,5 +179,5 @@ window.deletarVeiculo = async function (id) {
 // ================= INIT =================
 window.onload = () => {
   carregarVeiculos();
-  carregarClientes(); // 🔥 GARANTE QUE O SELECT SEMPRE VAI TER DADOS
+  carregarClientes();
 };

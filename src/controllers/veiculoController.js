@@ -14,7 +14,7 @@ const listarVeiculos = async (req, res) => {
         v.ano,
         c.nome AS cliente
       FROM veiculos v
-      JOIN clientes c ON c.id = v.cliente_id
+      LEFT JOIN clientes c ON c.id = v.cliente_id
       ORDER BY v.id ASC
     `);
 
@@ -41,7 +41,7 @@ const buscarVeiculoPorId = async (req, res) => {
         v.ano,
         c.nome AS cliente
       FROM veiculos v
-      JOIN clientes c ON c.id = v.cliente_id
+      LEFT JOIN clientes c ON c.id = v.cliente_id
       WHERE v.id = $1
     `, [id]);
 
