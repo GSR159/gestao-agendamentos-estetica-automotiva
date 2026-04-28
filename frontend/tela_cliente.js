@@ -1,5 +1,3 @@
-const API = "http://localhost:3000";
-
 // 🔄 trocar telas
 function trocarTela(tela) {
   ["agendamentos", "veiculos", "conta"].forEach(id => {

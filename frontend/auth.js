@@ -1,3 +1,5 @@
+const API = "http://localhost:3000";
+
 // 🔐 verifica se está logado
 function verificarLogin() {
   const token = localStorage.getItem("token");

@@ -1,15 +1,3 @@
-const API = "http://localhost:3000";
-
-// headers
-function getHeaders() {
-  const token = localStorage.getItem("token");
-
-  return {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${token}`
-  };
-}
-
 // ================= FORM =================
 window.abrirFormulario = function () {
   document.getElementById("formAgendamento").style.display = "block";
