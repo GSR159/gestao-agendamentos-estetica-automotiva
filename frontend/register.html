@@ -4,11 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart System - Criar Conta</title>
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  
+
   <style>
     :root {
       --bg-deep: #020617;
@@ -32,7 +30,6 @@
       overflow-x: hidden;
     }
 
-    /* Fundo decorativo sutil */
     .bg-glow {
       position: absolute;
       width: 400px;
@@ -48,6 +45,7 @@
       max-width: 420px;
       padding: 1.5rem;
       animation: fadeIn 0.5s ease-out;
+      z-index: 10;
     }
 
     @keyframes fadeIn {
@@ -83,27 +81,82 @@
 
     .input-icon {
       position: absolute;
-      left: 1rem;
+      left: 1.25rem;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-muted);
       pointer-events: none;
+      z-index: 10;
     }
 
-    input {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
       background: var(--bg-card) !important;
       border: 1px solid var(--border) !important;
       color: var(--text-main) !important;
-      padding: 0.75rem 1rem 0.75rem 2.75rem;
+      padding-top: 0.875rem !important;
+      padding-bottom: 0.875rem !important;
+      padding-left: 3.5rem !important;
+      padding-right: 1rem !important;
       border-radius: 0.75rem;
       outline: none;
       width: 100%;
+      box-sizing: border-box;
       transition: all 0.2s;
+    }
+
+    .input-with-eye {
+      padding-right: 3.5rem !important;
     }
 
     input:focus {
       border-color: var(--primary) !important;
       box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+
+    .toggle-password:hover {
+      color: var(--text-main);
+    }
+
+    .rule-item {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      transition: all 0.3s ease;
+    }
+
+    .rule-item svg {
+      transition: all 0.3s ease;
+    }
+
+    .rule-valid {
+      color: #22c55e !important;
+      transform: translateX(4px);
+    }
+
+    .checkbox-lgpd {
+      accent-color: var(--primary);
+      width: 1rem;
+      height: 1rem;
+      cursor: pointer;
+      margin-top: 0.125rem;
     }
 
     .btn-register {
@@ -120,6 +173,8 @@
       justify-content: center;
       gap: 0.5rem;
       margin-top: 1.5rem;
+      border: none;
+      cursor: pointer;
     }
 
     .btn-register:hover {
@@ -145,33 +200,43 @@
       text-decoration: underline;
     }
 
-    .erro {
-      background: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
+    .alerta {
       padding: 0.75rem;
       border-radius: 0.5rem;
       font-size: 0.875rem;
-      text-align: center;
+      text-align: left;
       margin-top: 1.5rem;
-      border: 1px solid rgba(239, 68, 68, 0.2);
       display: none;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .alerta.erro {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .alerta.sucesso {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-  <!-- Elementos de brilho de fundo -->
   <div class="bg-glow" style="top: -100px; right: -100px;"></div>
   <div class="bg-glow" style="bottom: -100px; left: -100px; opacity: 0.5;"></div>
 
   <div class="register-container">
-    
-    <div class="text-center mb-8">
+    <div class="text-center mb-6">
       <div class="inline-flex items-center justify-center p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-900/20 mb-4">
         <i data-lucide="user-plus" class="w-8 h-8 text-white"></i>
       </div>
       <h1 class="text-3xl font-extrabold tracking-tight text-white mb-1">Criar Conta</h1>
-      <p class="text-slate-400 text-sm">Registe-se para começar a gerir a sua estética.</p>
+      <p class="text-slate-400 text-sm">Registre-se para começar a gerir a sua estética.</p>
     </div>
 
     <div class="register-box">
@@ -180,7 +245,7 @@
         <label class="input-label" for="nome">Nome Completo</label>
         <div class="input-wrapper">
           <i data-lucide="user" class="w-5 h-5 input-icon"></i>
-          <input id="nome" type="text" placeholder="Como devemos chamá-lo?" required>
+          <input id="nome" type="text" placeholder="Como devemos chamá-lo?">
         </div>
       </div>
 
@@ -189,33 +254,76 @@
         <label class="input-label" for="email">Endereço de Email</label>
         <div class="input-wrapper">
           <i data-lucide="mail" class="w-5 h-5 input-icon"></i>
-          <input id="email" type="email" placeholder="exemplo@email.com" required >
+          <input id="email" type="email" placeholder="exemplo@email.com" oninput="this.value = this.value.toLowerCase()">
         </div>
       </div>
-      <!-- Telefone -->
-     <div class="input-group">
-      <label class="input-label" for="telefone">Telefone</label>
-      <div class="input-wrapper">
-        <i data-lucide="phone" class="w-5 h-5 input-icon"></i>
-        <input 
-          id="telefone" 
-         type="tel" 
-          placeholder="(11) 99999-9999"
-         pattern="\(\d{2}\)\s\d{4,5}-\d{4}"
-         title="Formato: (11) 99999-9999"
-         required>
-         
+
+      <!-- CONFIRMAR EMAIL -->
+      <div class="input-group">
+        <label class="input-label" for="confirmar_email">Confirme o Email</label>
+        <div class="input-wrapper">
+          <i data-lucide="mail-check" class="w-5 h-5 input-icon"></i>
+          <input id="confirmar_email" type="email" placeholder="Digite novamente o email" oninput="this.value = this.value.toLowerCase()">
+        </div>
       </div>
-      
-       </div>
 
       <!-- SENHA -->
       <div class="input-group">
         <label class="input-label" for="senha">Defina uma Palavra-passe</label>
         <div class="input-wrapper">
           <i data-lucide="lock" class="w-5 h-5 input-icon"></i>
-          <input id="senha" type="password" placeholder="No mínimo 6 caracteres" required>
+          <input id="senha" type="password" placeholder="No mínimo 6 caracteres" class="input-with-eye" oninput="avaliarSenha(this.value)">
+          <button type="button" class="toggle-password" onclick="togglePassword('senha', 'icon-eye-1', 'icon-eye-off-1')" aria-label="Mostrar senha">
+            <i data-lucide="eye" id="icon-eye-1" class="w-5 h-5 block"></i>
+            <i data-lucide="eye-off" id="icon-eye-off-1" class="w-5 h-5 hidden"></i>
+          </button>
         </div>
+
+        <ul class="mt-3 space-y-1 text-[11px] font-medium text-slate-500">
+          <li id="rule-length" class="rule-item">
+            <i data-lucide="x" class="w-3 h-3 icon-invalid"></i>
+            <i data-lucide="check" class="w-3 h-3 icon-valid hidden"></i>
+            <span>Mínimo de 6 caracteres</span>
+          </li>
+          <li id="rule-upper" class="rule-item">
+            <i data-lucide="x" class="w-3 h-3 icon-invalid"></i>
+            <i data-lucide="check" class="w-3 h-3 icon-valid hidden"></i>
+            <span>Pelo menos 1 letra maiúscula</span>
+          </li>
+          <li id="rule-lower" class="rule-item">
+            <i data-lucide="x" class="w-3 h-3 icon-invalid"></i>
+            <i data-lucide="check" class="w-3 h-3 icon-valid hidden"></i>
+            <span>Pelo menos 1 letra minúscula</span>
+          </li>
+          <li id="rule-special" class="rule-item">
+            <i data-lucide="x" class="w-3 h-3 icon-invalid"></i>
+            <i data-lucide="check" class="w-3 h-3 icon-valid hidden"></i>
+            <span>1 caractere especial (!@#$%)</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CONFIRMAR SENHA -->
+      <div class="input-group">
+        <label class="input-label" for="confirmar_senha">Confirme a Palavra-passe</label>
+        <div class="input-wrapper">
+          <i data-lucide="shield-check" class="w-5 h-5 input-icon"></i>
+          <input id="confirmar_senha" type="password" placeholder="Repita a senha" class="input-with-eye">
+          <button type="button" class="toggle-password" onclick="togglePassword('confirmar_senha', 'icon-eye-2', 'icon-eye-off-2')" aria-label="Mostrar senha">
+            <i data-lucide="eye" id="icon-eye-2" class="w-5 h-5 block"></i>
+            <i data-lucide="eye-off" id="icon-eye-off-2" class="w-5 h-5 hidden"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- LGPD -->
+      <div class="flex items-start gap-3 mt-6 mb-4">
+        <input type="checkbox" id="lgpd" class="checkbox-lgpd">
+        <label for="lgpd" class="text-xs text-slate-400 leading-tight cursor-pointer">
+          Li e concordo com os 
+          <a href="termos.html" class="text-blue-500 hover:underline">Termos de Uso</a> e autorizo o tratamento dos meus dados conforme a 
+          <a href="LGPD.html" class="text-blue-500 hover:underline">Política de Privacidade (LGPD)</a>.
+        </label>
       </div>
 
       <button class="btn-register" onclick="executarCadastro()">
@@ -223,42 +331,142 @@
         <i data-lucide="check" class="w-5 h-5"></i>
       </button>
 
-      <!-- MENSAGEM DE ERRO -->
-      <div id="erro" class="erro"></div>
+      <div id="alerta-erro" class="alerta erro"></div>
 
-      <!-- LINK PARA LOGIN -->
+      <div id="alerta-sucesso" class="alerta sucesso">
+        <strong><i data-lucide="mail-check" class="w-6 h-6 mx-auto mb-2"></i> Cadastro Realizado!</strong>
+        Um link de confirmação foi enviado para o seu email. Por favor, verifique a sua caixa de entrada para ativar a conta.
+      </div>
+
       <div class="login-link">
-        Já possui uma conta? 
+        Já possui uma conta?
         <a href="login.html">Faça login agora</a>
       </div>
     </div>
-
   </div>
 
   <script src="register.js"></script>
 
   <script>
-    // Inicializar ícones Lucide
     lucide.createIcons();
 
-    /**
-     * Função para gerir o clique de registo com feedback visual
-     */
-    function executarCadastro() {
-      const erroDiv = document.getElementById('erro');
-      erroDiv.style.display = 'none';
+    function togglePassword(inputId, eyeId, eyeOffId) {
+      const input = document.getElementById(inputId);
+      const iconEye = document.getElementById(eyeId);
+      const iconEyeOff = document.getElementById(eyeOffId);
 
-      // Chamar a função original do seu register.js
-      if (typeof cadastrar === 'function') {
-        cadastrar();
+      if (input.type === 'password') {
+        input.type = 'text';
+        iconEye.classList.remove('block');
+        iconEye.classList.add('hidden');
+        iconEyeOff.classList.remove('hidden');
+        iconEyeOff.classList.add('block');
       } else {
-        console.error("Função 'cadastrar' não encontrada no register.js");
-        erroDiv.innerText = "Erro ao processar registo. Tente novamente.";
-        erroDiv.style.display = 'block';
+        input.type = 'password';
+        iconEye.classList.remove('hidden');
+        iconEye.classList.add('block');
+        iconEyeOff.classList.remove('block');
+        iconEyeOff.classList.add('hidden');
       }
     }
 
-    // Permitir registo ao pressionar Enter
+    function avaliarSenha(senha) {
+      const regras = [
+        { id: 'rule-length', valid: senha.length >= 6 },
+        { id: 'rule-upper', valid: /[A-Z]/.test(senha) },
+        { id: 'rule-lower', valid: /[a-z]/.test(senha) },
+        { id: 'rule-special', valid: /[!@#$%^&*(),.?":{}|<>]/.test(senha) }
+      ];
+
+      regras.forEach(regra => {
+        const item = document.getElementById(regra.id);
+        const iconInvalid = item.querySelector('.icon-invalid');
+        const iconValid = item.querySelector('.icon-valid');
+
+        if (regra.valid) {
+          item.classList.add('rule-valid');
+          iconInvalid.classList.add('hidden');
+          iconValid.classList.remove('hidden');
+        } else {
+          item.classList.remove('rule-valid');
+          iconInvalid.classList.remove('hidden');
+          iconValid.classList.add('hidden');
+        }
+      });
+    }
+
+    function senhaTotalmenteValida(senha) {
+      return senha.length >= 6 &&
+             /[A-Z]/.test(senha) &&
+             /[a-z]/.test(senha) &&
+             /[!@#$%^&*(),.?":{}|<>]/.test(senha);
+    }
+
+    function executarCadastro() {
+      const erroDiv = document.getElementById('alerta-erro');
+      const sucessoDiv = document.getElementById('alerta-sucesso');
+
+      erroDiv.style.display = 'none';
+      sucessoDiv.style.display = 'none';
+      erroDiv.innerHTML = '';
+
+      const nome = document.getElementById('nome').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const confirmarEmail = document.getElementById('confirmar_email').value.trim();
+      const senha = document.getElementById('senha').value;
+      const confirmarSenha = document.getElementById('confirmar_senha').value;
+      const lgpdCheck = document.getElementById('lgpd').checked;
+
+      let erros = [];
+
+      if (!nome || !email || !confirmarEmail || !senha || !confirmarSenha) {
+        erros.push("Por favor, preencha todos os campos.");
+      }
+
+      if (email && !email.includes('@')) {
+        erros.push("Por favor, insira um endereço de email válido.");
+      }
+
+      if (confirmarEmail && !confirmarEmail.includes('@')) {
+        erros.push("Por favor, confirme com um endereço de email válido.");
+      }
+
+      if (email && confirmarEmail && email !== confirmarEmail) {
+        erros.push("Os emails não coincidem. Verifique e tente novamente.");
+      }
+
+      if (!lgpdCheck) {
+        erros.push("Você precisa aceitar os Termos de Uso e a Política de Privacidade.");
+      }
+
+      if (senha && confirmarSenha && senha !== confirmarSenha) {
+        erros.push("As palavras-passe não coincidem. Tente novamente.");
+      }
+
+      if (senha && !senhaTotalmenteValida(senha)) {
+        erros.push("A palavra-passe não cumpre todos os requisitos da lista.");
+      }
+
+      if (erros.length > 0) {
+        erroDiv.innerHTML =
+          "<strong>Atenção:</strong><ul style='margin-left: 1rem; list-style-type: disc;'>" +
+          erros.map(e => `<li>${e}</li>`).join('') +
+          "</ul>";
+        erroDiv.style.display = 'flex';
+        return;
+      }
+
+      sucessoDiv.style.display = 'flex';
+
+      setTimeout(() => {
+        if (typeof cadastrar === 'function') {
+          cadastrar();
+        } else {
+          console.warn("Função 'cadastrar' não encontrada em register.js.");
+        }
+      }, 1000);
+    }
+
     document.addEventListener('keypress', function (e) {
       if (e.key === 'Enter') {
         executarCadastro();

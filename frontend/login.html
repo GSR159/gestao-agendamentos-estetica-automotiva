@@ -88,22 +88,53 @@
       transform: translateY(-50%);
       color: var(--text-muted);
       pointer-events: none;
+      z-index: 10;
     }
 
     input {
       background: var(--bg-card) !important;
       border: 1px solid var(--border) !important;
       color: var(--text-main) !important;
-      padding: 0.75rem 1rem 0.75rem 2.75rem;
+      padding-top: 0.875rem !important;
+      padding-bottom: 0.875rem !important;
+      padding-right: 1rem !important;
+      padding-left: 3.5rem !important; /* Espaço forçado para o ícone da esquerda */
       border-radius: 0.75rem;
       outline: none;
       width: 100%;
+      box-sizing: border-box;
       transition: all 0.2s;
+    }
+
+    /* Padding extra à direita para o campo de senha (espaço do olho) */
+    .input-with-eye {
+      padding-right: 3.5rem !important; /* Espaço forçado para o botão do olho */
     }
 
     input:focus {
       border-color: var(--primary) !important;
       box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Estilo para o botão de ver senha */
+    .toggle-password {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+
+    .toggle-password:hover {
+      color: var(--text-main);
     }
 
     .btn-login {
@@ -194,7 +225,14 @@
         <label class="input-label" for="senha">Palavra-passe</label>
         <div class="input-wrapper">
           <i data-lucide="lock" class="w-5 h-5 input-icon"></i>
-          <input id="senha" type="password" placeholder="••••••••">
+          <!-- Adicionado classe "input-with-eye" para não sobrepor texto ao botão -->
+          <input id="senha" type="password" placeholder="••••••••" class="input-with-eye">
+          
+          <!-- Botão de mostrar/esconder senha -->
+          <button type="button" class="toggle-password" onclick="togglePassword()" aria-label="Mostrar senha">
+            <i data-lucide="eye" id="icon-eye" class="w-5 h-5 block"></i>
+            <i data-lucide="eye-off" id="icon-eye-off" class="w-5 h-5 hidden"></i>
+          </button>
         </div>
       </div>
 
@@ -205,6 +243,13 @@
 
       <!-- MENSAGEM DE ERRO -->
       <div id="erro" class="erro"></div>
+      
+      <button 
+     id="btn-reenviar" 
+     onclick="reenviarEmail()" 
+      style="display:none; margin-top:10px; width:100%; border:1px solid #3b82f6; padding:10px; border-radius:10px; color:#3b82f6;">
+      Reenviar email de confirmação
+      </button>
 
       <!-- LINK PARA CADASTRO -->
       <div class="cadastro-link">
@@ -220,6 +265,29 @@
   <script>
     // Inicializar ícones Lucide
     lucide.createIcons();
+
+    /**
+     * Alterna a visibilidade da palavra-passe
+     */
+    function togglePassword() {
+      const senhaInput = document.getElementById('senha');
+      const iconEye = document.getElementById('icon-eye');
+      const iconEyeOff = document.getElementById('icon-eye-off');
+
+      if (senhaInput.type === 'password') {
+        senhaInput.type = 'text';
+        iconEye.classList.remove('block');
+        iconEye.classList.add('hidden');
+        iconEyeOff.classList.remove('hidden');
+        iconEyeOff.classList.add('block');
+      } else {
+        senhaInput.type = 'password';
+        iconEye.classList.remove('hidden');
+        iconEye.classList.add('block');
+        iconEyeOff.classList.remove('block');
+        iconEyeOff.classList.add('hidden');
+      }
+    }
 
     /**
      * Função para gerir o clique de login com feedback visual simples

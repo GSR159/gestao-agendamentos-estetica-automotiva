@@ -2,17 +2,35 @@ let veiculoEditando = null;
 
 // ================= CLIENTES =================
 async function carregarClientes() {
-  const res = await fetch(`${API}/clientes`, {
-    headers: getHeaders()
-  });
+  try {
+    const res = await fetch(`${API}/clientes`, {
+      headers: getHeaders()
+    });
 
-  const dados = await res.json();
+    if (!res.ok) throw new Error("Erro ao buscar clientes");
 
-  const select = document.getElementById("cliente_id");
+    const dados = await res.json();
 
-  select.innerHTML = dados.map(c => `
-    <option value="${c.id}">${c.nome}</option>
-  `).join("");
+    const select = document.getElementById("cliente_id");
+
+    if (!select) {
+      console.error("Select cliente_id não encontrado");
+      return;
+    }
+
+    select.innerHTML = `
+      <option value="">Selecione um cliente</option>
+      ${dados.map(c => `
+        <option value="${c.id}">${c.nome}</option>
+      `).join("")}
+    `;
+
+    console.log("Clientes carregados:", dados);
+
+  } catch (erro) {
+    console.error(erro);
+    alert("Erro ao carregar clientes");
+  }
 }
 
 // ================= LISTAR =================
@@ -22,21 +40,29 @@ window.carregarVeiculos = async function () {
       headers: getHeaders()
     });
 
+    if (!res.ok) throw new Error("Erro na API");
+
     const dados = await res.json();
 
     const tabela = document.getElementById("tabela");
 
-    tabela.innerHTML = dados.map(v => `
-      <tr>
-        <td>${v.cliente}</td>
-        <td>${v.modelo}</td>
-        <td>${v.placa}</td>
-        <td>
-          <button onclick="editarVeiculo(${v.id})">✏️</button>
-          <button onclick="deletarVeiculo(${v.id})">🗑</button>
-        </td>
-      </tr>
-    `).join("");
+    tabela.innerHTML = "";
+
+dados.forEach(v => {
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td>${v.cliente_id}</td>
+    <td>${v.marca} ${v.modelo}</td>
+    <td>${v.placa}</td>
+    <td>
+      <button onclick="editarVeiculo(${v.id})">✏️</button>
+      <button onclick="deletarVeiculo(${v.id})">🗑</button>
+    </td>
+  `;
+
+  tabela.appendChild(tr);
+});
 
   } catch (erro) {
     console.error(erro);
@@ -46,9 +72,9 @@ window.carregarVeiculos = async function () {
 };
 
 // ================= FORM =================
-window.abrirFormVeiculo = async function () {
+window.abrirFormVeiculo = function () {
   document.getElementById("formVeiculo").style.display = "block";
-  await carregarClientes();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 window.fecharFormVeiculo = function () {
@@ -66,11 +92,13 @@ window.fecharFormVeiculo = function () {
 // ================= EDITAR =================
 window.editarVeiculo = async function (id) {
   try {
-    await carregarClientes();
+    abrirFormVeiculo();
 
     const res = await fetch(`${API}/veiculos/${id}`, {
       headers: getHeaders()
     });
+
+    if (!res.ok) throw new Error("Erro ao buscar veículo");
 
     const v = await res.json();
 
@@ -82,8 +110,6 @@ window.editarVeiculo = async function (id) {
     document.getElementById("ano").value = v.ano;
 
     veiculoEditando = id;
-
-    abrirFormVeiculo();
 
   } catch (erro) {
     console.error(erro);
@@ -152,4 +178,7 @@ window.deletarVeiculo = async function (id) {
 };
 
 // ================= INIT =================
-carregarVeiculos();
+window.onload = () => {
+  carregarVeiculos();
+  carregarClientes(); // 🔥 GARANTE QUE O SELECT SEMPRE VAI TER DADOS
+};

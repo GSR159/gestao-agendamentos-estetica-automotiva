@@ -1,17 +1,21 @@
 const API = "http://localhost:3000";
 
 async function cadastrar() {
-  const nome = document.getElementById("nome").value;
-  const email = document.getElementById("email").value;
+  const nome = document.getElementById("nome").value.trim();
+  const email = document.getElementById("email").value.trim().toLowerCase();
   const senha = document.getElementById("senha").value;
-  const telefone = document.getElementById("telefone").value; // 🔥 NOVO
+  const telefone = document.getElementById("telefone")?.value || ""; // opcional
 
-  const erroDiv = document.getElementById("erro");
+  const erroDiv = document.getElementById("alerta-erro");
+
+  // reset erro
+  erroDiv.style.display = "none";
+  erroDiv.innerText = "";
 
   if (!nome || !email || !senha) {
     erroDiv.innerText = "Preencha todos os campos";
     erroDiv.style.display = "block";
-    return;
+    throw new Error("Validação falhou");
   }
 
   try {
@@ -24,23 +28,23 @@ async function cadastrar() {
         nome,
         email,
         senha,
-        telefone // 🔥 ENVIANDO
+        telefone
       })
     });
 
     const data = await res.json();
 
-    if (res.ok) {
-      alert("Conta criada com sucesso!");
-      window.location.href = "login.html";
-    } else {
-      erroDiv.innerText = data.erro;
-      erroDiv.style.display = "block";
+    if (!res.ok) {
+      throw new Error(data.erro || "Erro ao cadastrar usuário.");
     }
+
+    // 🔥 IMPORTANTE: não redireciona mais
+    return data;
 
   } catch (error) {
     console.error(error);
-    erroDiv.innerText = "Erro ao conectar com servidor";
+    erroDiv.innerText = error.message || "Erro ao conectar com servidor";
     erroDiv.style.display = "block";
+    throw error;
   }
 }

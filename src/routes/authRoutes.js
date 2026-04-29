@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-const { login, register } = require('../controllers/authController');
+const {
+  register,
+  login,
+  confirmarEmail
+} = require('../controllers/authController');
 
-// LOGIN
-router.post('/login', login);
-
-// CADASTRO
 router.post('/register', register);
+router.post('/login', login);
+router.get('/confirmar-email', confirmarEmail);
 
 module.exports = router;

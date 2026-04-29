@@ -11,16 +11,20 @@ function verificarLogin() {
 
 // ================= LOGIN =================
 async function login() {
-  const email = document.getElementById("email").value;
+  const email = document.getElementById("email").value.trim().toLowerCase();
   const senha = document.getElementById("senha").value;
+  const erroEl = document.getElementById("erro");
+
+  erroEl.innerText = "";
+  erroEl.style.color = "#ef4444";
 
   if (!email || !senha) {
-    document.getElementById("erro").innerText = "Preencha todos os campos";
+    erroEl.innerText = "Preencha todos os campos";
     return;
   }
 
   try {
-    const res = await fetch("http://localhost:3000/auth/login", {
+    const res = await fetch(`${API}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -30,24 +34,86 @@ async function login() {
 
     const data = await res.json();
 
-    if (res.ok) {
-      localStorage.setItem("token", data.token);
+    if (!res.ok) {
+      erroEl.innerText = data.erro || "Erro ao fazer login";
 
-      const usuario = parseJwt(data.token);
-      
-      if(usuario.tipo === "admin" || usuario.tipo === "superadmin")
-        {
-        window.location.href = "dashboard.html";
+      // 🔥 mostra botão se não confirmou email
+      if (data.erro && data.erro.includes("Confirme seu email")) {
+        mostrarBotaoReenvio(true);
+      } else {
+        mostrarBotaoReenvio(false);
       }
-      else {
-        window.location.href = "tela_cliente.html";
-      }
+
+      return;
     }
-    
+
+    // sucesso → limpa botão
+    mostrarBotaoReenvio(false);
+
+    localStorage.setItem("token", data.token);
+
+    const usuario = parseJwt(data.token);
+
+    if (!usuario) {
+      erroEl.innerText = "Token inválido recebido do servidor";
+      localStorage.removeItem("token");
+      return;
+    }
+
+    if (usuario.tipo === "admin" || usuario.tipo === "superadmin") {
+      window.location.href = "dashboard.html";
+    } else {
+      window.location.href = "tela_cliente.html";
+    }
+
   } catch (erro) {
     console.error(erro);
-    document.getElementById("erro").innerText = "Erro ao conectar com servidor";
+    erroEl.innerText = "Erro ao conectar com servidor";
   }
+}
+
+// ================= REENVIAR EMAIL =================
+async function reenviarEmail() {
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const erroEl = document.getElementById("erro");
+
+  if (!email) {
+    erroEl.innerText = "Digite seu email para reenviar.";
+    erroEl.style.color = "#ef4444";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/auth/reenviar-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.erro);
+    }
+
+    erroEl.style.color = "#22c55e";
+    erroEl.innerText = data.mensagem;
+
+  } catch (error) {
+    erroEl.style.color = "#ef4444";
+    erroEl.innerText = error.message;
+  }
+}
+
+// ================= BOTÃO DINÂMICO =================
+function mostrarBotaoReenvio(mostrar) {
+  const btn = document.getElementById("btn-reenviar");
+
+  if (!btn) return;
+
+  btn.style.display = mostrar ? "block" : "none";
 }
 
 // 🔓 decode seguro do JWT
@@ -94,7 +160,7 @@ function ocultarParaCliente() {
   const usuario = getUsuario();
   const elementosAdmin = document.querySelectorAll(".admin-only");
 
-  if (!usuario || usuario.tipo !== "admin") {
+  if (!usuario || (usuario.tipo !== "admin" && usuario.tipo !== "superadmin")) {
     elementosAdmin.forEach(el => {
       el.style.display = "none";
     });
@@ -110,6 +176,7 @@ function ocultarParaCliente() {
   });
 }
 
+// 🔐 headers autenticados
 function getHeaders() {
   const token = localStorage.getItem("token");
 
