@@ -344,27 +344,6 @@
   lucide.createIcons();
 
   /**
-   * Abre o formulário de veículo
-   */
-  function abrirFormVeiculo() {
-    document.getElementById('formVeiculo').style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  /**
-   * Fecha o formulário e limpa os campos
-   */
-  function fecharFormVeiculo() {
-    document.getElementById('formVeiculo').style.display = 'none';
-    // Limpeza de campos para novos registos
-    const campos = ['marca', 'modelo', 'placa', 'cor', 'ano', 'cliente_id'];
-    campos.forEach(id => {
-      const el = document.getElementById(id);
-      if(el) el.value = '';
-    });
-  }
-
-  /**
    * Efetuar Logout
    */
   function efetuarLogout() {
