@@ -2,84 +2,564 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart System - Área do Cliente</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg-deep: #020617;
+      --bg-surface: #0f172a;
+      --bg-card: #1e293b;
+      --border: #334155;
+      --primary: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      position: fixed;
+      height: 100vh;
+      z-index: 40;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 2.5rem;
+    }
+
+    .nav-links {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      text-align: left;
+      width: 100%;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    }
+
+    .user-footer {
+      margin-top: auto;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+
+    /* Conteúdo */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2.5rem;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--primary);
+    }
+
+    /* Stat Card */
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+    }
+
+    .stat-icon {
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      width: fit-content;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+
+    /* Tabelas */
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      background: rgba(30, 41, 59, 0.5);
+      padding: 0.875rem 1.25rem;
+      text-align: left;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 0.875rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    tbody tr:hover td { background: rgba(59, 130, 246, 0.04); color: var(--text-main); }
+
+    /* Tela */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* Badge de status */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-pending  { background: rgba(251, 191, 36, 0.12); color: #fbbf24; }
+    .badge-approved { background: rgba(34, 197, 94, 0.12);  color: #22c55e; }
+    .badge-rejected { background: rgba(239, 68, 68, 0.12);  color: #ef4444; }
+
+    /* Inputs */
+    .input-field {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      border-radius: 0.65rem;
+      padding: 0.6rem 1rem;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    .input-field:focus { border-color: var(--primary); }
+    .input-field::placeholder { color: var(--text-muted); }
+
+    /* Botões */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      font-size: 0.875rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.65rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover { background: #2563eb; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+
+    .btn-danger {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      font-weight: 700;
+      font-size: 0.875rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.65rem;
+      border: 1px solid rgba(239,68,68,0.25);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+    /* Veículo Card */
+    .vehicle-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.875rem;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s;
+    }
+
+    .vehicle-card:hover { border-color: var(--primary); }
+
+    /* Conta info row */
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .info-row:last-child { border-bottom: none; }
+
+    /* Responsividade */
+    @media (max-width: 1024px) {
+      .sidebar { width: 80px; padding: 1.5rem 0.75rem; }
+      .sidebar span, .logo span { display: none; }
+      .main-content { margin-left: 80px; }
+    }
+  </style>
 </head>
 
-<body class="bg-slate-900 text-white">
-
-<div class="flex">
+<body>
+<div class="app-container">
 
   <!-- SIDEBAR -->
-  <aside class="w-64 h-screen bg-slate-800 p-5 fixed">
-    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
-      <i data-lucide="user"></i> Cliente
-    </h2>
+  <aside class="sidebar">
+    <div class="logo">
+      <i data-lucide="car"></i>
+      <span>Smart System</span>
+    </div>
 
-    <nav class="flex flex-col gap-3">
-      <button onclick="trocarTela('agendamentos')" class="text-left">Meus Agendamentos</button>
-      <button onclick="trocarTela('veiculos')" class="text-left">Meus Veículos</button>
-      <button onclick="trocarTela('conta')" class="text-left">Minha Conta</button>
+    <nav class="nav-links">
+      <button onclick="trocarTela('agendamentos')" class="nav-item active" id="btn-agendamentos">
+        <i data-lucide="calendar-check"></i>
+        <span>Meus Agendamentos</span>
+      </button>
+      <button onclick="trocarTela('veiculos')" class="nav-item" id="btn-veiculos">
+        <i data-lucide="car-front"></i>
+        <span>Meus Veículos</span>
+      </button>
+      <button onclick="trocarTela('conta')" class="nav-item" id="btn-conta">
+        <i data-lucide="user-circle"></i>
+        <span>Minha Conta</span>
+      </button>
     </nav>
 
-    <div class="mt-10">
-      <button onclick="logout()" class="text-red-400">Sair</button>
+    <div class="user-footer">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <div class="avatar" id="user-initial">C</div>
+        <span id="usuario-logado" class="text-sm font-bold truncate w-24 text-white">Cliente</span>
+      </div>
+      <button onclick="efetuarLogout()" class="text-slate-500 hover:text-red-500 transition-colors">
+        <i data-lucide="log-out" class="w-5 h-5"></i>
+      </button>
     </div>
   </aside>
 
-  <!-- CONTEÚDO -->
-  <main class="ml-64 p-6 w-full">
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="main-content">
 
-    <!-- AGENDAMENTOS -->
-    <div id="agendamentos">
-      <h1 class="text-2xl mb-4">Meus Agendamentos</h1>
+    <!-- ==================== AGENDAMENTOS ==================== -->
+    <div id="agendamentos" class="screen active">
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold tracking-tight text-white">Meus Agendamentos</h1>
+        <p class="text-slate-400 text-sm mt-1">Acompanhe seus serviços agendados e o status de cada um.</p>
+      </header>
 
-      <table class="w-full">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Serviço</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="listaAgendamentos"></tbody>
-      </table>
-    </div>
-
-    <!-- VEÍCULOS -->
-    <div id="veiculos" class="hidden">
-      <h1 class="text-2xl mb-4">Meus Veículos</h1>
-
-      <div class="flex gap-2 mb-4">
-        <input id="modelo" placeholder="Modelo" class="text-black p-2">
-        <input id="placa" placeholder="Placa" class="text-black p-2">
-        <button onclick="criarVeiculo()" class="bg-blue-500 px-4">Adicionar</button>
+      <!-- Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div class="stat-card">
+          <div class="stat-icon bg-blue-500/10 text-blue-500">
+            <i data-lucide="layers"></i>
+          </div>
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total</span>
+          <div class="stat-value" id="stat-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon bg-amber-500/10 text-amber-500">
+            <i data-lucide="clock"></i>
+          </div>
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pendentes</span>
+          <div class="stat-value" id="stat-pendentes">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon bg-green-500/10 text-green-500">
+            <i data-lucide="check-circle"></i>
+          </div>
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Concluídos</span>
+          <div class="stat-value" id="stat-concluidos">0</div>
+        </div>
       </div>
 
-      <ul id="listaVeiculos"></ul>
+      <!-- Tabela -->
+      <div class="card shadow-xl">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-base font-bold flex items-center gap-2">
+            <i data-lucide="list" class="text-blue-500 w-4 h-4"></i>
+            Histórico de Agendamentos
+          </h2>
+        </div>
+        <div class="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Hora</th>
+                <th>Serviço</th>
+                <th>Veículo</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="listaAgendamentos">
+              <!-- Demo rows (remova quando integrar com tela_cliente.js) -->
+              <tr>
+                <td>15/05/2025</td>
+                <td>09:00</td>
+                <td>Revisão Completa</td>
+                <td>HB20 · ABC-1234</td>
+                <td><span class="badge badge-approved"><i data-lucide="check" style="width:11px;height:11px"></i> Aprovado</span></td>
+              </tr>
+              <tr>
+                <td>22/05/2025</td>
+                <td>14:30</td>
+                <td>Troca de Óleo</td>
+                <td>HB20 · ABC-1234</td>
+                <td><span class="badge badge-pending"><i data-lucide="clock" style="width:11px;height:11px"></i> Pendente</span></td>
+              </tr>
+              <tr>
+                <td>28/04/2025</td>
+                <td>11:00</td>
+                <td>Alinhamento e Balanceamento</td>
+                <td>Civic · XYZ-5678</td>
+                <td><span class="badge badge-rejected"><i data-lucide="x" style="width:11px;height:11px"></i> Recusado</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-    <!-- CONTA -->
-    <div id="conta" class="hidden">
-      <h1 class="text-2xl mb-4">Minha Conta</h1>
+    <!-- ==================== VEÍCULOS ==================== -->
+    <div id="veiculos" class="screen">
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold tracking-tight text-white">Meus Veículos</h1>
+        <p class="text-slate-400 text-sm mt-1">Gerencie os veículos associados à sua conta.</p>
+      </header>
 
-      <button onclick="excluirConta()" class="bg-red-600 px-4 py-2">
-        Excluir Conta Permanentemente
-      </button>
+      <!-- Formulário de adição -->
+      <div class="card mb-6 shadow-xl">
+        <h2 class="text-base font-bold mb-4 flex items-center gap-2">
+          <i data-lucide="plus-circle" class="text-blue-500 w-4 h-4"></i>
+          Adicionar Novo Veículo
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <input id="modelo" placeholder="Modelo (ex: HB20)" class="input-field">
+          <input id="placa" placeholder="Placa (ex: ABC-1234)" class="input-field">
+          <input id="ano" placeholder="Ano (ex: 2023)" class="input-field">
+        </div>
+        <div class="mt-3 flex justify-end">
+          <button onclick="criarVeiculo()" class="btn-primary">
+            <i data-lucide="plus" class="w-4 h-4"></i> Adicionar Veículo
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de veículos -->
+      <div class="card shadow-xl">
+        <h2 class="text-base font-bold mb-4 flex items-center gap-2">
+          <i data-lucide="car-front" class="text-blue-500 w-4 h-4"></i>
+          Veículos Cadastrados
+        </h2>
+        <div id="listaVeiculos" class="flex flex-col gap-3">
+          <!-- Demo item -->
+          <div class="vehicle-card">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                <i data-lucide="car-front" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="font-bold text-sm text-white">HB20</p>
+                <p class="text-xs text-slate-500">ABC-1234 · 2022</p>
+              </div>
+            </div>
+            <button class="text-slate-500 hover:text-red-400 transition-colors">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="vehicle-card">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                <i data-lucide="car-front" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="font-bold text-sm text-white">Civic</p>
+                <p class="text-xs text-slate-500">XYZ-5678 · 2020</p>
+              </div>
+            </div>
+            <button class="text-slate-500 hover:text-red-400 transition-colors">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CONTA ==================== -->
+    <div id="conta" class="screen">
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold tracking-tight text-white">Minha Conta</h1>
+        <p class="text-slate-400 text-sm mt-1">Seus dados e preferências de acesso.</p>
+      </header>
+
+      <!-- Info do perfil -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Avatar & nome -->
+        <div class="card shadow-xl flex flex-col items-center justify-center py-10 gap-4">
+          <div class="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-3xl font-black" id="conta-avatar">C</div>
+          <div class="text-center">
+            <p class="font-bold text-lg text-white" id="conta-nome">Nome do Cliente</p>
+            <p class="text-xs text-slate-500" id="conta-email">cliente@email.com</p>
+          </div>
+          <span class="badge badge-approved mt-1">
+            <i data-lucide="shield-check" style="width:11px;height:11px"></i>
+            Conta Verificada
+          </span>
+        </div>
+
+        <!-- Detalhes -->
+        <div class="lg:col-span-2 card shadow-xl">
+          <h2 class="text-base font-bold mb-4 flex items-center gap-2">
+            <i data-lucide="user" class="text-blue-500 w-4 h-4"></i>
+            Informações Pessoais
+          </h2>
+          <div class="divide-y divide-slate-800">
+            <div class="info-row">
+              <span class="text-slate-500 text-sm w-28 shrink-0">Nome</span>
+              <span class="text-sm font-medium" id="conta-nome-row">Nome do Cliente</span>
+            </div>
+            <div class="info-row">
+              <span class="text-slate-500 text-sm w-28 shrink-0">E-mail</span>
+              <span class="text-sm font-medium" id="conta-email-row">cliente@email.com</span>
+            </div>
+            <div class="info-row">
+              <span class="text-slate-500 text-sm w-28 shrink-0">Telefone</span>
+              <span class="text-sm font-medium">—</span>
+            </div>
+            <div class="info-row">
+              <span class="text-slate-500 text-sm w-28 shrink-0">Membro desde</span>
+              <span class="text-sm font-medium">Janeiro, 2025</span>
+            </div>
+          </div>
+
+          <!-- Zona de perigo -->
+          <div class="mt-6 pt-5 border-t border-slate-800">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Zona de Perigo</p>
+            <button onclick="excluirConta()" class="btn-danger">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              Excluir Conta Permanentemente
+            </button>
+            <p class="text-xs text-slate-600 mt-2">Esta ação é irreversível. Todos os seus dados serão removidos.</p>
+          </div>
+        </div>
+      </div>
     </div>
 
   </main>
-
 </div>
 
 <script src="auth.js"></script>
 <script src="tela_cliente.js"></script>
 
 <script>
-lucide.createIcons();
-</script>
+  lucide.createIcons();
 
+  // Navegação entre telas
+  function trocarTela(tela) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById(tela).classList.add('active');
+    document.getElementById('btn-' + tela).classList.add('active');
+    lucide.createIcons();
+  }
+
+  function efetuarLogout() {
+    if (confirm("Deseja mesmo sair do sistema?")) {
+      if (typeof logout === 'function') logout();
+      else { localStorage.clear(); window.location.href = 'login.html'; }
+    }
+  }
+
+  window.onload = () => {
+    try {
+      if (typeof verificarLogin === "function") verificarLogin();
+      if (typeof mostrarUsuario === "function") mostrarUsuario();
+    } catch(e) { console.error(e); }
+  };
+</script>
 </body>
 </html>
