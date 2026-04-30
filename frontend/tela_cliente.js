@@ -179,29 +179,108 @@ async function excluirVeiculo(id) {
   }
 }
 
+// ---------- AGENDAMENTO (NOVO) ----------
+let listaServicosCliente = [];
+
+async function carregarServicosParaAgendamento() {
+  try {
+    const res = await fetch(`${API}/servicos`, { headers: getHeaders() });
+    listaServicosCliente = await res.json();
+
+    const select = document.getElementById("agend-servico");
+    if (!select) return;
+
+    select.innerHTML = `<option value="">Selecione o serviço</option>` +
+      listaServicosCliente.map(s =>
+        `<option value="${s.id}">${s.nome} (${s.duracao_minutos} min) — R$ ${Number(s.preco).toFixed(2).replace(".", ",")}</option>`
+      ).join("");
+  } catch (err) {
+    console.error("Erro ao carregar serviços:", err);
+  }
+}
+
+async function carregarVeiculosParaAgendamento() {
+  try {
+    const res = await fetch(`${API}/cliente/meus-veiculos`, { headers: getHeaders() });
+    const dados = await res.json();
+
+    const select = document.getElementById("agend-veiculo");
+    if (!select) return;
+
+    select.innerHTML = `<option value="">Selecione o veículo</option>` +
+      dados.map(v =>
+        `<option value="${v.id}">${v.modelo} — ${v.placa}</option>`
+      ).join("");
+  } catch (err) {
+    console.error("Erro ao carregar veículos para agendamento:", err);
+  }
+}
+
+function abrirFormAgendamento() {
+  carregarVeiculosParaAgendamento();
+  carregarServicosParaAgendamento();
+  document.getElementById("formAgendamentoCliente").style.display = "block";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  lucide.createIcons();
+}
+
+function fecharFormAgendamento() {
+  document.getElementById("formAgendamentoCliente").style.display = "none";
+  document.getElementById("agend-veiculo").value = "";
+  document.getElementById("agend-servico").value = "";
+  document.getElementById("agend-data").value = "";
+}
+
+async function enviarAgendamento() {
+  const veiculo_id = document.getElementById("agend-veiculo").value;
+  const servico_id = document.getElementById("agend-servico").value;
+  const data = document.getElementById("agend-data").value;
+
+  if (!veiculo_id || !servico_id || !data) {
+    alert("Preencha todos os campos.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/cliente/agendar`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ veiculo_id, servico_id, data })
+    });
+
+    const resposta = await res.json();
+
+    if (!res.ok) {
+      alert(resposta.erro ?? "Erro ao criar agendamento.");
+      return;
+    }
+
+    alert("Agendamento criado com sucesso! Aguarde aprovação.");
+    fecharFormAgendamento();
+    carregarAgendamentos();
+  } catch (err) {
+    console.error("Erro ao criar agendamento:", err);
+    alert("Erro de conexão com o servidor.");
+  }
+}
+
 // ---------- CONTA ----------
 function preencherInfoConta() {
   try {
-    // Ajuste conforme a estrutura do seu localStorage / auth.js
-    const usuario = JSON.parse(localStorage.getItem("usuario") ?? "{}");
-    const nome    = usuario.nome  ?? "Nome do Cliente";
-    const email   = usuario.email ?? "cliente@email.com";
+    const usuario = getUsuario();
+    const email   = usuario?.email ?? "cliente@email.com";
+    const nome    = usuario?.nome  ?? email.split("@")[0];
     const inicial = nome.charAt(0).toUpperCase();
 
-    // Sidebar
-    const nomeSpan = document.getElementById("usuario-logado");
-    const avatarEl = document.getElementById("user-initial");
-    if (nomeSpan) nomeSpan.textContent = nome;
-    if (avatarEl) avatarEl.textContent = inicial;
-
-    // Tela Conta
     const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+    setEl("usuario-logado",  nome);
+    setEl("user-initial",    inicial);
     setEl("conta-avatar",    inicial);
     setEl("conta-nome",      nome);
     setEl("conta-email",     email);
     setEl("conta-nome-row",  nome);
     setEl("conta-email-row", email);
-
   } catch (e) {
     console.warn("Não foi possível preencher dados da conta:", e);
   }
@@ -228,6 +307,14 @@ async function excluirConta() {
 
   } catch (err) {
     console.error("Erro ao excluir conta:", err);
+  }
+}
+
+// ---------- LOGOUT ----------
+function efetuarLogout() {
+  if (confirm("Deseja mesmo sair do sistema?")) {
+    if (typeof logout === "function") logout();
+    else { localStorage.clear(); window.location.href = "login.html"; }
   }
 }
 
