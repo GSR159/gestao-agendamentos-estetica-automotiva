@@ -52,7 +52,7 @@ dados.forEach(v => {
   const tr = document.createElement("tr");
 
   tr.innerHTML = `
-    <td>${v.cliente_id}</td>
+    <td>${v.cliente}</td>
     <td>${v.marca} ${v.modelo}</td>
     <td>${v.placa}</td>
     <td>
