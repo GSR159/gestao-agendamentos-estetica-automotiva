@@ -8,6 +8,7 @@ const agendamentoRoutes = require('./routes/agendamentoRoutes');
 const authRoutes = require('./routes/authRoutes');
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const relatorioRoutes = require('./routes/relatorioRoutes');
+const clienteAreaRoutes = require('./routes/clienteAreaRoutes');
 
 
 app.use(cors());
@@ -20,5 +21,6 @@ app.use('/agendamentos', agendamentoRoutes);
 app.use('/auth', authRoutes);
 app.use('/usuarios', usuarioRoutes);
 app.use('/relatorios',relatorioRoutes);
+app.use('/cliente', clienteAreaRoutes);
 
 module.exports = app;

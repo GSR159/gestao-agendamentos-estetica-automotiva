@@ -326,10 +326,49 @@
 
     <!-- ==================== AGENDAMENTOS ==================== -->
     <div id="agendamentos" class="screen active">
-      <header class="mb-8">
-        <h1 class="text-3xl font-bold tracking-tight text-white">Meus Agendamentos</h1>
-        <p class="text-slate-400 text-sm mt-1">Acompanhe seus serviços agendados e o status de cada um.</p>
+      <header class="flex justify-between items-center mb-8">
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight text-white">Meus Agendamentos</h1>
+          <p class="text-slate-400 text-sm mt-1">Acompanhe seus serviços agendados e o status de cada um.</p>
+        </div>
+        <button onclick="abrirFormAgendamento()" class="btn-primary">
+          <i data-lucide="plus-circle" class="w-5 h-5"></i> Novo Agendamento
+        </button>
       </header>
+
+      <!-- Formulário de Novo Agendamento -->
+      <div id="formAgendamentoCliente" class="card mb-6 shadow-xl" style="display:none;">
+        <h2 class="text-base font-bold mb-4 flex items-center gap-2">
+          <i data-lucide="calendar-plus" class="text-blue-500 w-4 h-4"></i>
+          Novo Agendamento
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Veículo</label>
+            <select id="agend-veiculo" class="input-field">
+              <option value="">Selecione o veículo</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Serviço</label>
+            <select id="agend-servico" class="input-field">
+              <option value="">Selecione o serviço</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Data e Hora</label>
+            <input type="datetime-local" id="agend-data" class="input-field">
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 border-t border-slate-800 pt-4">
+          <button onclick="fecharFormAgendamento()" class="px-5 py-2 text-slate-400 font-bold hover:text-white transition-colors">
+            Cancelar
+          </button>
+          <button onclick="enviarAgendamento()" class="btn-primary">
+            <i data-lucide="check" class="w-4 h-4"></i> Confirmar Agendamento
+          </button>
+        </div>
+      </div>
 
       <!-- Stats -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
@@ -376,28 +415,6 @@
               </tr>
             </thead>
             <tbody id="listaAgendamentos">
-              <!-- Demo rows (remova quando integrar com tela_cliente.js) -->
-              <tr>
-                <td>15/05/2025</td>
-                <td>09:00</td>
-                <td>Revisão Completa</td>
-                <td>HB20 · ABC-1234</td>
-                <td><span class="badge badge-approved"><i data-lucide="check" style="width:11px;height:11px"></i> Aprovado</span></td>
-              </tr>
-              <tr>
-                <td>22/05/2025</td>
-                <td>14:30</td>
-                <td>Troca de Óleo</td>
-                <td>HB20 · ABC-1234</td>
-                <td><span class="badge badge-pending"><i data-lucide="clock" style="width:11px;height:11px"></i> Pendente</span></td>
-              </tr>
-              <tr>
-                <td>28/04/2025</td>
-                <td>11:00</td>
-                <td>Alinhamento e Balanceamento</td>
-                <td>Civic · XYZ-5678</td>
-                <td><span class="badge badge-rejected"><i data-lucide="x" style="width:11px;height:11px"></i> Recusado</span></td>
-              </tr>
             </tbody>
           </table>
         </div>
@@ -436,35 +453,6 @@
           Veículos Cadastrados
         </h2>
         <div id="listaVeiculos" class="flex flex-col gap-3">
-          <!-- Demo item -->
-          <div class="vehicle-card">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                <i data-lucide="car-front" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <p class="font-bold text-sm text-white">HB20</p>
-                <p class="text-xs text-slate-500">ABC-1234 · 2022</p>
-              </div>
-            </div>
-            <button class="text-slate-500 hover:text-red-400 transition-colors">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          </div>
-          <div class="vehicle-card">
-            <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                <i data-lucide="car-front" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <p class="font-bold text-sm text-white">Civic</p>
-                <p class="text-xs text-slate-500">XYZ-5678 · 2020</p>
-              </div>
-            </div>
-            <button class="text-slate-500 hover:text-red-400 transition-colors">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -532,34 +520,12 @@
   </main>
 </div>
 
+<script src="config.js"></script>
 <script src="auth.js"></script>
 <script src="tela_cliente.js"></script>
 
 <script>
   lucide.createIcons();
-
-  // Navegação entre telas
-  function trocarTela(tela) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    document.getElementById(tela).classList.add('active');
-    document.getElementById('btn-' + tela).classList.add('active');
-    lucide.createIcons();
-  }
-
-  function efetuarLogout() {
-    if (confirm("Deseja mesmo sair do sistema?")) {
-      if (typeof logout === 'function') logout();
-      else { localStorage.clear(); window.location.href = 'login.html'; }
-    }
-  }
-
-  window.onload = () => {
-    try {
-      if (typeof verificarLogin === "function") verificarLogin();
-      if (typeof mostrarUsuario === "function") mostrarUsuario();
-    } catch(e) { console.error(e); }
-  };
 </script>
 </body>
 </html>
