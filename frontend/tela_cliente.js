@@ -1,20 +1,13 @@
 // ============================================================
-//  tela_cliente.js — compatível com o novo layout Smart System
+//  tela_cliente.js — com integração Google Calendar e iCal
 // ============================================================
 
 // ---------- NAVEGAÇÃO ----------
 function trocarTela(tela) {
-  // Esconde todas as telas
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-
-  // Remove active de todos os botões do sidebar
   document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
-
-  // Ativa a tela e o botão correspondente
   document.getElementById(tela).classList.add("active");
   document.getElementById("btn-" + tela).classList.add("active");
-
-  // Reinicia os ícones Lucide para os recém-renderizados
   lucide.createIcons();
 }
 
@@ -35,22 +28,100 @@ function getBadge(status) {
           </span>`;
 }
 
+// ---------- GOOGLE CALENDAR ----------
+function abrirGoogleCalendar(agendamento) {
+  const inicio = new Date(agendamento.data);
+  const fim    = new Date(inicio.getTime() + 60 * 60 * 1000); // +1h padrão
+
+  const fmt = d => d.toISOString().replace(/-|:|\.\d{3}/g, "");
+
+  const params = new URLSearchParams({
+    action:   "TEMPLATE",
+    text:     `Serviço: ${agendamento.servico}`,
+    dates:    `${fmt(inicio)}/${fmt(fim)}`,
+    details:  `Veículo: ${agendamento.veiculo?.modelo ?? ""} · ${agendamento.veiculo?.placa ?? ""}`,
+    location: "Smart System Auto"
+  });
+
+  window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, "_blank");
+}
+
+// ---------- APPLE CALENDAR (iCal) ----------
+function baixarICS(agendamento) {
+  const inicio = new Date(agendamento.data);
+  const fim    = new Date(inicio.getTime() + 60 * 60 * 1000); // +1h padrão
+
+  const fmt = d => d.toISOString().replace(/-|:|\.\d{3}/g, "").slice(0, 15) + "Z";
+
+  const uid     = `agendamento-${agendamento.id}@smartsystem`;
+  const veiculo = `${agendamento.veiculo?.modelo ?? ""} · ${agendamento.veiculo?.placa ?? ""}`;
+
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Smart System//PT",
+    "BEGIN:VEVENT",
+    `UID:${uid}`,
+    `DTSTAMP:${fmt(new Date())}`,
+    `DTSTART:${fmt(inicio)}`,
+    `DTEND:${fmt(fim)}`,
+    `SUMMARY:Serviço: ${agendamento.servico}`,
+    `DESCRIPTION:Veículo: ${veiculo}`,
+    "LOCATION:Smart System Auto",
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].join("\r\n");
+
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+
+  a.href     = url;
+  a.download = `agendamento-${agendamento.id}.ics`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+// ---------- BOTÕES DE CALENDÁRIO ----------
+function getBotoesCalendario(agendamento) {
+  if ((agendamento.status ?? "").toLowerCase() !== "aprovado") return "";
+
+  // Serializa o objeto para passar via onclick
+  const dados = encodeURIComponent(JSON.stringify(agendamento));
+
+  return `
+    <div class="flex items-center gap-2 mt-1">
+      <button
+        onclick='abrirGoogleCalendar(JSON.parse(decodeURIComponent("${dados}")))'
+        title="Adicionar ao Google Calendar"
+        class="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors border border-blue-500/20 hover:border-blue-400/40 rounded-lg px-2 py-1">
+        <i data-lucide="calendar-plus" style="width:12px;height:12px"></i> Google
+      </button>
+      <button
+        onclick='baixarICS(JSON.parse(decodeURIComponent("${dados}")))'
+        title="Baixar para Apple Calendar"
+        class="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition-colors border border-slate-600/30 hover:border-slate-400/40 rounded-lg px-2 py-1">
+        <i data-lucide="apple" style="width:12px;height:12px"></i> Apple
+      </button>
+    </div>
+  `;
+}
+
 // ---------- AGENDAMENTOS ----------
 async function carregarAgendamentos() {
   try {
     const res  = await fetch(`${API}/cliente/meus-agendamentos`, { headers: getHeaders() });
     const data = await res.json();
 
-    // Atualiza os cards de estatísticas
-    const total     = data.length;
-    const pendentes = data.filter(a => a.status?.toLowerCase() === "pendente").length;
-    const concluidos= data.filter(a => ["aprovado","concluido"].includes(a.status?.toLowerCase())).length;
+    const total      = data.length;
+    const pendentes  = data.filter(a => a.status?.toLowerCase() === "pendente").length;
+    const concluidos = data.filter(a => ["aprovado", "concluido"].includes(a.status?.toLowerCase())).length;
 
-    document.getElementById("stat-total").textContent     = total;
-    document.getElementById("stat-pendentes").textContent = pendentes;
-    document.getElementById("stat-concluidos").textContent= concluidos;
+    document.getElementById("stat-total").textContent      = total;
+    document.getElementById("stat-pendentes").textContent  = pendentes;
+    document.getElementById("stat-concluidos").textContent = concluidos;
 
-    // Preenche a tabela
     const tabela = document.getElementById("listaAgendamentos");
 
     if (!data.length) {
@@ -65,9 +136,9 @@ async function carregarAgendamentos() {
 
     tabela.innerHTML = data.map(a => {
       const data_fmt = a.data ? new Date(a.data).toLocaleDateString("pt-BR") : "—";
-      const hora     = a.hora  ?? "—";
-      const servico  = a.servico  ?? "—";
-      const veiculo  = a.veiculo  ? `${a.veiculo.modelo} · ${a.veiculo.placa}` : "—";
+      const hora     = a.hora    ?? "—";
+      const servico  = a.servico ?? "—";
+      const veiculo  = a.veiculo ? `${a.veiculo.modelo} · ${a.veiculo.placa}` : "—";
 
       return `
         <tr>
@@ -75,7 +146,10 @@ async function carregarAgendamentos() {
           <td>${hora}</td>
           <td>${servico}</td>
           <td>${veiculo}</td>
-          <td>${getBadge(a.status)}</td>
+          <td>
+            ${getBadge(a.status)}
+            ${getBotoesCalendario(a)}
+          </td>
         </tr>`;
     }).join("");
 
@@ -151,7 +225,6 @@ async function criarVeiculo() {
       return;
     }
 
-    // Limpa os campos
     document.getElementById("modelo").value = "";
     document.getElementById("placa").value  = "";
     document.getElementById("ano").value    = "";
@@ -201,7 +274,7 @@ async function carregarServicosParaAgendamento() {
 
 async function carregarVeiculosParaAgendamento() {
   try {
-    const res = await fetch(`${API}/cliente/meus-veiculos`, { headers: getHeaders() });
+    const res   = await fetch(`${API}/cliente/meus-veiculos`, { headers: getHeaders() });
     const dados = await res.json();
 
     const select = document.getElementById("agend-veiculo");
@@ -217,6 +290,13 @@ async function carregarVeiculosParaAgendamento() {
 }
 
 function abrirFormAgendamento() {
+  // ✅ Bloqueia datas passadas
+  const agora   = new Date();
+  const minimo  = new Date(agora.getTime() - agora.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+  document.getElementById("agend-data").min = minimo;
+
   carregarVeiculosParaAgendamento();
   carregarServicosParaAgendamento();
   document.getElementById("formAgendamentoCliente").style.display = "block";
@@ -228,24 +308,30 @@ function fecharFormAgendamento() {
   document.getElementById("formAgendamentoCliente").style.display = "none";
   document.getElementById("agend-veiculo").value = "";
   document.getElementById("agend-servico").value = "";
-  document.getElementById("agend-data").value = "";
+  document.getElementById("agend-data").value    = "";
 }
 
 async function enviarAgendamento() {
   const veiculo_id = document.getElementById("agend-veiculo").value;
   const servico_id = document.getElementById("agend-servico").value;
-  const data = document.getElementById("agend-data").value;
+  const data       = document.getElementById("agend-data").value;
 
   if (!veiculo_id || !servico_id || !data) {
     alert("Preencha todos os campos.");
     return;
   }
 
+  // ✅ Validação de data passada (camada de segurança)
+  if (new Date(data) <= new Date()) {
+    alert("Não é possível agendar em uma data e horário passados.");
+    return;
+  }
+
   try {
     const res = await fetch(`${API}/cliente/agendar`, {
-      method: "POST",
+      method:  "POST",
       headers: getHeaders(),
-      body: JSON.stringify({ veiculo_id, servico_id, data })
+      body:    JSON.stringify({ veiculo_id, servico_id, data })
     });
 
     const resposta = await res.json();
@@ -258,6 +344,7 @@ async function enviarAgendamento() {
     alert("Agendamento criado com sucesso! Aguarde aprovação.");
     fecharFormAgendamento();
     carregarAgendamentos();
+
   } catch (err) {
     console.error("Erro ao criar agendamento:", err);
     alert("Erro de conexão com o servidor.");

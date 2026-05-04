@@ -10,7 +10,6 @@ async function carregarClientes() {
     if (!res.ok) throw new Error("Erro ao buscar clientes");
 
     const dados = await res.json();
-
     const select = document.getElementById("cliente_id");
 
     if (!select) {
@@ -24,8 +23,6 @@ async function carregarClientes() {
         <option value="${c.id}">${c.nome}</option>
       `).join("")}
     `;
-
-    console.log("Clientes carregados:", dados);
 
   } catch (erro) {
     console.error(erro);
@@ -43,26 +40,22 @@ window.carregarVeiculos = async function () {
     if (!res.ok) throw new Error("Erro na API");
 
     const dados = await res.json();
-
     const tabela = document.getElementById("tabela");
-
     tabela.innerHTML = "";
 
-dados.forEach(v => {
-  const tr = document.createElement("tr");
-
-  tr.innerHTML = `
-    <td>${v.cliente}</td>
-    <td>${v.marca} ${v.modelo}</td>
-    <td>${v.placa}</td>
-    <td>
-      <button onclick="editarVeiculo(${v.id})">✏️</button>
-      <button onclick="deletarVeiculo(${v.id})">🗑</button>
-    </td>
-  `;
-
-  tabela.appendChild(tr);
-});
+    dados.forEach(v => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${v.cliente}</td>
+        <td>${v.marca} ${v.modelo}</td>
+        <td>${v.placa}</td>
+        <td>
+          <button onclick="editarVeiculo(${v.id})">✏️</button>
+          <button onclick="deletarVeiculo(${v.id})">🗑</button>
+        </td>
+      `;
+      tabela.appendChild(tr);
+    });
 
   } catch (erro) {
     console.error(erro);
@@ -126,42 +119,33 @@ window.salvarVeiculo = async function () {
   const cor = document.getElementById("cor").value;
   const ano = document.getElementById("ano").value;
 
+  if (!cliente_id || !marca || !modelo || !placa) {
+    alert("Preencha os campos obrigatórios: Cliente, Marca, Modelo e Placa.");
+    return;
+  }
+
   let res;
 
   if (veiculoEditando) {
     res = await fetch(`${API}/veiculos/${veiculoEditando}`, {
       method: "PUT",
       headers: getHeaders(),
-      body: JSON.stringify({
-        cliente_id,
-        marca,
-        modelo,
-        placa,
-        cor,
-        ano
-      })
+      body: JSON.stringify({ cliente_id, marca, modelo, placa, cor, ano })
     });
   } else {
     res = await fetch(`${API}/veiculos`, {
       method: "POST",
       headers: getHeaders(),
-      body: JSON.stringify({
-        cliente_id,
-        marca,
-        modelo,
-        placa,
-        cor,
-        ano
-      })
+      body: JSON.stringify({ cliente_id, marca, modelo, placa, cor, ano })
     });
   }
 
   if (res.ok) {
-    alert("Salvo com sucesso!");
     fecharFormVeiculo();
     carregarVeiculos();
   } else {
-    alert("Erro ao salvar");
+    const erro = await res.json().catch(() => ({}));
+    alert(erro.erro || "Erro ao salvar veículo");
   }
 };
 
@@ -175,10 +159,4 @@ window.deletarVeiculo = async function (id) {
   });
 
   carregarVeiculos();
-};
-
-// ================= INIT =================
-window.onload = () => {
-  carregarVeiculos();
-  carregarClientes(); // 🔥 GARANTE QUE O SELECT SEMPRE VAI TER DADOS
 };

@@ -14,7 +14,6 @@ async function carregarClientes() {
   });
 
   const dados = await res.json();
-
   const select = document.getElementById("cliente_id");
 
   select.innerHTML = dados.map(c => `
@@ -33,9 +32,7 @@ window.carregarVeiculosDoCliente = async function () {
   });
 
   const dados = await res.json();
-
   const filtrados = dados.filter(v => v.cliente_id == cliente_id);
-
   const select = document.getElementById("veiculo_id");
 
   select.innerHTML = filtrados.map(v => `
@@ -52,7 +49,6 @@ async function carregarServicos() {
   });
 
   listaServicos = await res.json();
-
   const select = document.getElementById("servico_id");
 
   select.innerHTML = listaServicos.map(s => `
@@ -67,7 +63,6 @@ async function horarioOcupado(dataSelecionada, servico_id) {
   });
 
   const agendamentos = await res.json();
-
   const servico = listaServicos.find(s => s.id == servico_id);
   if (!servico) return false;
 
@@ -79,7 +74,6 @@ async function horarioOcupado(dataSelecionada, servico_id) {
     if (a.status === "recusado") continue;
 
     const inicioExistente = new Date(a.data);
-
     const servicoExistente = listaServicos.find(s => s.nome === a.servico);
     if (!servicoExistente) continue;
 
@@ -88,9 +82,7 @@ async function horarioOcupado(dataSelecionada, servico_id) {
       fimExistente.getMinutes() + servicoExistente.duracao_minutos
     );
 
-    const conflito =
-      inicioNovo < fimExistente && fimNovo > inicioExistente;
-
+    const conflito = inicioNovo < fimExistente && fimNovo > inicioExistente;
     if (conflito) return true;
   }
 
@@ -109,8 +101,13 @@ window.criarAgendamento = async function () {
     return;
   }
 
-  const ocupado = await horarioOcupado(data, servico_id);
+  // ✅ Validação de data passada
+  if (new Date(data) <= new Date()) {
+    alert("Não é possível agendar em uma data e horário passados.");
+    return;
+  }
 
+  const ocupado = await horarioOcupado(data, servico_id);
   if (ocupado) {
     alert("Horário ocupado");
     return;
@@ -151,7 +148,6 @@ window.atualizarStatus = async function (id, status) {
       const erro = await res.json();
       alert(erro.erro || "Erro ao atualizar status");
     }
-
   } catch (erro) {
     console.error("Erro no update:", erro);
   }
@@ -164,7 +160,6 @@ window.carregarAgendamentos = async function () {
   });
 
   const dados = await res.json();
-
   const tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
 
@@ -186,7 +181,6 @@ window.carregarAgendamentos = async function () {
           <button onclick="atualizarStatus(${a.id}, 'aprovado')">Aprovar</button>
           <button onclick="atualizarStatus(${a.id}, 'recusado')">Recusar</button>
         ` : ""}
-
         <button onclick="deletar(${a.id})">Excluir</button>
       </td>
     `;

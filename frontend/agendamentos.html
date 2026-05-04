@@ -339,10 +339,17 @@
   /**
    * Controla a visibilidade do formulário com animação
    */
-  function abrirFormulario() {
+    function abrirFormulario() {
+    // Bloqueia datas passadas no calendário
+    const agora = new Date();
+    const minimo = new Date(agora.getTime() - agora.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+    document.getElementById("data").min = minimo;
+
     document.getElementById('formAgendamento').style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+}
 
   function fecharFormulario() {
     document.getElementById('formAgendamento').style.display = 'none';
