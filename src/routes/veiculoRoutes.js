@@ -12,12 +12,13 @@ const {
   deletarVeiculo
 } = require('../controllers/veiculoController');
 
-// 🔹 ROTAS PROTEGIDAS
 router.get('/', verificarToken, listarVeiculos);
 router.get('/:id', verificarToken, buscarVeiculoPorId);
 
-// 🔹 SÓ ADMIN PODE ALTERAR
-router.post('/', verificarToken, verificarAdmin, criarVeiculo);
+// Cliente pode criar o veiculo
+router.post('/', verificarToken, criarVeiculo);
+
+// Só admin pode editar e deletar
 router.put('/:id', verificarToken, verificarAdmin, atualizarVeiculo);
 router.delete('/:id', verificarToken, verificarAdmin, deletarVeiculo);
 

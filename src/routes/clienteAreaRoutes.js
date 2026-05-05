@@ -7,6 +7,7 @@ const {
   criarVeiculoCliente,
   excluirVeiculoCliente,
   criarAgendamentoCliente,
+  atualizarTelefone,
   excluirConta
 } = require('../controllers/clienteAreaController');
 
@@ -19,6 +20,9 @@ router.post('/meus-veiculos', criarVeiculoCliente);
 router.delete('/meus-veiculos/:id', excluirVeiculoCliente);
 
 router.post('/agendar', criarAgendamentoCliente);
+
+// 🔥 Rota de atualização de telefone
+router.put('/minha-conta', atualizarTelefone);
 
 router.delete('/minha-conta', excluirConta);
 

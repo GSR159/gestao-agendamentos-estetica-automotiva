@@ -10,7 +10,6 @@ const FRONT_URL = process.env.FRONT_URL || "http://127.0.0.1:5500";
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 
-// ================= CONFIG EMAIL =================
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -19,7 +18,6 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// ================= FUNÇÃO ENVIAR EMAIL =================
 async function enviarEmailConfirmacao(email, nome, link) {
   await transporter.sendMail({
     from: `"Smart System" <${EMAIL_USER}>`,
@@ -30,7 +28,6 @@ async function enviarEmailConfirmacao(email, nome, link) {
         <h2>Olá, ${nome}!</h2>
         <p>Seu cadastro foi realizado com sucesso.</p>
         <p>Clique abaixo para confirmar seu email:</p>
-
         <a href="${link}" style="
           display:inline-block;
           background:#2563eb;
@@ -42,11 +39,7 @@ async function enviarEmailConfirmacao(email, nome, link) {
         ">
           Confirmar Email
         </a>
-
-        <p style="margin-top:20px;">
-          Ou copie e cole:
-        </p>
-
+        <p style="margin-top:20px;">Ou copie e cole:</p>
         <p>${link}</p>
       </div>
     `
@@ -76,18 +69,29 @@ const register = async (req, res) => {
     }
 
     const senhaHash = await bcrypt.hash(senha, 10);
-
     const token = crypto.randomBytes(32).toString('hex');
     const expiracao = new Date(Date.now() + 1000 * 60 * 60 * 24);
-
     const tipoUsuario = tipo || 'cliente';
 
-    await pool.query(
+    // Insere o usuário e retorna o id
+    const novoUsuario = await pool.query(
       `INSERT INTO usuarios
         (nome, email, senha, telefone, tipo, email_confirmado, token_confirmacao, token_expira_em)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id`,
       [nome, email, senhaHash, telefone, tipoUsuario, false, token, expiracao]
     );
+
+    const usuarioId = novoUsuario.rows[0].id;
+
+    // 🔥 Cria o cliente automaticamente se for do tipo cliente
+    if (tipoUsuario === 'cliente') {
+      await pool.query(
+        `INSERT INTO clientes (nome, email, telefone, usuario_id)
+         VALUES ($1, $2, $3, $4)`,
+        [nome, email, telefone, usuarioId]
+      );
+    }
 
     const link = `${FRONT_URL}/confirmar-email.html?token=${token}`;
 
@@ -130,7 +134,6 @@ const login = async (req, res) => {
     const usuario = resultado.rows[0];
 
     const senhaValida = await bcrypt.compare(senha, usuario.senha);
-
     if (!senhaValida) {
       return res.status(401).json({ erro: 'Senha inválida.' });
     }
@@ -139,11 +142,19 @@ const login = async (req, res) => {
       return res.status(401).json({ erro: 'Confirme seu email antes de fazer login.' });
     }
 
+    // Busca o cliente_id vinculado ao usuário
+    const clienteResult = await pool.query(
+      'SELECT id FROM clientes WHERE usuario_id = $1',
+      [usuario.id]
+    );
+    const cliente_id = clienteResult.rows[0]?.id || null;
+
     const token = jwt.sign(
       {
         id: usuario.id,
         tipo: usuario.tipo,
-        email: usuario.email
+        email: usuario.email,
+        cliente_id
       },
       SECRET,
       { expiresIn: '1d' }
@@ -171,8 +182,7 @@ const confirmarEmail = async (req, res) => {
 
     const resultado = await pool.query(
       `SELECT id, token_expira_em, email_confirmado
-       FROM usuarios
-       WHERE token_confirmacao = $1`,
+       FROM usuarios WHERE token_confirmacao = $1`,
       [token]
     );
 
@@ -238,8 +248,7 @@ const reenviarEmail = async (req, res) => {
 
     await pool.query(
       `UPDATE usuarios
-       SET token_confirmacao = $1,
-           token_expira_em = $2
+       SET token_confirmacao = $1, token_expira_em = $2
        WHERE id = $3`,
       [novoToken, novaExpiracao, usuario.id]
     );
@@ -252,9 +261,7 @@ const reenviarEmail = async (req, res) => {
       console.warn("LINK DE REENVIO:", link);
     }
 
-    return res.status(200).json({
-      mensagem: 'Email reenviado com sucesso.'
-    });
+    return res.status(200).json({ mensagem: 'Email reenviado com sucesso.' });
 
   } catch (error) {
     console.error(error);
@@ -262,9 +269,4 @@ const reenviarEmail = async (req, res) => {
   }
 };
 
-module.exports = {
-  register,
-  login,
-  confirmarEmail,
-  reenviarEmail
-};
+module.exports = { register, login, confirmarEmail, reenviarEmail };

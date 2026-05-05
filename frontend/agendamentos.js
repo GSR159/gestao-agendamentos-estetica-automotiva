@@ -101,7 +101,6 @@ window.criarAgendamento = async function () {
     return;
   }
 
-  // ✅ Validação de data passada
   if (new Date(data) <= new Date()) {
     alert("Não é possível agendar em uma data e horário passados.");
     return;
@@ -116,12 +115,7 @@ window.criarAgendamento = async function () {
   const res = await fetch(`${API}/agendamentos`, {
     method: "POST",
     headers: getHeaders(),
-    body: JSON.stringify({
-      cliente_id,
-      veiculo_id,
-      servico_id,
-      data
-    })
+    body: JSON.stringify({ cliente_id, veiculo_id, servico_id, data })
   });
 
   if (res.ok) {
@@ -166,11 +160,21 @@ window.carregarAgendamentos = async function () {
   dados.forEach(a => {
     const tr = document.createElement("tr");
 
+    // 🔥 Força exibição em 24h
+    const dataFormatada = new Date(a.data).toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    });
+
     tr.innerHTML = `
       <td>${a.cliente}</td>
       <td>${a.veiculo}</td>
       <td>${a.servico}</td>
-      <td>${new Date(a.data).toLocaleString("pt-BR")}</td>
+      <td>${dataFormatada}</td>
       <td>
         <span class="status ${a.status}">
           ${a.status.toUpperCase()}

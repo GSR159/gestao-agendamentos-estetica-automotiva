@@ -32,7 +32,6 @@
       min-height: 100vh;
     }
 
-    /* Sidebar */
     .sidebar {
       width: 260px;
       background: var(--bg-surface);
@@ -105,14 +104,12 @@
       font-size: 0.8rem;
     }
 
-    /* Conteúdo */
     .main-content {
       flex: 1;
       margin-left: 260px;
       padding: 2.5rem;
     }
 
-    /* Cards */
     .card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
@@ -125,7 +122,6 @@
       border-color: var(--primary);
     }
 
-    /* Stat Card */
     .stat-card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
@@ -155,7 +151,6 @@
       letter-spacing: -0.025em;
     }
 
-    /* Tabelas */
     table { width: 100%; border-collapse: collapse; }
 
     thead th {
@@ -177,14 +172,11 @@
     }
 
     tbody tr:last-child td { border-bottom: none; }
-
     tbody tr:hover td { background: rgba(59, 130, 246, 0.04); color: var(--text-main); }
 
-    /* Tela */
     .screen { display: none; }
     .screen.active { display: block; }
 
-    /* Badge de status */
     .badge {
       display: inline-flex;
       align-items: center;
@@ -200,7 +192,6 @@
     .badge-approved { background: rgba(34, 197, 94, 0.12);  color: #22c55e; }
     .badge-rejected { background: rgba(239, 68, 68, 0.12);  color: #ef4444; }
 
-    /* Inputs */
     .input-field {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -216,7 +207,6 @@
     .input-field:focus { border-color: var(--primary); }
     .input-field::placeholder { color: var(--text-muted); }
 
-    /* Botões */
     .btn-primary {
       display: inline-flex;
       align-items: center;
@@ -251,7 +241,6 @@
 
     .btn-danger:hover { background: rgba(239,68,68,0.2); }
 
-    /* Veículo Card */
     .vehicle-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -265,7 +254,6 @@
 
     .vehicle-card:hover { border-color: var(--primary); }
 
-    /* Conta info row */
     .info-row {
       display: flex;
       align-items: center;
@@ -276,7 +264,6 @@
 
     .info-row:last-child { border-bottom: none; }
 
-    /* Responsividade */
     @media (max-width: 1024px) {
       .sidebar { width: 80px; padding: 1.5rem 0.75rem; }
       .sidebar span, .logo span { display: none; }
@@ -324,7 +311,7 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <main class="main-content">
 
-    <!-- ==================== AGENDAMENTOS ==================== -->
+    <!-- AGENDAMENTOS -->
     <div id="agendamentos" class="screen active">
       <header class="flex justify-between items-center mb-8">
         <div>
@@ -336,7 +323,6 @@
         </button>
       </header>
 
-      <!-- Formulário de Novo Agendamento -->
       <div id="formAgendamentoCliente" class="card mb-6 shadow-xl" style="display:none;">
         <h2 class="text-base font-bold mb-4 flex items-center gap-2">
           <i data-lucide="calendar-plus" class="text-blue-500 w-4 h-4"></i>
@@ -370,7 +356,6 @@
         </div>
       </div>
 
-      <!-- Stats -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
         <div class="stat-card">
           <div class="stat-icon bg-blue-500/10 text-blue-500">
@@ -395,7 +380,6 @@
         </div>
       </div>
 
-      <!-- Tabela -->
       <div class="card shadow-xl">
         <div class="flex items-center justify-between mb-5">
           <h2 class="text-base font-bold flex items-center gap-2">
@@ -414,29 +398,29 @@
                 <th>Status</th>
               </tr>
             </thead>
-            <tbody id="listaAgendamentos">
-            </tbody>
+            <tbody id="listaAgendamentos"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ==================== VEÍCULOS ==================== -->
+    <!-- VEÍCULOS -->
     <div id="veiculos" class="screen">
       <header class="mb-8">
         <h1 class="text-3xl font-bold tracking-tight text-white">Meus Veículos</h1>
         <p class="text-slate-400 text-sm mt-1">Gerencie os veículos associados à sua conta.</p>
       </header>
 
-      <!-- Formulário de adição -->
       <div class="card mb-6 shadow-xl">
         <h2 class="text-base font-bold mb-4 flex items-center gap-2">
           <i data-lucide="plus-circle" class="text-blue-500 w-4 h-4"></i>
           Adicionar Novo Veículo
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <input id="modelo" placeholder="Modelo (ex: HB20)" class="input-field">
+          <input id="marca" placeholder="Marca (ex: Toyota)" class="input-field">
+          <input id="modelo" placeholder="Modelo (ex: Corolla)" class="input-field">
           <input id="placa" placeholder="Placa (ex: ABC-1234)" class="input-field">
+          <input id="cor" placeholder="Cor (ex: Cinza Chumbo)" class="input-field">
           <input id="ano" placeholder="Ano (ex: 2023)" class="input-field">
         </div>
         <div class="mt-3 flex justify-end">
@@ -446,27 +430,25 @@
         </div>
       </div>
 
-      <!-- Lista de veículos -->
       <div class="card shadow-xl">
         <h2 class="text-base font-bold mb-4 flex items-center gap-2">
           <i data-lucide="car-front" class="text-blue-500 w-4 h-4"></i>
           Veículos Cadastrados
         </h2>
-        <div id="listaVeiculos" class="flex flex-col gap-3">
-        </div>
+        <div id="listaVeiculos" class="flex flex-col gap-3"></div>
       </div>
     </div>
 
-    <!-- ==================== CONTA ==================== -->
+    <!-- CONTA -->
     <div id="conta" class="screen">
       <header class="mb-8">
         <h1 class="text-3xl font-bold tracking-tight text-white">Minha Conta</h1>
         <p class="text-slate-400 text-sm mt-1">Seus dados e preferências de acesso.</p>
       </header>
 
-      <!-- Info do perfil -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Avatar & nome -->
+
+        <!-- Avatar -->
         <div class="card shadow-xl flex flex-col items-center justify-center py-10 gap-4">
           <div class="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-3xl font-black" id="conta-avatar">C</div>
           <div class="text-center">
@@ -485,23 +467,51 @@
             <i data-lucide="user" class="text-blue-500 w-4 h-4"></i>
             Informações Pessoais
           </h2>
+
           <div class="divide-y divide-slate-800">
+
             <div class="info-row">
               <span class="text-slate-500 text-sm w-28 shrink-0">Nome</span>
-              <span class="text-sm font-medium" id="conta-nome-row">Nome do Cliente</span>
+              <span class="text-sm font-medium" id="conta-nome-row">—</span>
             </div>
+
             <div class="info-row">
               <span class="text-slate-500 text-sm w-28 shrink-0">E-mail</span>
-              <span class="text-sm font-medium" id="conta-email-row">cliente@email.com</span>
+              <span class="text-sm font-medium" id="conta-email-row">—</span>
             </div>
+
+            <!-- Telefone com edição inline -->
             <div class="info-row">
               <span class="text-slate-500 text-sm w-28 shrink-0">Telefone</span>
-              <span class="text-sm font-medium">—</span>
+              <div class="flex items-center gap-2 flex-1">
+                <span class="text-sm font-medium" id="conta-telefone">—</span>
+                <button onclick="editarTelefone()"
+                        class="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1">
+                  <i data-lucide="pencil" style="width:12px;height:12px"></i> Editar
+                </button>
+              </div>
             </div>
+
+            <!-- Campo de edição do telefone -->
+            <div class="info-row" id="row-editar-telefone" style="display:none;">
+              <span class="text-slate-500 text-sm w-28 shrink-0">Novo Telefone</span>
+              <div class="flex items-center gap-2 flex-1">
+                <input id="input-telefone" type="tel" placeholder="(11) 99999-9999" class="input-field">
+                <button onclick="salvarTelefone()" class="btn-primary" style="white-space:nowrap;">
+                  <i data-lucide="check" class="w-4 h-4"></i> Salvar
+                </button>
+                <button onclick="cancelarEdicaoTelefone()"
+                        class="text-slate-400 hover:text-white transition-colors font-bold px-2">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+
             <div class="info-row">
               <span class="text-slate-500 text-sm w-28 shrink-0">Membro desde</span>
-              <span class="text-sm font-medium">Janeiro, 2025</span>
+              <span class="text-sm font-medium" id="conta-membro-desde">—</span>
             </div>
+
           </div>
 
           <!-- Zona de perigo -->
@@ -514,6 +524,7 @@
             <p class="text-xs text-slate-600 mt-2">Esta ação é irreversível. Todos os seus dados serão removidos.</p>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -523,7 +534,6 @@
 <script src="config.js"></script>
 <script src="auth.js"></script>
 <script src="tela_cliente.js"></script>
-
 <script>
   lucide.createIcons();
 </script>

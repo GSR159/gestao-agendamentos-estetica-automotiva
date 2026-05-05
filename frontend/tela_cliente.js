@@ -1,5 +1,5 @@
 // ============================================================
-//  tela_cliente.js — com integração Google Calendar e iCal
+//  tela_cliente.js
 // ============================================================
 
 // ---------- NAVEGAÇÃO ----------
@@ -19,9 +19,7 @@ function getBadge(status) {
     "concluido": { cls: "badge-approved", icon: "check-circle", label: "Concluído" },
     "recusado":  { cls: "badge-rejected", icon: "x",            label: "Recusado"  },
   };
-
   const s = map[(status || "").toLowerCase()] ?? { cls: "badge-pending", icon: "clock", label: status };
-
   return `<span class="badge ${s.cls}">
             <i data-lucide="${s.icon}" style="width:11px;height:11px"></i>
             ${s.label}
@@ -31,35 +29,27 @@ function getBadge(status) {
 // ---------- GOOGLE CALENDAR ----------
 function abrirGoogleCalendar(agendamento) {
   const inicio = new Date(agendamento.data);
-  const fim    = new Date(inicio.getTime() + 60 * 60 * 1000); // +1h padrão
-
-  const fmt = d => d.toISOString().replace(/-|:|\.\d{3}/g, "");
-
+  const fim    = new Date(inicio.getTime() + 60 * 60 * 1000);
+  const fmt    = d => d.toISOString().replace(/-|:|\.\d{3}/g, "");
   const params = new URLSearchParams({
     action:   "TEMPLATE",
     text:     `Serviço: ${agendamento.servico}`,
     dates:    `${fmt(inicio)}/${fmt(fim)}`,
     details:  `Veículo: ${agendamento.veiculo?.modelo ?? ""} · ${agendamento.veiculo?.placa ?? ""}`,
-    location: "Smart System Auto"
+    location: "Smart System"
   });
-
   window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, "_blank");
 }
 
 // ---------- APPLE CALENDAR (iCal) ----------
 function baixarICS(agendamento) {
-  const inicio = new Date(agendamento.data);
-  const fim    = new Date(inicio.getTime() + 60 * 60 * 1000); // +1h padrão
-
-  const fmt = d => d.toISOString().replace(/-|:|\.\d{3}/g, "").slice(0, 15) + "Z";
-
+  const inicio  = new Date(agendamento.data);
+  const fim     = new Date(inicio.getTime() + 60 * 60 * 1000);
+  const fmt     = d => d.toISOString().replace(/-|:|\.\d{3}/g, "").slice(0, 15) + "Z";
   const uid     = `agendamento-${agendamento.id}@smartsystem`;
   const veiculo = `${agendamento.veiculo?.modelo ?? ""} · ${agendamento.veiculo?.placa ?? ""}`;
-
   const ics = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Smart System//PT",
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Smart System//PT",
     "BEGIN:VEVENT",
     `UID:${uid}`,
     `DTSTAMP:${fmt(new Date())}`,
@@ -68,44 +58,32 @@ function baixarICS(agendamento) {
     `SUMMARY:Serviço: ${agendamento.servico}`,
     `DESCRIPTION:Veículo: ${veiculo}`,
     "LOCATION:Smart System Auto",
-    "END:VEVENT",
-    "END:VCALENDAR"
+    "END:VEVENT", "END:VCALENDAR"
   ].join("\r\n");
-
   const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement("a");
-
-  a.href     = url;
-  a.download = `agendamento-${agendamento.id}.ics`;
-  a.click();
-
+  a.href = url; a.download = `agendamento-${agendamento.id}.ics`; a.click();
   URL.revokeObjectURL(url);
 }
 
 // ---------- BOTÕES DE CALENDÁRIO ----------
 function getBotoesCalendario(agendamento) {
   if ((agendamento.status ?? "").toLowerCase() !== "aprovado") return "";
-
-  // Serializa o objeto para passar via onclick
   const dados = encodeURIComponent(JSON.stringify(agendamento));
-
   return `
     <div class="flex items-center gap-2 mt-1">
-      <button
-        onclick='abrirGoogleCalendar(JSON.parse(decodeURIComponent("${dados}")))'
+      <button onclick='abrirGoogleCalendar(JSON.parse(decodeURIComponent("${dados}")))'
         title="Adicionar ao Google Calendar"
         class="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors border border-blue-500/20 hover:border-blue-400/40 rounded-lg px-2 py-1">
         <i data-lucide="calendar-plus" style="width:12px;height:12px"></i> Google
       </button>
-      <button
-        onclick='baixarICS(JSON.parse(decodeURIComponent("${dados}")))'
+      <button onclick='baixarICS(JSON.parse(decodeURIComponent("${dados}")))'
         title="Baixar para Apple Calendar"
         class="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition-colors border border-slate-600/30 hover:border-slate-400/40 rounded-lg px-2 py-1">
         <i data-lucide="apple" style="width:12px;height:12px"></i> Apple
       </button>
-    </div>
-  `;
+    </div>`;
 }
 
 // ---------- AGENDAMENTOS ----------
@@ -136,25 +114,20 @@ async function carregarAgendamentos() {
 
     tabela.innerHTML = data.map(a => {
       const data_fmt = a.data ? new Date(a.data).toLocaleDateString("pt-BR") : "—";
-      const hora     = a.hora    ?? "—";
+      const hora     = a.hora ?? "—";
       const servico  = a.servico ?? "—";
       const veiculo  = a.veiculo ? `${a.veiculo.modelo} · ${a.veiculo.placa}` : "—";
-
       return `
         <tr>
           <td>${data_fmt}</td>
           <td>${hora}</td>
           <td>${servico}</td>
           <td>${veiculo}</td>
-          <td>
-            ${getBadge(a.status)}
-            ${getBotoesCalendario(a)}
-          </td>
+          <td>${getBadge(a.status)}${getBotoesCalendario(a)}</td>
         </tr>`;
     }).join("");
 
     lucide.createIcons();
-
   } catch (err) {
     console.error("Erro ao carregar agendamentos:", err);
   }
@@ -165,14 +138,10 @@ async function carregarVeiculos() {
   try {
     const res  = await fetch(`${API}/cliente/meus-veiculos`, { headers: getHeaders() });
     const data = await res.json();
-
     const lista = document.getElementById("listaVeiculos");
 
     if (!data.length) {
-      lista.innerHTML = `
-        <p class="text-center text-slate-500 italic py-6">
-          Nenhum veículo cadastrado.
-        </p>`;
+      lista.innerHTML = `<p class="text-center text-slate-500 italic py-6">Nenhum veículo cadastrado.</p>`;
       return;
     }
 
@@ -188,15 +157,13 @@ async function carregarVeiculos() {
           </div>
         </div>
         <button onclick="excluirVeiculo('${v.id}')"
-                class="text-slate-500 hover:text-red-400 transition-colors"
-                title="Remover veículo">
+                class="text-slate-500 hover:text-red-400 transition-colors" title="Remover veículo">
           <i data-lucide="trash-2" class="w-4 h-4"></i>
         </button>
       </div>
     `).join("");
 
     lucide.createIcons();
-
   } catch (err) {
     console.error("Erro ao carregar veículos:", err);
   }
@@ -207,30 +174,20 @@ async function criarVeiculo() {
   const placa  = document.getElementById("placa").value.trim();
   const ano    = document.getElementById("ano").value.trim();
 
-  if (!modelo || !placa) {
-    alert("Preencha ao menos o modelo e a placa.");
-    return;
-  }
+  if (!modelo || !placa) { alert("Preencha ao menos o modelo e a placa."); return; }
 
   try {
     const res = await fetch(`${API}/cliente/meus-veiculos`, {
-      method:  "POST",
-      headers: getHeaders(),
-      body:    JSON.stringify({ modelo, placa, ano })
+      method: "POST", headers: getHeaders(),
+      body: JSON.stringify({ modelo, placa, ano })
     });
 
-    if (!res.ok) {
-      const err = await res.json();
-      alert(err.erro ?? "Erro ao adicionar veículo.");
-      return;
-    }
+    if (!res.ok) { const err = await res.json(); alert(err.erro ?? "Erro ao adicionar veículo."); return; }
 
     document.getElementById("modelo").value = "";
     document.getElementById("placa").value  = "";
     document.getElementById("ano").value    = "";
-
     carregarVeiculos();
-
   } catch (err) {
     console.error("Erro ao criar veículo:", err);
   }
@@ -238,15 +195,9 @@ async function criarVeiculo() {
 
 async function excluirVeiculo(id) {
   if (!confirm("Remover este veículo?")) return;
-
   try {
-    await fetch(`${API}/cliente/meus-veiculos/${id}`, {
-      method:  "DELETE",
-      headers: getHeaders()
-    });
-
+    await fetch(`${API}/cliente/meus-veiculos/${id}`, { method: "DELETE", headers: getHeaders() });
     carregarVeiculos();
-
   } catch (err) {
     console.error("Erro ao excluir veículo:", err);
   }
@@ -259,10 +210,8 @@ async function carregarServicosParaAgendamento() {
   try {
     const res = await fetch(`${API}/servicos`, { headers: getHeaders() });
     listaServicosCliente = await res.json();
-
     const select = document.getElementById("agend-servico");
     if (!select) return;
-
     select.innerHTML = `<option value="">Selecione o serviço</option>` +
       listaServicosCliente.map(s =>
         `<option value="${s.id}">${s.nome} (${s.duracao_minutos} min) — R$ ${Number(s.preco).toFixed(2).replace(".", ",")}</option>`
@@ -276,27 +225,19 @@ async function carregarVeiculosParaAgendamento() {
   try {
     const res   = await fetch(`${API}/cliente/meus-veiculos`, { headers: getHeaders() });
     const dados = await res.json();
-
     const select = document.getElementById("agend-veiculo");
     if (!select) return;
-
     select.innerHTML = `<option value="">Selecione o veículo</option>` +
-      dados.map(v =>
-        `<option value="${v.id}">${v.modelo} — ${v.placa}</option>`
-      ).join("");
+      dados.map(v => `<option value="${v.id}">${v.modelo} — ${v.placa}</option>`).join("");
   } catch (err) {
     console.error("Erro ao carregar veículos para agendamento:", err);
   }
 }
 
 function abrirFormAgendamento() {
-  // ✅ Bloqueia datas passadas
-  const agora   = new Date();
-  const minimo  = new Date(agora.getTime() - agora.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16);
+  const agora  = new Date();
+  const minimo = new Date(agora.getTime() - agora.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   document.getElementById("agend-data").min = minimo;
-
   carregarVeiculosParaAgendamento();
   carregarServicosParaAgendamento();
   document.getElementById("formAgendamentoCliente").style.display = "block";
@@ -316,35 +257,21 @@ async function enviarAgendamento() {
   const servico_id = document.getElementById("agend-servico").value;
   const data       = document.getElementById("agend-data").value;
 
-  if (!veiculo_id || !servico_id || !data) {
-    alert("Preencha todos os campos.");
-    return;
-  }
-
-  // ✅ Validação de data passada (camada de segurança)
-  if (new Date(data) <= new Date()) {
-    alert("Não é possível agendar em uma data e horário passados.");
-    return;
-  }
+  if (!veiculo_id || !servico_id || !data) { alert("Preencha todos os campos."); return; }
+  if (new Date(data) <= new Date()) { alert("Não é possível agendar em uma data e horário passados."); return; }
 
   try {
     const res = await fetch(`${API}/cliente/agendar`, {
-      method:  "POST",
-      headers: getHeaders(),
-      body:    JSON.stringify({ veiculo_id, servico_id, data })
+      method: "POST", headers: getHeaders(),
+      body: JSON.stringify({ veiculo_id, servico_id, data })
     });
 
     const resposta = await res.json();
-
-    if (!res.ok) {
-      alert(resposta.erro ?? "Erro ao criar agendamento.");
-      return;
-    }
+    if (!res.ok) { alert(resposta.erro ?? "Erro ao criar agendamento."); return; }
 
     alert("Agendamento criado com sucesso! Aguarde aprovação.");
     fecharFormAgendamento();
     carregarAgendamentos();
-
   } catch (err) {
     console.error("Erro ao criar agendamento:", err);
     alert("Erro de conexão com o servidor.");
@@ -352,7 +279,7 @@ async function enviarAgendamento() {
 }
 
 // ---------- CONTA ----------
-function preencherInfoConta() {
+async function preencherInfoConta() {
   try {
     const usuario = getUsuario();
     const email   = usuario?.email ?? "cliente@email.com";
@@ -368,30 +295,72 @@ function preencherInfoConta() {
     setEl("conta-email",     email);
     setEl("conta-nome-row",  nome);
     setEl("conta-email-row", email);
+
+    // Membro desde — pega do token
+    if (usuario?.iat) {
+      const dataCriacao     = new Date(usuario.iat * 1000);
+      const membroDesde     = dataCriacao.toLocaleDateString("pt-BR", {
+        month: "long", year: "numeric", timeZone: "America/Sao_Paulo"
+      });
+      const membroFormatado = membroDesde.charAt(0).toUpperCase() + membroDesde.slice(1);
+      setEl("conta-membro-desde", membroFormatado);
+    }
+
+    // Telefone — busca da API
+    const contaRes = await fetch(`${API}/cliente/minha-conta`, { headers: getHeaders() });
+    if (contaRes.ok) {
+      const conta = await contaRes.json();
+      setEl("conta-telefone", conta.telefone || "—");
+    }
+
   } catch (e) {
     console.warn("Não foi possível preencher dados da conta:", e);
   }
 }
 
-async function excluirConta() {
-  if (!confirm("Isso vai excluir sua conta PERMANENTEMENTE. Deseja continuar?")) return;
+// ---------- TELEFONE ----------
+function editarTelefone() {
+  document.getElementById("row-editar-telefone").style.display = "flex";
+  document.getElementById("input-telefone").focus();
+}
+
+function cancelarEdicaoTelefone() {
+  document.getElementById("row-editar-telefone").style.display = "none";
+  document.getElementById("input-telefone").value = "";
+}
+
+async function salvarTelefone() {
+  const telefone = document.getElementById("input-telefone").value.trim();
+
+  if (!telefone) { alert("Digite um telefone válido."); return; }
 
   try {
     const res  = await fetch(`${API}/cliente/minha-conta`, {
-      method:  "DELETE",
-      headers: getHeaders()
+      method: "PUT", headers: getHeaders(),
+      body: JSON.stringify({ telefone })
     });
 
     const data = await res.json();
 
-    if (!res.ok) {
-      alert(data.erro ?? "Erro ao excluir conta.");
-      return;
-    }
+    if (!res.ok) { alert(data.erro ?? "Erro ao salvar telefone."); return; }
 
+    document.getElementById("conta-telefone").textContent = telefone;
+    cancelarEdicaoTelefone();
+    alert("Telefone atualizado com sucesso!");
+  } catch (err) {
+    console.error("Erro ao salvar telefone:", err);
+  }
+}
+
+// ---------- EXCLUIR CONTA ----------
+async function excluirConta() {
+  if (!confirm("Isso vai excluir sua conta PERMANENTEMENTE. Deseja continuar?")) return;
+  try {
+    const res  = await fetch(`${API}/cliente/minha-conta`, { method: "DELETE", headers: getHeaders() });
+    const data = await res.json();
+    if (!res.ok) { alert(data.erro ?? "Erro ao excluir conta."); return; }
     alert("Conta excluída com sucesso.");
     logout();
-
   } catch (err) {
     console.error("Erro ao excluir conta:", err);
   }
