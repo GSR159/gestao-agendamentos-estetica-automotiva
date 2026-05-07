@@ -1,2 +1,2 @@
 // config.js
-window.API = "http://localhost:3000";
+window.API = "https://gestao-agendamentos-estetica-automotiva.onrender.com";
