@@ -1,4 +1,3 @@
-const API = "http://localhost:3000";
 
 async function cadastrar() {
   const nome = document.getElementById("nome").value.trim();
