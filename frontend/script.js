@@ -1,4 +1,4 @@
-const API = "http://localhost:3000";
+
 
 // carregar serviços
 async function carregarServicos() {

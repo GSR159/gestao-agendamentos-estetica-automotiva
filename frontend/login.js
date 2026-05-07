@@ -1,4 +1,3 @@
-const API = "http://localhost:3000";
 
 async function login() {
   const email = document.getElementById("email").value;
