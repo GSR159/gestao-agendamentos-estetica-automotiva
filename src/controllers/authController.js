@@ -14,8 +14,11 @@ const EMAIL_PASS = process.env.EMAIL_PASS;
 //  TRANSPORTER
 // ─────────────────────────────────────────
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: { user: EMAIL_USER, pass: EMAIL_PASS }
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
+  auth: { user: EMAIL_USER, pass: EMAIL_PASS },
+  tls: { rejectUnauthorized: false }
 });
 
 // ─────────────────────────────────────────
