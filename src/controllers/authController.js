@@ -1,25 +1,19 @@
-const pool     = require('../config/db');
-const bcrypt   = require('bcrypt');
-const jwt      = require('jsonwebtoken');
-const crypto   = require('crypto');
-const nodemailer = require('nodemailer');
+const pool   = require('../config/db');
+const bcrypt = require('bcrypt');
+const jwt    = require('jsonwebtoken');
+const crypto = require('crypto');
+const { Resend } = require('resend');
 const { normalizarEmail } = require('../utils/normalizar');
 
-const SECRET    = process.env.JWT_SECRET  || 'segredo_super_forte';
-const FRONT_URL = process.env.FRONT_URL   || 'http://127.0.0.1:5500';
-const EMAIL_USER = process.env.EMAIL_USER;
-const EMAIL_PASS = process.env.EMAIL_PASS;
+const SECRET       = process.env.JWT_SECRET   || 'segredo_super_forte';
+const FRONT_URL    = process.env.FRONT_URL    || 'http://127.0.0.1:5500';
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const EMAIL_FROM   = process.env.EMAIL_USER   || 'onboarding@resend.dev';
 
 // ─────────────────────────────────────────
-//  TRANSPORTER
+//  RESEND CLIENT
 // ─────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: { user: EMAIL_USER, pass: EMAIL_PASS },
-  tls: { rejectUnauthorized: false }
-});
+const resend = new Resend(RESEND_API_KEY);
 
 // ─────────────────────────────────────────
 //  TEMPLATE DE EMAIL
@@ -50,17 +44,31 @@ function templateEmail(titulo, corpo, linkTexto, linkHref) {
   `;
 }
 
+// ─────────────────────────────────────────
+//  ENVIAR EMAIL VIA RESEND
+// ─────────────────────────────────────────
 async function enviarEmail(para, assunto, html) {
-  if (!EMAIL_USER || !EMAIL_PASS) {
-    console.warn('[EMAIL NÃO ENVIADO — sem credenciais] Link:', html.match(/href="([^"]+)"/)?.[1]);
+  if (!RESEND_API_KEY) {
+    console.warn('[EMAIL NÃO ENVIADO — sem RESEND_API_KEY]');
     return;
   }
-  await transporter.sendMail({
-    from: `"Smart System" <${EMAIL_USER}>`,
-    to: para,
-    subject: assunto,
-    html,
-  });
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `Smart System <${EMAIL_FROM}>`,
+      to:   para,
+      subject: assunto,
+      html,
+    });
+
+    if (error) {
+      console.error('[RESEND ERROR]', error);
+    } else {
+      console.log('[EMAIL ENVIADO]', data?.id);
+    }
+  } catch (err) {
+    console.error('[RESEND EXCEPTION]', err);
+  }
 }
 
 // ─────────────────────────────────────────
@@ -70,8 +78,8 @@ const register = async (req, res) => {
   try {
     let { nome, email, senha, telefone, tipo } = req.body;
 
-    nome  = nome?.trim();
-    email = normalizarEmail(email);
+    nome     = nome?.trim();
+    email    = normalizarEmail(email);
     telefone = telefone?.trim() || null;
 
     if (!nome || !email || !senha) {
@@ -107,15 +115,17 @@ const register = async (req, res) => {
 
     const link = `${FRONT_URL}/confirmar-email.html?token=${token}`;
     const html = templateEmail(
-      `Olá, ${nome}! Confirme seu email`,
+      `Olá, ${nome}! Confirme seu e-mail`,
       'Seu cadastro foi realizado com sucesso. Clique no botão abaixo para ativar sua conta.',
-      'Confirmar Email',
+      'Confirmar E-mail',
       link
     );
 
-    await enviarEmail(email, 'Confirme seu email — Smart System', html);
+    await enviarEmail(email, 'Confirme seu e-mail — Smart System', html);
 
-    return res.status(201).json({ mensagem: 'Cadastro realizado! Verifique seu email para ativar a conta.' });
+    return res.status(201).json({
+      mensagem: 'Cadastro realizado! Verifique seu e-mail para ativar a conta.'
+    });
 
   } catch (error) {
     console.error(error);
@@ -208,7 +218,7 @@ const confirmarEmail = async (req, res) => {
       [usuario.id]
     );
 
-    return res.status(200).json({ mensagem: 'Email confirmado com sucesso! Você já pode fazer login.' });
+    return res.status(200).json({ mensagem: 'E-mail confirmado com sucesso! Você já pode fazer login.' });
 
   } catch (error) {
     console.error(error);
@@ -242,7 +252,7 @@ const reenviarEmail = async (req, res) => {
       return res.status(400).json({ erro: 'Email já confirmado.' });
     }
 
-    const novoToken   = crypto.randomBytes(32).toString('hex');
+    const novoToken     = crypto.randomBytes(32).toString('hex');
     const novaExpiracao = new Date(Date.now() + 1000 * 60 * 60 * 24);
 
     await pool.query(
@@ -253,14 +263,14 @@ const reenviarEmail = async (req, res) => {
     const link = `${FRONT_URL}/confirmar-email.html?token=${novoToken}`;
     const html = templateEmail(
       `Novo link de confirmação`,
-      'Você solicitou um novo link de confirmação de email. Clique abaixo para ativar sua conta.',
-      'Confirmar Email',
+      'Você solicitou um novo link de confirmação de e-mail. Clique abaixo para ativar sua conta.',
+      'Confirmar E-mail',
       link
     );
 
     await enviarEmail(email, 'Novo link de confirmação — Smart System', html);
 
-    return res.status(200).json({ mensagem: 'Email reenviado com sucesso! Verifique sua caixa de entrada.' });
+    return res.status(200).json({ mensagem: 'E-mail reenviado com sucesso! Verifique sua caixa de entrada.' });
 
   } catch (error) {
     console.error(error);
@@ -284,16 +294,15 @@ const esquecerSenha = async (req, res) => {
       'SELECT id, nome FROM usuarios WHERE email = $1', [email]
     );
 
-    // Sempre retorna sucesso (segurança — não revela se email existe)
     if (resultado.rows.length === 0) {
       return res.status(200).json({
-        mensagem: 'Se este email estiver cadastrado, você receberá as instruções em breve.'
+        mensagem: 'Se este e-mail estiver cadastrado, você receberá as instruções em breve.'
       });
     }
 
-    const usuario    = resultado.rows[0];
-    const token      = crypto.randomBytes(32).toString('hex');
-    const expiracao  = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
+    const usuario   = resultado.rows[0];
+    const token     = crypto.randomBytes(32).toString('hex');
+    const expiracao = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
 
     await pool.query(
       `UPDATE usuarios SET token_recuperacao = $1, token_recuperacao_expira = $2 WHERE id = $3`,
@@ -311,7 +320,7 @@ const esquecerSenha = async (req, res) => {
     await enviarEmail(email, 'Redefinição de senha — Smart System', html);
 
     return res.status(200).json({
-      mensagem: 'Se este email estiver cadastrado, você receberá as instruções em breve.'
+      mensagem: 'Se este e-mail estiver cadastrado, você receberá as instruções em breve.'
     });
 
   } catch (error) {
@@ -353,9 +362,7 @@ const redefinirSenha = async (req, res) => {
     const senhaHash = await bcrypt.hash(novaSenha, 10);
 
     await pool.query(
-      `UPDATE usuarios
-       SET senha = $1, token_recuperacao = NULL, token_recuperacao_expira = NULL
-       WHERE id = $2`,
+      `UPDATE usuarios SET senha = $1, token_recuperacao = NULL, token_recuperacao_expira = NULL WHERE id = $2`,
       [senhaHash, usuario.id]
     );
 
@@ -369,7 +376,6 @@ const redefinirSenha = async (req, res) => {
 
 // ─────────────────────────────────────────
 //  VALIDAR TOKEN DE RECUPERAÇÃO
-//  (frontend usa para verificar se token ainda é válido)
 // ─────────────────────────────────────────
 const validarTokenRecuperacao = async (req, res) => {
   try {
@@ -410,4 +416,4 @@ module.exports = {
   esquecerSenha,
   redefinirSenha,
   validarTokenRecuperacao,
-};  
+};
