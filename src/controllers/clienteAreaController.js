@@ -1,6 +1,8 @@
 const pool = require('../config/db');
 
-// Busca o cliente pelo email do usuário logado
+// ─────────────────────────────────────────
+//  UTILITÁRIO
+// ─────────────────────────────────────────
 async function buscarClientePorEmail(email) {
   const resultado = await pool.query(
     'SELECT * FROM clientes WHERE email = $1',
@@ -9,11 +11,23 @@ async function buscarClientePorEmail(email) {
   return resultado.rows[0] || null;
 }
 
-// GET /cliente/meus-agendamentos
+// Verifica se hoje é o aniversário do cliente
+function ehAniversario(dataNascimento) {
+  if (!dataNascimento) return false;
+  const hoje = new Date();
+  const nasc  = new Date(dataNascimento);
+  return (
+    hoje.getDate()  === nasc.getUTCDate() &&
+    hoje.getMonth() === nasc.getUTCMonth()
+  );
+}
+
+// ─────────────────────────────────────────
+//  AGENDAMENTOS
+// ─────────────────────────────────────────
 const meusAgendamentos = async (req, res) => {
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
-
     if (!cliente) return res.status(200).json([]);
 
     const resultado = await pool.query(`
@@ -21,10 +35,12 @@ const meusAgendamentos = async (req, res) => {
         a.id,
         a.data,
         a.status,
-        s.nome AS servico,
+        a.desconto_aniversario,
+        s.nome            AS servico,
         s.duracao_minutos,
-        v.modelo AS veiculo_modelo,
-        v.placa AS veiculo_placa
+        s.preco,
+        v.modelo          AS veiculo_modelo,
+        v.placa           AS veiculo_placa
       FROM agendamentos a
       JOIN servicos s ON a.servico_id = s.id
       JOIN veiculos v ON a.veiculo_id = v.id
@@ -35,15 +51,17 @@ const meusAgendamentos = async (req, res) => {
     const agendamentos = resultado.rows.map(a => {
       const dataObj = new Date(a.data);
       return {
-        id: a.id,
-        data: a.data,
-        hora: dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-        status: a.status,
-        servico: a.servico,
-        duracao_minutos: a.duracao_minutos,
+        id:                   a.id,
+        data:                 a.data,
+        hora:                 dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        status:               a.status,
+        servico:              a.servico,
+        duracao_minutos:      a.duracao_minutos,
+        preco:                a.preco,
+        desconto_aniversario: a.desconto_aniversario,
         veiculo: {
           modelo: a.veiculo_modelo,
-          placa: a.veiculo_placa
+          placa:  a.veiculo_placa
         }
       };
     });
@@ -55,11 +73,12 @@ const meusAgendamentos = async (req, res) => {
   }
 };
 
-// GET /cliente/meus-veiculos
+// ─────────────────────────────────────────
+//  VEÍCULOS
+// ─────────────────────────────────────────
 const meusVeiculos = async (req, res) => {
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
-
     if (!cliente) return res.status(200).json([]);
 
     const resultado = await pool.query(
@@ -74,16 +93,15 @@ const meusVeiculos = async (req, res) => {
   }
 };
 
-// POST /cliente/meus-veiculos
 const criarVeiculoCliente = async (req, res) => {
   const { modelo, placa, ano, marca, cor } = req.body;
 
+  if (placa && placa.replace(/[^a-zA-Z0-9]/g, '').length > 7)
+    return res.status(400).json({ erro: 'Placa inválida. Máximo de 7 caracteres alfanuméricos.' });
+
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
-
-    if (!cliente) {
-      return res.status(400).json({ erro: 'Cliente não encontrado para este usuário.' });
-    }
+    if (!cliente) return res.status(400).json({ erro: 'Cliente não encontrado para este usuário.' });
 
     const resultado = await pool.query(
       `INSERT INTO veiculos (cliente_id, modelo, placa, ano, marca, cor)
@@ -98,25 +116,19 @@ const criarVeiculoCliente = async (req, res) => {
   }
 };
 
-// DELETE /cliente/meus-veiculos/:id
 const excluirVeiculoCliente = async (req, res) => {
   const { id } = req.params;
-
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
-
-    if (!cliente) {
-      return res.status(400).json({ erro: 'Cliente não encontrado.' });
-    }
+    if (!cliente) return res.status(400).json({ erro: 'Cliente não encontrado.' });
 
     const resultado = await pool.query(
       'DELETE FROM veiculos WHERE id = $1 AND cliente_id = $2 RETURNING *',
       [id, cliente.id]
     );
 
-    if (resultado.rows.length === 0) {
+    if (resultado.rows.length === 0)
       return res.status(404).json({ erro: 'Veículo não encontrado ou não pertence a você.' });
-    }
 
     res.status(200).json({ mensagem: 'Veículo removido com sucesso.' });
   } catch (error) {
@@ -125,43 +137,35 @@ const excluirVeiculoCliente = async (req, res) => {
   }
 };
 
-// POST /cliente/agendar
+// ─────────────────────────────────────────
+//  AGENDAMENTO PELO CLIENTE
+// ─────────────────────────────────────────
 const criarAgendamentoCliente = async (req, res) => {
   const { veiculo_id, servico_id, data } = req.body;
 
-  if (!veiculo_id || !servico_id || !data) {
+  if (!veiculo_id || !servico_id || !data)
     return res.status(400).json({ erro: 'Veículo, serviço e data são obrigatórios.' });
-  }
 
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
-
-    if (!cliente) {
-      return res.status(400).json({ erro: 'Cliente não encontrado para este usuário.' });
-    }
+    if (!cliente) return res.status(400).json({ erro: 'Cliente não encontrado para este usuário.' });
 
     const servicoResult = await pool.query(
-      'SELECT duracao_minutos FROM servicos WHERE id = $1',
-      [servico_id]
+      'SELECT duracao_minutos, preco FROM servicos WHERE id = $1', [servico_id]
     );
-
-    if (servicoResult.rows.length === 0) {
+    if (servicoResult.rows.length === 0)
       return res.status(404).json({ erro: 'Serviço não encontrado.' });
-    }
 
-    const duracaoMinutos = servicoResult.rows[0].duracao_minutos;
+    const { duracao_minutos: duracaoMinutos } = servicoResult.rows[0];
 
     const veiculoCheck = await pool.query(
-      'SELECT * FROM veiculos WHERE id = $1 AND cliente_id = $2',
-      [veiculo_id, cliente.id]
+      'SELECT * FROM veiculos WHERE id = $1 AND cliente_id = $2', [veiculo_id, cliente.id]
     );
-
-    if (veiculoCheck.rows.length === 0) {
+    if (veiculoCheck.rows.length === 0)
       return res.status(400).json({ erro: 'Veículo não pertence a você.' });
-    }
 
     const inicioNovo = new Date(data);
-    const fimNovo = new Date(inicioNovo);
+    const fimNovo    = new Date(inicioNovo);
     fimNovo.setMinutes(fimNovo.getMinutes() + duracaoMinutos);
 
     const agendamentosExistentes = await pool.query(`
@@ -172,83 +176,162 @@ const criarAgendamentoCliente = async (req, res) => {
       AND a.data BETWEEN $1 AND $2
     `, [
       new Date(inicioNovo.getTime() - 24 * 60 * 60 * 1000),
-      new Date(fimNovo.getTime() + 24 * 60 * 60 * 1000)
+      new Date(fimNovo.getTime()   + 24 * 60 * 60 * 1000)
     ]);
 
-    for (const agendamento of agendamentosExistentes.rows) {
-      const inicioExistente = new Date(agendamento.data);
-      const fimExistente = new Date(inicioExistente);
-      fimExistente.setMinutes(fimExistente.getMinutes() + agendamento.duracao_minutos);
-
-      if (inicioNovo < fimExistente && fimNovo > inicioExistente) {
+    for (const ag of agendamentosExistentes.rows) {
+      const inicioEx = new Date(ag.data);
+      const fimEx    = new Date(inicioEx);
+      fimEx.setMinutes(fimEx.getMinutes() + ag.duracao_minutos);
+      if (inicioNovo < fimEx && fimNovo > inicioEx)
         return res.status(400).json({ erro: 'Horário já ocupado. Escolha outro horário.' });
-      }
     }
+
+    // Aniversário — desconto de 15%
+    const isAniversario = ehAniversario(cliente.data_nascimento);
 
     const resultado = await pool.query(
       `INSERT INTO agendamentos
-       (cliente_id, veiculo_id, servico_id, data, duracao_minutos, status)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [cliente.id, veiculo_id, servico_id, data, duracaoMinutos, 'pendente']
+       (cliente_id, veiculo_id, servico_id, data, duracao_minutos, status, desconto_aniversario)
+       VALUES ($1, $2, $3, $4, $5, 'pendente', $6) RETURNING *`,
+      [cliente.id, veiculo_id, servico_id, data, duracaoMinutos, isAniversario]
     );
 
-    res.status(201).json(resultado.rows[0]);
+    const resposta = resultado.rows[0];
+
+    if (isAniversario) {
+      return res.status(201).json({
+        ...resposta,
+        mensagem_aniversario: '🎂 Parabéns! Você ganhou 15% de desconto por ser seu aniversário!'
+      });
+    }
+
+    res.status(201).json(resposta);
   } catch (error) {
     console.error('Erro ao criar agendamento:', error);
     res.status(500).json({ erro: 'Erro ao criar agendamento' });
   }
 };
 
-// 🔥 PUT /cliente/minha-conta — atualiza telefone
-const atualizarTelefone = async (req, res) => {
-  const { telefone } = req.body;
-
-  if (!telefone || telefone.trim() === '') {
-    return res.status(400).json({ erro: 'Telefone não pode estar vazio.' });
-  }
-
+// ─────────────────────────────────────────
+//  MINHA CONTA — GET
+// ─────────────────────────────────────────
+const buscarConta = async (req, res) => {
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
+    if (!cliente) return res.status(404).json({ erro: 'Cliente não encontrado.' });
 
-    if (!cliente) {
-      return res.status(404).json({ erro: 'Cliente não encontrado.' });
-    }
-
-    // Atualiza nas duas tabelas
-    await pool.query(
-      'UPDATE clientes SET telefone = $1 WHERE id = $2',
-      [telefone.trim(), cliente.id]
-    );
-
-    await pool.query(
-      'UPDATE usuarios SET telefone = $1 WHERE id = $2',
-      [telefone.trim(), req.usuario.id]
-    );
-
-    res.status(200).json({ mensagem: 'Telefone atualizado com sucesso.' });
+    res.status(200).json({
+      id:               cliente.id,
+      nome:             cliente.nome,
+      email:            cliente.email,
+      telefone:         cliente.telefone         || null,
+      data_nascimento:  cliente.data_nascimento  || null,
+      cep:              cliente.cep              || null,
+      logradouro:       cliente.logradouro       || null,
+      numero:           cliente.numero           || null,
+      complemento:      cliente.complemento      || null,
+      bairro:           cliente.bairro           || null,
+      cidade:           cliente.cidade           || null,
+      estado:           cliente.estado           || null,
+      perfil_completo:  cliente.perfil_completo  || false,
+      criado_em:        cliente.criado_em        || null,
+      aniversario_hoje: ehAniversario(cliente.data_nascimento),
+    });
   } catch (error) {
-    console.error('Erro ao atualizar telefone:', error);
-    res.status(500).json({ erro: 'Erro ao atualizar telefone' });
+    console.error('Erro ao buscar conta:', error);
+    res.status(500).json({ erro: 'Erro ao buscar dados da conta.' });
   }
 };
 
-// DELETE /cliente/minha-conta — anonimiza (LGPD)
+// ─────────────────────────────────────────
+//  MINHA CONTA — PUT
+// ─────────────────────────────────────────
+const atualizarConta = async (req, res) => {
+  const { telefone, data_nascimento, cep, logradouro, numero, complemento, bairro, cidade, estado } = req.body;
+
+  try {
+    const cliente = await buscarClientePorEmail(req.usuario.email);
+    if (!cliente) return res.status(404).json({ erro: 'Cliente não encontrado.' });
+
+    const campos  = [];
+    const valores = [];
+    let idx = 1;
+
+    const adicionar = (campo, valor) => {
+      if (valor !== undefined) { campos.push(`${campo} = $${idx++}`); valores.push(valor); }
+    };
+
+    adicionar('telefone',        telefone);
+    adicionar('data_nascimento', data_nascimento || null);
+    adicionar('cep',             cep);
+    adicionar('logradouro',      logradouro);
+    adicionar('numero',          numero);
+    adicionar('complemento',     complemento);
+    adicionar('bairro',          bairro);
+    adicionar('cidade',          cidade);
+    adicionar('estado',          estado);
+
+    if (campos.length === 0)
+      return res.status(400).json({ erro: 'Nenhum campo enviado para atualização.' });
+
+    // Calcula se o perfil ficou completo
+    const c = cliente;
+    const perfilCompleto = !!(
+      (telefone        ?? c.telefone)        &&
+      (data_nascimento ?? c.data_nascimento) &&
+      (cep             ?? c.cep)             &&
+      (logradouro      ?? c.logradouro)      &&
+      (cidade          ?? c.cidade)
+    );
+
+    adicionar('perfil_completo', perfilCompleto);
+
+    valores.push(cliente.id);
+    const resultado = await pool.query(
+      `UPDATE clientes SET ${campos.join(', ')} WHERE id = $${idx} RETURNING *`,
+      valores
+    );
+
+    if (telefone) {
+      await pool.query('UPDATE usuarios SET telefone = $1 WHERE id = $2', [telefone.trim(), req.usuario.id]);
+    }
+
+    res.status(200).json({
+      mensagem:        'Dados atualizados com sucesso.',
+      perfil_completo: perfilCompleto,
+      cliente:         resultado.rows[0],
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar conta:', error);
+    res.status(500).json({ erro: 'Erro ao atualizar conta.' });
+  }
+};
+
+// ─────────────────────────────────────────
+//  EXCLUIR CONTA — LGPD
+// ─────────────────────────────────────────
 const excluirConta = async (req, res) => {
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
 
     if (cliente) {
-      // Anonimiza o cliente, preserva histórico de agendamentos
       await pool.query(
-        `UPDATE clientes 
-         SET nome = 'Usuário Removido', email = NULL, telefone = NULL, usuario_id = NULL
+        `UPDATE veiculos SET placa = NULL, cor = NULL WHERE cliente_id = $1`,
+        [cliente.id]
+      );
+      await pool.query(
+        `UPDATE clientes
+         SET nome = 'Usuário Removido', email = NULL, telefone = NULL,
+             data_nascimento = NULL, cep = NULL, logradouro = NULL,
+             numero = NULL, complemento = NULL, bairro = NULL,
+             cidade = NULL, estado = NULL, usuario_id = NULL, perfil_completo = FALSE
          WHERE id = $1`,
         [cliente.id]
       );
     }
 
     await pool.query('DELETE FROM usuarios WHERE id = $1', [req.usuario.id]);
-
     res.status(200).json({ mensagem: 'Conta removida em conformidade com a LGPD.' });
   } catch (error) {
     console.error('Erro ao excluir conta:', error);
@@ -262,6 +345,7 @@ module.exports = {
   criarVeiculoCliente,
   excluirVeiculoCliente,
   criarAgendamentoCliente,
-  atualizarTelefone,
-  excluirConta
+  buscarConta,
+  atualizarConta,
+  excluirConta,
 };

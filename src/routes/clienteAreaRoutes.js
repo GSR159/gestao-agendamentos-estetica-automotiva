@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
 const verificarToken = require('../middlewares/authMiddleware');
 const {
   meusAgendamentos,
@@ -7,23 +7,27 @@ const {
   criarVeiculoCliente,
   excluirVeiculoCliente,
   criarAgendamentoCliente,
-  atualizarTelefone,
-  excluirConta
+  buscarConta,
+  atualizarConta,
+  excluirConta,
 } = require('../controllers/clienteAreaController');
 
 router.use(verificarToken);
 
+// Agendamentos
 router.get('/meus-agendamentos', meusAgendamentos);
 
-router.get('/meus-veiculos', meusVeiculos);
-router.post('/meus-veiculos', criarVeiculoCliente);
-router.delete('/meus-veiculos/:id', excluirVeiculoCliente);
+// Veículos
+router.get   ('/meus-veiculos',        meusVeiculos);
+router.post  ('/meus-veiculos',        criarVeiculoCliente);
+router.delete('/meus-veiculos/:id',    excluirVeiculoCliente);
 
+// Agendamento pelo cliente
 router.post('/agendar', criarAgendamentoCliente);
 
-// 🔥 Rota de atualização de telefone
-router.put('/minha-conta', atualizarTelefone);
-
+// Conta do cliente
+router.get   ('/minha-conta', buscarConta);
+router.put   ('/minha-conta', atualizarConta);   // atualiza telefone, endereço, nascimento
 router.delete('/minha-conta', excluirConta);
 
 module.exports = router;

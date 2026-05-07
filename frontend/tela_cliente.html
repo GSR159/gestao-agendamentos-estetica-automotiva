@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart System - Área do Cliente</title>
-
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -27,170 +26,104 @@
       overflow-x: hidden;
     }
 
-    .app-container {
-      display: flex;
-      min-height: 100vh;
-    }
+    .app-container { display: flex; min-height: 100vh; }
 
     .sidebar {
       width: 260px;
       background: var(--bg-surface);
       border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       padding: 1.5rem;
-      position: fixed;
-      height: 100vh;
-      z-index: 40;
+      position: fixed; height: 100vh; z-index: 40;
     }
 
     .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: #fff;
+      display: flex; align-items: center; gap: 0.75rem;
+      font-size: 1.25rem; font-weight: 800; color: #fff;
       margin-bottom: 2.5rem;
     }
 
-    .nav-links {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+    .nav-links { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
 
     .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      border-radius: 0.75rem;
-      color: var(--text-muted);
-      font-weight: 500;
-      transition: all 0.2s;
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      text-align: left;
-      width: 100%;
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1rem; border-radius: 0.75rem;
+      color: var(--text-muted); font-weight: 500;
+      transition: all 0.2s; cursor: pointer;
+      border: none; background: transparent;
+      text-align: left; width: 100%;
     }
 
     .nav-item:hover, .nav-item.active {
-      background: var(--primary);
-      color: white;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+      background: var(--primary); color: white;
+      box-shadow: 0 4px 12px rgba(59,130,246,0.25);
     }
 
     .user-footer {
-      margin-top: auto;
-      padding-top: 1.5rem;
+      margin-top: auto; padding-top: 1.5rem;
       border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
     }
 
     .avatar {
-      width: 32px;
-      height: 32px;
-      background: var(--primary);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 0.8rem;
+      width: 32px; height: 32px;
+      background: var(--primary); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 0.8rem;
     }
 
-    .main-content {
-      flex: 1;
-      margin-left: 260px;
-      padding: 2.5rem;
-    }
+    .main-content { flex: 1; margin-left: 260px; padding: 2.5rem; }
 
     .card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      transition: transform 0.2s, border-color 0.2s;
+      border-radius: 1rem; padding: 1.5rem;
+      transition: border-color 0.2s;
     }
-
-    .card:hover {
-      border-color: var(--primary);
-    }
+    .card:hover { border-color: var(--primary); }
 
     .stat-card {
       background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+      border-radius: 1rem; padding: 1.5rem;
+      display: flex; flex-direction: column; gap: 0.5rem;
       transition: transform 0.2s;
     }
+    .stat-card:hover { transform: translateY(-4px); border-color: var(--primary); }
 
-    .stat-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--primary);
-    }
-
-    .stat-icon {
-      padding: 0.5rem;
-      border-radius: 0.5rem;
-      width: fit-content;
-      margin-bottom: 0.25rem;
-    }
-
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: -0.025em;
-    }
+    .stat-icon { padding: 0.5rem; border-radius: 0.5rem; width: fit-content; margin-bottom: 0.25rem; }
+    .stat-value { font-size: 2rem; font-weight: 800; letter-spacing: -0.025em; }
 
     table { width: 100%; border-collapse: collapse; }
 
     thead th {
-      background: rgba(30, 41, 59, 0.5);
-      padding: 0.875rem 1.25rem;
-      text-align: left;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 700;
+      background: rgba(30,41,59,0.5);
+      padding: 0.875rem 1.25rem; text-align: left;
+      font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; font-weight: 700;
       border-bottom: 1px solid var(--border);
     }
 
     tbody td {
       padding: 0.875rem 1.25rem;
       border-bottom: 1px solid var(--border);
-      font-size: 0.875rem;
-      color: var(--text-muted);
+      font-size: 0.875rem; color: var(--text-muted);
     }
 
     tbody tr:last-child td { border-bottom: none; }
-    tbody tr:hover td { background: rgba(59, 130, 246, 0.04); color: var(--text-main); }
+    tbody tr:hover td { background: rgba(59,130,246,0.04); color: var(--text-main); }
 
     .screen { display: none; }
     .screen.active { display: block; }
 
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      padding: 0.2rem 0.65rem;
-      border-radius: 9999px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.2rem 0.65rem; border-radius: 9999px;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em;
     }
-
-    .badge-pending  { background: rgba(251, 191, 36, 0.12); color: #fbbf24; }
-    .badge-approved { background: rgba(34, 197, 94, 0.12);  color: #22c55e; }
-    .badge-rejected { background: rgba(239, 68, 68, 0.12);  color: #ef4444; }
+    .badge-pending  { background: rgba(251,191,36,0.12); color: #fbbf24; }
+    .badge-approved { background: rgba(34,197,94,0.12);  color: #22c55e; }
+    .badge-rejected { background: rgba(239,68,68,0.12);  color: #ef4444; }
 
     .input-field {
       background: var(--bg-card);
@@ -198,47 +131,41 @@
       color: var(--text-main);
       border-radius: 0.65rem;
       padding: 0.6rem 1rem;
-      font-size: 0.875rem;
-      outline: none;
-      transition: border-color 0.2s;
-      width: 100%;
+      font-size: 0.875rem; outline: none;
+      transition: border-color 0.2s; width: 100%;
     }
-
     .input-field:focus { border-color: var(--primary); }
     .input-field::placeholder { color: var(--text-muted); }
 
+    /* Contador placa */
+    .placa-wrapper { position: relative; }
+    .placa-contador {
+      position: absolute; right: 0.75rem; top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.7rem; color: var(--text-muted);
+      pointer-events: none;
+    }
+    .placa-contador.limite { color: #f87171; }
+
     .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--primary);
-      color: white;
-      font-weight: 700;
-      font-size: 0.875rem;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--primary); color: white;
+      font-weight: 700; font-size: 0.875rem;
       padding: 0.65rem 1.25rem;
-      border-radius: 0.65rem;
-      border: none;
-      cursor: pointer;
+      border-radius: 0.65rem; border: none; cursor: pointer;
       transition: all 0.2s;
     }
-
     .btn-primary:hover { background: #2563eb; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
 
     .btn-danger {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
-      font-weight: 700;
-      font-size: 0.875rem;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(239,68,68,0.1); color: #ef4444;
+      font-weight: 700; font-size: 0.875rem;
       padding: 0.65rem 1.25rem;
       border-radius: 0.65rem;
       border: 1px solid rgba(239,68,68,0.25);
-      cursor: pointer;
-      transition: all 0.2s;
+      cursor: pointer; transition: all 0.2s;
     }
-
     .btn-danger:hover { background: rgba(239,68,68,0.2); }
 
     .vehicle-card {
@@ -246,23 +173,89 @@
       border: 1px solid var(--border);
       border-radius: 0.875rem;
       padding: 1rem 1.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       transition: border-color 0.2s;
     }
-
     .vehicle-card:hover { border-color: var(--primary); }
 
     .info-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+      display: flex; align-items: center; gap: 1rem;
       padding: 1rem 1.25rem;
       border-bottom: 1px solid var(--border);
     }
-
     .info-row:last-child { border-bottom: none; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 9000;
+      background: rgba(2,6,23,0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+    }
+
+    .modal-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 1.25rem; padding: 2rem;
+      width: 100%; max-width: 420px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+      animation: modalEntrar 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    @keyframes modalEntrar {
+      from { opacity: 0; transform: scale(0.92) translateY(12px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-icone {
+      width: 52px; height: 52px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.25rem;
+    }
+    .modal-icone-perigo { background: rgba(239,68,68,0.12); color: #ef4444; }
+    .modal-icone-aviso  { background: rgba(251,191,36,0.12); color: #fbbf24; }
+
+    .modal-titulo {
+      font-size: 1.125rem; font-weight: 800;
+      color: #f8fafc; text-align: center; margin-bottom: 0.5rem;
+    }
+
+    .modal-desc {
+      font-size: 0.875rem; color: #94a3b8;
+      text-align: center; line-height: 1.6; margin-bottom: 1.75rem;
+    }
+    .modal-desc strong { color: #f8fafc; }
+
+    .modal-acoes { display: flex; gap: 0.75rem; }
+
+    .btn-modal-cancelar {
+      flex: 1; padding: 0.7rem 1rem;
+      border-radius: 0.75rem; border: 1px solid #334155;
+      background: transparent; color: #94a3b8;
+      font-weight: 700; font-size: 0.875rem; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-modal-cancelar:hover { background: rgba(255,255,255,0.05); color: #f8fafc; }
+
+    .btn-modal-perigo {
+      flex: 1; padding: 0.7rem 1rem;
+      border-radius: 0.75rem; border: none;
+      background: #dc2626; color: white;
+      font-weight: 700; font-size: 0.875rem; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-modal-perigo:hover { background: #b91c1c; }
+
+    .btn-modal-sair {
+      flex: 1; padding: 0.7rem 1rem;
+      border-radius: 0.75rem;
+      background: rgba(251,191,36,0.12); color: #fbbf24;
+      border: 1px solid rgba(251,191,36,0.25);
+      font-weight: 700; font-size: 0.875rem; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-modal-sair:hover { background: rgba(251,191,36,0.22); }
 
     @media (max-width: 1024px) {
       .sidebar { width: 80px; padding: 1.5rem 0.75rem; }
@@ -284,16 +277,13 @@
 
     <nav class="nav-links">
       <button onclick="trocarTela('agendamentos')" class="nav-item active" id="btn-agendamentos">
-        <i data-lucide="calendar-check"></i>
-        <span>Meus Agendamentos</span>
+        <i data-lucide="calendar-check"></i><span>Meus Agendamentos</span>
       </button>
       <button onclick="trocarTela('veiculos')" class="nav-item" id="btn-veiculos">
-        <i data-lucide="car-front"></i>
-        <span>Meus Veículos</span>
+        <i data-lucide="car-front"></i><span>Meus Veículos</span>
       </button>
       <button onclick="trocarTela('conta')" class="nav-item" id="btn-conta">
-        <i data-lucide="user-circle"></i>
-        <span>Minha Conta</span>
+        <i data-lucide="user-circle"></i><span>Minha Conta</span>
       </button>
     </nav>
 
@@ -302,7 +292,7 @@
         <div class="avatar" id="user-initial">C</div>
         <span id="usuario-logado" class="text-sm font-bold truncate w-24 text-white">Cliente</span>
       </div>
-      <button onclick="efetuarLogout()" class="text-slate-500 hover:text-red-500 transition-colors">
+      <button onclick="abrirModalLogout()" class="text-slate-500 hover:text-red-500 transition-colors">
         <i data-lucide="log-out" class="w-5 h-5"></i>
       </button>
     </div>
@@ -347,9 +337,8 @@
           </div>
         </div>
         <div class="flex justify-end gap-3 border-t border-slate-800 pt-4">
-          <button onclick="fecharFormAgendamento()" class="px-5 py-2 text-slate-400 font-bold hover:text-white transition-colors">
-            Cancelar
-          </button>
+          <button onclick="fecharFormAgendamento()"
+            class="px-5 py-2 text-slate-400 font-bold hover:text-white transition-colors">Cancelar</button>
           <button onclick="enviarAgendamento()" class="btn-primary">
             <i data-lucide="check" class="w-4 h-4"></i> Confirmar Agendamento
           </button>
@@ -358,44 +347,32 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
         <div class="stat-card">
-          <div class="stat-icon bg-blue-500/10 text-blue-500">
-            <i data-lucide="layers"></i>
-          </div>
+          <div class="stat-icon bg-blue-500/10 text-blue-500"><i data-lucide="layers"></i></div>
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total</span>
           <div class="stat-value" id="stat-total">0</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon bg-amber-500/10 text-amber-500">
-            <i data-lucide="clock"></i>
-          </div>
+          <div class="stat-icon bg-amber-500/10 text-amber-500"><i data-lucide="clock"></i></div>
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pendentes</span>
           <div class="stat-value" id="stat-pendentes">0</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon bg-green-500/10 text-green-500">
-            <i data-lucide="check-circle"></i>
-          </div>
+          <div class="stat-icon bg-green-500/10 text-green-500"><i data-lucide="check-circle"></i></div>
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Concluídos</span>
           <div class="stat-value" id="stat-concluidos">0</div>
         </div>
       </div>
 
       <div class="card shadow-xl">
-        <div class="flex items-center justify-between mb-5">
-          <h2 class="text-base font-bold flex items-center gap-2">
-            <i data-lucide="list" class="text-blue-500 w-4 h-4"></i>
-            Histórico de Agendamentos
-          </h2>
-        </div>
+        <h2 class="text-base font-bold mb-5 flex items-center gap-2">
+          <i data-lucide="list" class="text-blue-500 w-4 h-4"></i>
+          Histórico de Agendamentos
+        </h2>
         <div class="overflow-x-auto">
           <table>
             <thead>
               <tr>
-                <th>Data</th>
-                <th>Hora</th>
-                <th>Serviço</th>
-                <th>Veículo</th>
-                <th>Status</th>
+                <th>Data</th><th>Hora</th><th>Serviço</th><th>Veículo</th><th>Status</th>
               </tr>
             </thead>
             <tbody id="listaAgendamentos"></tbody>
@@ -417,11 +394,30 @@
           Adicionar Novo Veículo
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <input id="marca" placeholder="Marca (ex: Toyota)" class="input-field">
-          <input id="modelo" placeholder="Modelo (ex: Corolla)" class="input-field">
-          <input id="placa" placeholder="Placa (ex: ABC-1234)" class="input-field">
+          <input id="marca"  placeholder="Marca (ex: Toyota)"     class="input-field">
+          <input id="modelo" placeholder="Modelo (ex: Corolla)"   class="input-field">
+
+          <!-- Ponto 8: maxlength na placa -->
+          <div class="placa-wrapper">
+            <input
+              id="placa"
+              placeholder="Placa (ex: ABC-1234)"
+              class="input-field"
+              maxlength="8"
+              style="padding-right: 3rem;"
+              oninput="
+                this.value = this.value.toUpperCase();
+                const limpo = this.value.replace(/[^A-Z0-9]/g,'');
+                const cont = document.getElementById('placa-contador');
+                cont.textContent = limpo.length + '/7';
+                cont.classList.toggle('limite', limpo.length >= 7);
+              ">
+            <span class="placa-contador" id="placa-contador">0/7</span>
+          </div>
+
           <input id="cor" placeholder="Cor (ex: Cinza Chumbo)" class="input-field">
-          <input id="ano" placeholder="Ano (ex: 2023)" class="input-field">
+          <input id="ano" placeholder="Ano (ex: 2023)" class="input-field"
+                 type="number" min="1900" max="2099" maxlength="4">
         </div>
         <div class="mt-3 flex justify-end">
           <button onclick="criarVeiculo()" class="btn-primary">
@@ -450,7 +446,8 @@
 
         <!-- Avatar -->
         <div class="card shadow-xl flex flex-col items-center justify-center py-10 gap-4">
-          <div class="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-3xl font-black" id="conta-avatar">C</div>
+          <div class="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center text-3xl font-black"
+               id="conta-avatar">C</div>
           <div class="text-center">
             <p class="font-bold text-lg text-white" id="conta-nome">Nome do Cliente</p>
             <p class="text-xs text-slate-500" id="conta-email">cliente@email.com</p>
@@ -469,30 +466,24 @@
           </h2>
 
           <div class="divide-y divide-slate-800">
-
             <div class="info-row">
               <span class="text-slate-500 text-sm w-28 shrink-0">Nome</span>
               <span class="text-sm font-medium" id="conta-nome-row">—</span>
             </div>
-
             <div class="info-row">
               <span class="text-slate-500 text-sm w-28 shrink-0">E-mail</span>
               <span class="text-sm font-medium" id="conta-email-row">—</span>
             </div>
-
-            <!-- Telefone com edição inline -->
             <div class="info-row">
               <span class="text-slate-500 text-sm w-28 shrink-0">Telefone</span>
               <div class="flex items-center gap-2 flex-1">
                 <span class="text-sm font-medium" id="conta-telefone">—</span>
                 <button onclick="editarTelefone()"
-                        class="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1">
+                  class="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1">
                   <i data-lucide="pencil" style="width:12px;height:12px"></i> Editar
                 </button>
               </div>
             </div>
-
-            <!-- Campo de edição do telefone -->
             <div class="info-row" id="row-editar-telefone" style="display:none;">
               <span class="text-slate-500 text-sm w-28 shrink-0">Novo Telefone</span>
               <div class="flex items-center gap-2 flex-1">
@@ -501,27 +492,25 @@
                   <i data-lucide="check" class="w-4 h-4"></i> Salvar
                 </button>
                 <button onclick="cancelarEdicaoTelefone()"
-                        class="text-slate-400 hover:text-white transition-colors font-bold px-2">
-                  Cancelar
-                </button>
+                  class="text-slate-400 hover:text-white transition-colors font-bold px-2">Cancelar</button>
               </div>
             </div>
-
             <div class="info-row">
               <span class="text-slate-500 text-sm w-28 shrink-0">Membro desde</span>
               <span class="text-sm font-medium" id="conta-membro-desde">—</span>
             </div>
-
           </div>
 
           <!-- Zona de perigo -->
           <div class="mt-6 pt-5 border-t border-slate-800">
             <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Zona de Perigo</p>
-            <button onclick="excluirConta()" class="btn-danger">
+            <button onclick="abrirModalExcluirConta()" class="btn-danger">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
               Excluir Conta Permanentemente
             </button>
-            <p class="text-xs text-slate-600 mt-2">Esta ação é irreversível. Todos os seus dados serão removidos.</p>
+            <p class="text-xs text-slate-600 mt-2">
+              Em conformidade com a LGPD, todos os seus dados pessoais e placas dos veículos serão removidos.
+            </p>
           </div>
         </div>
 
@@ -531,11 +520,97 @@
   </main>
 </div>
 
+<!-- ══════════════════════════
+     MODAL — Excluir Conta
+══════════════════════════ -->
+<div id="modal-excluir-conta"
+     class="modal-overlay hidden"
+     onclick="if(event.target===this) fecharModalExcluirConta()">
+  <div class="modal-box">
+    <div class="modal-icone modal-icone-perigo">
+      <i data-lucide="trash-2" class="w-6 h-6"></i>
+    </div>
+    <p class="modal-titulo">Excluir conta permanentemente?</p>
+    <p class="modal-desc">
+      Esta ação é <strong>irreversível</strong>.<br>
+      Em conformidade com a <strong>LGPD</strong>, seus dados pessoais, e-mail, telefone
+      e placas dos veículos serão removidos do sistema.
+    </p>
+    <div class="modal-acoes">
+      <button class="btn-modal-cancelar" onclick="fecharModalExcluirConta()">Cancelar</button>
+      <button class="btn-modal-perigo"   onclick="executarExclusaoConta()">Sim, excluir tudo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════
+     MODAL — Logout
+══════════════════════════ -->
+<div id="modal-logout"
+     class="modal-overlay hidden"
+     onclick="if(event.target===this) fecharModalLogout()">
+  <div class="modal-box">
+    <div class="modal-icone modal-icone-aviso">
+      <i data-lucide="log-out" class="w-6 h-6"></i>
+    </div>
+    <p class="modal-titulo">Encerrar sessão?</p>
+    <p class="modal-desc">
+      Você será redirecionado para a tela de login.<br>
+      Deseja mesmo sair agora?
+    </p>
+    <div class="modal-acoes">
+      <button class="btn-modal-cancelar" onclick="fecharModalLogout()">Permanecer</button>
+      <button class="btn-modal-sair"     onclick="executarLogout()">Sair</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="toast.js"></script>
 <script src="config.js"></script>
 <script src="auth.js"></script>
+<script src="completar-perfil.js"></script>
 <script src="tela_cliente.js"></script>
+
 <script>
   lucide.createIcons();
+
+  /* ── Modal Logout ── */
+  function abrirModalLogout() {
+    const m = document.getElementById('modal-logout');
+    m.classList.remove('hidden'); m.classList.add('flex');
+  }
+  function fecharModalLogout() {
+    const m = document.getElementById('modal-logout');
+    m.classList.add('hidden'); m.classList.remove('flex');
+  }
+  function executarLogout() {
+    fecharModalLogout();
+    if (typeof logout === 'function') logout();
+    else { localStorage.clear(); window.location.href = 'login.html'; }
+  }
+
+  /* ── Modal Excluir Conta ── */
+  function abrirModalExcluirConta() {
+    const m = document.getElementById('modal-excluir-conta');
+    m.classList.remove('hidden'); m.classList.add('flex');
+  }
+  function fecharModalExcluirConta() {
+    const m = document.getElementById('modal-excluir-conta');
+    m.classList.add('hidden'); m.classList.remove('flex');
+  }
+  function executarExclusaoConta() {
+    fecharModalExcluirConta();
+    if (typeof excluirConta === 'function') excluirConta();
+  }
+
+  /* ── ESC fecha modais ── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      fecharModalLogout();
+      fecharModalExcluirConta();
+    }
+  });
 </script>
 </body>
 </html>

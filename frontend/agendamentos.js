@@ -1,209 +1,243 @@
-// ================= FORM =================
+// =====================================================
+//  agendamentos.js — com suporte a funcionários
+// =====================================================
+
 window.abrirFormulario = function () {
-  document.getElementById("formAgendamento").style.display = "block";
+  document.getElementById('formAgendamento').style.display = 'block';
+  carregarFuncionariosSelect();
 };
 
 window.fecharFormulario = function () {
-  document.getElementById("formAgendamento").style.display = "none";
+  document.getElementById('formAgendamento').style.display = 'none';
 };
 
-// ================= CLIENTES =================
+// ── Clientes ──────────────────────────────────────────
 async function carregarClientes() {
-  const res = await fetch(`${API}/clientes`, {
-    headers: getHeaders()
-  });
-
+  const res   = await fetch(`${API}/clientes`, { headers: getHeaders() });
   const dados = await res.json();
-  const select = document.getElementById("cliente_id");
 
-  select.innerHTML = dados.map(c => `
-    <option value="${c.id}">${c.nome}</option>
-  `).join("");
+  // Filtra anonimizados
+  const ativos = dados.filter(c => c.nome !== 'Usuário Removido' && c.email !== null);
+
+  const select = document.getElementById('cliente_id');
+  select.innerHTML = `<option value="">Selecione o cliente</option>` +
+    ativos.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
 
   carregarVeiculosDoCliente();
 }
 
-// ================= VEÍCULOS =================
+// ── Veículos ──────────────────────────────────────────
 window.carregarVeiculosDoCliente = async function () {
-  const cliente_id = document.getElementById("cliente_id").value;
-
-  const res = await fetch(`${API}/veiculos`, {
-    headers: getHeaders()
-  });
-
+  const cliente_id = document.getElementById('cliente_id').value;
+  const res   = await fetch(`${API}/veiculos`, { headers: getHeaders() });
   const dados = await res.json();
-  const filtrados = dados.filter(v => v.cliente_id == cliente_id);
-  const select = document.getElementById("veiculo_id");
 
-  select.innerHTML = filtrados.map(v => `
-    <option value="${v.id}">${v.modelo} - ${v.placa}</option>
-  `).join("");
+  const filtrados = dados.filter(v => v.cliente_id == cliente_id);
+  const select    = document.getElementById('veiculo_id');
+  select.innerHTML = `<option value="">Selecione o veículo</option>` +
+    filtrados.map(v => `<option value="${v.id}">${v.modelo} — ${v.placa}</option>`).join('');
 };
 
-// ================= SERVIÇOS =================
+// ── Serviços ──────────────────────────────────────────
 let listaServicos = [];
 
 async function carregarServicos() {
-  const res = await fetch(`${API}/servicos`, {
-    headers: getHeaders()
-  });
-
-  listaServicos = await res.json();
-  const select = document.getElementById("servico_id");
-
-  select.innerHTML = listaServicos.map(s => `
-    <option value="${s.id}">${s.nome}</option>
-  `).join("");
+  const res      = await fetch(`${API}/servicos`, { headers: getHeaders() });
+  listaServicos  = await res.json();
+  const select   = document.getElementById('servico_id');
+  select.innerHTML = `<option value="">Selecione o serviço</option>` +
+    listaServicos.map(s => `<option value="${s.id}">${s.nome} (${s.duracao_minutos} min)</option>`).join('');
 }
 
-// ================= BLOQUEIO =================
-async function horarioOcupado(dataSelecionada, servico_id) {
-  const res = await fetch(`${API}/agendamentos`, {
-    headers: getHeaders()
-  });
+// ── Funcionários ──────────────────────────────────────
+async function carregarFuncionariosSelect() {
+  try {
+    const res   = await fetch(`${API}/funcionarios/ativos`, { headers: getHeaders() });
+    const dados = await res.json();
+    const select = document.getElementById('funcionario_id');
+    if (!select) return;
 
-  const agendamentos = await res.json();
-  const servico = listaServicos.find(s => s.id == servico_id);
-  if (!servico) return false;
-
-  const inicioNovo = new Date(dataSelecionada);
-  const fimNovo = new Date(inicioNovo);
-  fimNovo.setMinutes(fimNovo.getMinutes() + servico.duracao_minutos);
-
-  for (const a of agendamentos) {
-    if (a.status === "recusado") continue;
-
-    const inicioExistente = new Date(a.data);
-    const servicoExistente = listaServicos.find(s => s.nome === a.servico);
-    if (!servicoExistente) continue;
-
-    const fimExistente = new Date(inicioExistente);
-    fimExistente.setMinutes(
-      fimExistente.getMinutes() + servicoExistente.duracao_minutos
-    );
-
-    const conflito = inicioNovo < fimExistente && fimNovo > inicioExistente;
-    if (conflito) return true;
+    select.innerHTML = `<option value="">Sem funcionário designado</option>` +
+      dados.map(f => `<option value="${f.id}">${f.nome}</option>`).join('');
+  } catch (err) {
+    console.error('Erro ao carregar funcionários:', err);
   }
-
-  return false;
 }
 
-// ================= CRIAR =================
+// ── Criar agendamento ─────────────────────────────────
 window.criarAgendamento = async function () {
-  const cliente_id = document.getElementById("cliente_id").value;
-  const veiculo_id = document.getElementById("veiculo_id").value;
-  const servico_id = document.getElementById("servico_id").value;
-  const data = document.getElementById("data").value;
+  const cliente_id    = document.getElementById('cliente_id').value;
+  const veiculo_id    = document.getElementById('veiculo_id').value;
+  const servico_id    = document.getElementById('servico_id').value;
+  const data          = document.getElementById('data').value;
+  const funcionario_id = document.getElementById('funcionario_id')?.value || null;
 
   if (!cliente_id || !veiculo_id || !servico_id || !data) {
-    alert("Preencha tudo");
-    return;
+    toast.aviso('Preencha todos os campos obrigatórios.'); return;
   }
 
   if (new Date(data) <= new Date()) {
-    alert("Não é possível agendar em uma data e horário passados.");
-    return;
+    toast.aviso('Não é possível agendar em data e horário passados.'); return;
   }
 
-  const ocupado = await horarioOcupado(data, servico_id);
-  if (ocupado) {
-    alert("Horário ocupado");
-    return;
-  }
+  try {
+    const res = await fetch(`${API}/agendamentos`, {
+      method: 'POST', headers: getHeaders(),
+      body: JSON.stringify({ cliente_id, veiculo_id, servico_id, data, funcionario_id: funcionario_id || null })
+    });
 
-  const res = await fetch(`${API}/agendamentos`, {
-    method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify({ cliente_id, veiculo_id, servico_id, data })
-  });
-
-  if (res.ok) {
-    fecharFormulario();
-    carregarAgendamentos();
-  } else {
-    const erro = await res.json();
-    alert(erro.erro || "Erro ao agendar");
+    if (res.ok) {
+      toast.sucesso('Agendamento criado com sucesso!');
+      fecharFormulario();
+      carregarAgendamentos();
+    } else {
+      const erro = await res.json();
+      toast.erro(erro.erro || 'Erro ao criar agendamento.');
+    }
+  } catch (err) {
+    console.error(err);
+    toast.erro('Erro de conexão com o servidor.');
   }
 };
 
-// ================= STATUS =================
+// ── Atualizar status (+ atribuir funcionário) ─────────
 window.atualizarStatus = async function (id, status) {
   try {
     const res = await fetch(`${API}/agendamentos/${id}`, {
-      method: "PUT",
-      headers: getHeaders(),
+      method: 'PUT', headers: getHeaders(),
       body: JSON.stringify({ status })
     });
 
     if (res.ok) {
+      const labels = { aprovado: 'Agendamento aprovado!', recusado: 'Agendamento recusado.' };
+      toast[status === 'aprovado' ? 'sucesso' : 'aviso'](labels[status] ?? `Status: ${status}`);
       carregarAgendamentos();
     } else {
       const erro = await res.json();
-      alert(erro.erro || "Erro ao atualizar status");
+      toast.erro(erro.erro || 'Erro ao atualizar status.');
     }
-  } catch (erro) {
-    console.error("Erro no update:", erro);
+  } catch (err) {
+    console.error(err);
+    toast.erro('Erro de conexão ao atualizar status.');
   }
 };
 
-// ================= LISTAR =================
-window.carregarAgendamentos = async function () {
-  const res = await fetch(`${API}/agendamentos`, {
-    headers: getHeaders()
-  });
-
-  const dados = await res.json();
-  const tabela = document.getElementById("tabela");
-  tabela.innerHTML = "";
-
-  dados.forEach(a => {
-    const tr = document.createElement("tr");
-
-    // 🔥 Força exibição em 24h
-    const dataFormatada = new Date(a.data).toLocaleString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
+// ── Atribuir funcionário inline ───────────────────────
+window.atribuirFuncionario = async function (agendamentoId, funcionarioId) {
+  try {
+    const res = await fetch(`${API}/agendamentos/${agendamentoId}`, {
+      method: 'PUT', headers: getHeaders(),
+      body: JSON.stringify({ status: 'aprovado', funcionario_id: funcionarioId || null })
     });
 
+    if (res.ok) {
+      toast.sucesso('Funcionário atribuído e agendamento aprovado!');
+      carregarAgendamentos();
+    } else {
+      const erro = await res.json();
+      toast.erro(erro.erro || 'Erro ao atribuir funcionário.');
+    }
+  } catch (err) {
+    console.error(err);
+    toast.erro('Erro de conexão.');
+  }
+};
+
+// ── Listar agendamentos ───────────────────────────────
+let _listaFuncionarios = [];
+
+window.carregarAgendamentos = async function () {
+  // Carrega funcionários ativos para os selects inline
+  try {
+    const fRes = await fetch(`${API}/funcionarios/ativos`, { headers: getHeaders() });
+    _listaFuncionarios = fRes.ok ? await fRes.json() : [];
+  } catch { _listaFuncionarios = []; }
+
+  const res   = await fetch(`${API}/agendamentos`, { headers: getHeaders() });
+  const dados = await res.json();
+  const tabela = document.getElementById('tabela');
+
+  tabela.innerHTML = '';
+
+  if (!dados.length) {
+    tabela.innerHTML = `
+      <tr><td colspan="7" class="py-16 text-center text-slate-500">
+        <div class="flex flex-col items-center gap-3">
+          <i data-lucide="calendar-off" class="w-10 h-10 opacity-20"></i>
+          <p>Nenhum agendamento encontrado.</p>
+        </div>
+      </td></tr>`;
+    lucide.createIcons(); return;
+  }
+
+  const badgeMap = {
+    pendente: '<span style="background:rgba(251,191,36,.12);color:#fbbf24;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700">PENDENTE</span>',
+    aprovado: '<span style="background:rgba(34,197,94,.12);color:#22c55e;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700">APROVADO</span>',
+    recusado: '<span style="background:rgba(239,68,68,.12);color:#ef4444;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700">RECUSADO</span>',
+  };
+
+  const opsFuncionarios = `<option value="">— Nenhum —</option>` +
+    _listaFuncionarios.map(f => `<option value="${f.id}">${f.nome}</option>`).join('');
+
+  dados.forEach(a => {
+    const tr = document.createElement('tr');
+
+    const dataFormatada = new Date(a.data).toLocaleString('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    });
+
+    // Select de funcionário com valor atual pré-selecionado
+    const selectFunc = `
+      <select onchange="atribuirFuncionario(${a.id}, this.value)"
+        style="background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:.3rem .6rem;border-radius:.5rem;font-size:.75rem;outline:none;min-width:130px;">
+        ${opsFuncionarios.replace(
+          `value="${a.funcionario_id}"`,
+          `value="${a.funcionario_id}" selected`
+        )}
+      </select>`;
+
+    const anivBadge = a.desconto_aniversario
+      ? `<span title="Desconto de aniversário" style="margin-left:.25rem;font-size:.75rem">🎂</span>`
+      : '';
+
     tr.innerHTML = `
-      <td>${a.cliente}</td>
-      <td>${a.veiculo}</td>
-      <td>${a.servico}</td>
-      <td>${dataFormatada}</td>
-      <td>
-        <span class="status ${a.status}">
-          ${a.status.toUpperCase()}
-        </span>
-      </td>
-      <td>
-        ${a.status === "pendente" ? `
-          <button onclick="atualizarStatus(${a.id}, 'aprovado')">Aprovar</button>
-          <button onclick="atualizarStatus(${a.id}, 'recusado')">Recusar</button>
-        ` : ""}
-        <button onclick="deletar(${a.id})">Excluir</button>
-      </td>
-    `;
+      <td class="text-slate-200">${a.cliente}</td>
+      <td class="text-slate-400">${a.veiculo}</td>
+      <td class="text-slate-400">${a.servico}${anivBadge}</td>
+      <td class="text-slate-400">${dataFormatada}</td>
+      <td>${badgeMap[a.status] ?? a.status}</td>
+      <td>${selectFunc}</td>
+      <td class="text-right">
+        <div class="flex items-center justify-end gap-2">
+          ${a.status === 'pendente' ? `
+            <button onclick="atualizarStatus(${a.id}, 'aprovado')"
+              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors border border-green-500/20">Aprovar</button>
+            <button onclick="atualizarStatus(${a.id}, 'recusado')"
+              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors border border-red-500/20">Recusar</button>
+          ` : ''}
+          <button onclick="deletar(${a.id})"
+            class="text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-700/50 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors border border-slate-600/30">Excluir</button>
+        </div>
+      </td>`;
 
     tabela.appendChild(tr);
   });
+
+  lucide.createIcons();
 };
 
-// ================= DELETE =================
+// ── Deletar ───────────────────────────────────────────
 window.deletar = async function (id) {
-  await fetch(`${API}/agendamentos/${id}`, {
-    method: "DELETE",
-    headers: getHeaders()
+  if (!confirm('Excluir este agendamento?')) return;
+  const res = await fetch(`${API}/agendamentos/${id}`, {
+    method: 'DELETE', headers: getHeaders()
   });
-
-  carregarAgendamentos();
+  if (res.ok) { toast.sucesso('Agendamento excluído.'); carregarAgendamentos(); }
+  else toast.erro('Erro ao excluir agendamento.');
 };
 
-// ================= INICIAR =================
+// ── Init ──────────────────────────────────────────────
 carregarClientes();
 carregarServicos();
 carregarAgendamentos();

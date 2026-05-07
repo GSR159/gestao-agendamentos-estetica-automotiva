@@ -1,57 +1,73 @@
-const pool = require('../config/db');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
+const pool     = require('../config/db');
+const bcrypt   = require('bcrypt');
+const jwt      = require('jsonwebtoken');
+const crypto   = require('crypto');
 const nodemailer = require('nodemailer');
 const { normalizarEmail } = require('../utils/normalizar');
 
-const SECRET = process.env.JWT_SECRET || "segredo_super_forte";
-const FRONT_URL = process.env.FRONT_URL || "http://127.0.0.1:5500";
+const SECRET    = process.env.JWT_SECRET  || 'segredo_super_forte';
+const FRONT_URL = process.env.FRONT_URL   || 'http://127.0.0.1:5500';
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 
+// ─────────────────────────────────────────
+//  TRANSPORTER
+// ─────────────────────────────────────────
 const transporter = nodemailer.createTransport({
   service: 'gmail',
-  auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS
-  }
+  auth: { user: EMAIL_USER, pass: EMAIL_PASS }
 });
 
-async function enviarEmailConfirmacao(email, nome, link) {
+// ─────────────────────────────────────────
+//  TEMPLATE DE EMAIL
+// ─────────────────────────────────────────
+function templateEmail(titulo, corpo, linkTexto, linkHref) {
+  return `
+    <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;background:#0f172a;color:#f8fafc;border-radius:16px;">
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="display:inline-block;background:#3b82f6;border-radius:12px;padding:12px 20px;">
+          <span style="color:white;font-size:1.2rem;font-weight:800;">🚗 Smart System</span>
+        </div>
+      </div>
+      <h2 style="color:#f8fafc;margin-bottom:8px;">${titulo}</h2>
+      <p style="color:#94a3b8;line-height:1.6;">${corpo}</p>
+      <div style="text-align:center;margin:28px 0;">
+        <a href="${linkHref}"
+           style="display:inline-block;background:#3b82f6;color:#fff;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:700;font-size:1rem;">
+          ${linkTexto}
+        </a>
+      </div>
+      <p style="color:#475569;font-size:0.8rem;text-align:center;">
+        Se não foi você quem solicitou, ignore este email.<br>
+        O link expira em <strong style="color:#94a3b8;">24 horas</strong>.
+      </p>
+      <hr style="border:none;border-top:1px solid #1e293b;margin:20px 0;">
+      <p style="color:#334155;font-size:0.75rem;text-align:center;">Smart System © ${new Date().getFullYear()}</p>
+    </div>
+  `;
+}
+
+async function enviarEmail(para, assunto, html) {
+  if (!EMAIL_USER || !EMAIL_PASS) {
+    console.warn('[EMAIL NÃO ENVIADO — sem credenciais] Link:', html.match(/href="([^"]+)"/)?.[1]);
+    return;
+  }
   await transporter.sendMail({
     from: `"Smart System" <${EMAIL_USER}>`,
-    to: email,
-    subject: 'Confirme seu email - Smart System',
-    html: `
-      <div style="font-family: Arial, sans-serif; padding: 24px;">
-        <h2>Olá, ${nome}!</h2>
-        <p>Seu cadastro foi realizado com sucesso.</p>
-        <p>Clique abaixo para confirmar seu email:</p>
-        <a href="${link}" style="
-          display:inline-block;
-          background:#2563eb;
-          color:#fff;
-          padding:12px 20px;
-          border-radius:8px;
-          text-decoration:none;
-          font-weight:bold;
-        ">
-          Confirmar Email
-        </a>
-        <p style="margin-top:20px;">Ou copie e cole:</p>
-        <p>${link}</p>
-      </div>
-    `
+    to: para,
+    subject: assunto,
+    html,
   });
 }
 
-// ================= REGISTER =================
+// ─────────────────────────────────────────
+//  REGISTER
+// ─────────────────────────────────────────
 const register = async (req, res) => {
   try {
     let { nome, email, senha, telefone, tipo } = req.body;
 
-    nome = nome?.trim();
+    nome  = nome?.trim();
     email = normalizarEmail(email);
     telefone = telefone?.trim() || null;
 
@@ -59,51 +75,44 @@ const register = async (req, res) => {
       return res.status(400).json({ erro: 'Nome, email e senha são obrigatórios.' });
     }
 
-    const existe = await pool.query(
-      'SELECT id FROM usuarios WHERE email = $1',
-      [email]
-    );
-
+    const existe = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email]);
     if (existe.rows.length > 0) {
       return res.status(400).json({ erro: 'Email já cadastrado.' });
     }
 
-    const senhaHash = await bcrypt.hash(senha, 10);
-    const token = crypto.randomBytes(32).toString('hex');
-    const expiracao = new Date(Date.now() + 1000 * 60 * 60 * 24);
+    const senhaHash   = await bcrypt.hash(senha, 10);
+    const token       = crypto.randomBytes(32).toString('hex');
+    const expiracao   = new Date(Date.now() + 1000 * 60 * 60 * 24);
     const tipoUsuario = tipo || 'cliente';
 
-    // Insere o usuário e retorna o id
     const novoUsuario = await pool.query(
       `INSERT INTO usuarios
         (nome, email, senha, telefone, tipo, email_confirmado, token_confirmacao, token_expira_em)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
        RETURNING id`,
       [nome, email, senhaHash, telefone, tipoUsuario, false, token, expiracao]
     );
 
     const usuarioId = novoUsuario.rows[0].id;
 
-    // 🔥 Cria o cliente automaticamente se for do tipo cliente
     if (tipoUsuario === 'cliente') {
       await pool.query(
-        `INSERT INTO clientes (nome, email, telefone, usuario_id)
-         VALUES ($1, $2, $3, $4)`,
+        `INSERT INTO clientes (nome, email, telefone, usuario_id) VALUES ($1,$2,$3,$4)`,
         [nome, email, telefone, usuarioId]
       );
     }
 
     const link = `${FRONT_URL}/confirmar-email.html?token=${token}`;
+    const html = templateEmail(
+      `Olá, ${nome}! Confirme seu email`,
+      'Seu cadastro foi realizado com sucesso. Clique no botão abaixo para ativar sua conta.',
+      'Confirmar Email',
+      link
+    );
 
-    if (EMAIL_USER && EMAIL_PASS) {
-      await enviarEmailConfirmacao(email, nome, link);
-    } else {
-      console.warn("LINK DE CONFIRMAÇÃO:", link);
-    }
+    await enviarEmail(email, 'Confirme seu email — Smart System', html);
 
-    return res.status(201).json({
-      mensagem: 'Cadastro realizado com sucesso. Verifique seu email.'
-    });
+    return res.status(201).json({ mensagem: 'Cadastro realizado! Verifique seu email para ativar a conta.' });
 
   } catch (error) {
     console.error(error);
@@ -111,22 +120,19 @@ const register = async (req, res) => {
   }
 };
 
-// ================= LOGIN =================
+// ─────────────────────────────────────────
+//  LOGIN
+// ─────────────────────────────────────────
 const login = async (req, res) => {
   try {
     let { email, senha } = req.body;
-
     email = normalizarEmail(email);
 
     if (!email || !senha) {
       return res.status(400).json({ erro: 'Email e senha são obrigatórios.' });
     }
 
-    const resultado = await pool.query(
-      'SELECT * FROM usuarios WHERE email = $1',
-      [email]
-    );
-
+    const resultado = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
     if (resultado.rows.length === 0) {
       return res.status(401).json({ erro: 'Usuário não encontrado.' });
     }
@@ -139,31 +145,24 @@ const login = async (req, res) => {
     }
 
     if (!usuario.email_confirmado) {
-      return res.status(401).json({ erro: 'Confirme seu email antes de fazer login.' });
+      return res.status(401).json({
+        erro: 'Confirme seu email antes de fazer login.',
+        reenviar: true,
+      });
     }
 
-    // Busca o cliente_id vinculado ao usuário
     const clienteResult = await pool.query(
-      'SELECT id FROM clientes WHERE usuario_id = $1',
-      [usuario.id]
+      'SELECT id FROM clientes WHERE usuario_id = $1', [usuario.id]
     );
     const cliente_id = clienteResult.rows[0]?.id || null;
 
     const token = jwt.sign(
-      {
-        id: usuario.id,
-        tipo: usuario.tipo,
-        email: usuario.email,
-        cliente_id
-      },
+      { id: usuario.id, tipo: usuario.tipo, email: usuario.email, cliente_id },
       SECRET,
       { expiresIn: '1d' }
     );
 
-    return res.status(200).json({
-      mensagem: 'Login realizado com sucesso.',
-      token
-    });
+    return res.status(200).json({ mensagem: 'Login realizado com sucesso.', token });
 
   } catch (error) {
     console.error(error);
@@ -171,7 +170,9 @@ const login = async (req, res) => {
   }
 };
 
-// ================= CONFIRMAR EMAIL =================
+// ─────────────────────────────────────────
+//  CONFIRMAR EMAIL
+// ─────────────────────────────────────────
 const confirmarEmail = async (req, res) => {
   try {
     const { token } = req.query;
@@ -181,8 +182,7 @@ const confirmarEmail = async (req, res) => {
     }
 
     const resultado = await pool.query(
-      `SELECT id, token_expira_em, email_confirmado
-       FROM usuarios WHERE token_confirmacao = $1`,
+      `SELECT id, token_expira_em, email_confirmado FROM usuarios WHERE token_confirmacao = $1`,
       [token]
     );
 
@@ -193,23 +193,19 @@ const confirmarEmail = async (req, res) => {
     const usuario = resultado.rows[0];
 
     if (usuario.email_confirmado) {
-      return res.status(200).json({ mensagem: 'Email já confirmado.' });
+      return res.status(200).json({ mensagem: 'Email já confirmado. Faça login!' });
     }
 
     if (!usuario.token_expira_em || new Date(usuario.token_expira_em) < new Date()) {
-      return res.status(400).json({ erro: 'Token expirado.' });
+      return res.status(400).json({ erro: 'Token expirado. Solicite um novo link.' });
     }
 
     await pool.query(
-      `UPDATE usuarios
-       SET email_confirmado = true,
-           token_confirmacao = NULL,
-           token_expira_em = NULL
-       WHERE id = $1`,
+      `UPDATE usuarios SET email_confirmado = true, token_confirmacao = NULL, token_expira_em = NULL WHERE id = $1`,
       [usuario.id]
     );
 
-    return res.status(200).json({ mensagem: 'Email confirmado com sucesso.' });
+    return res.status(200).json({ mensagem: 'Email confirmado com sucesso! Você já pode fazer login.' });
 
   } catch (error) {
     console.error(error);
@@ -217,11 +213,12 @@ const confirmarEmail = async (req, res) => {
   }
 };
 
-// ================= REENVIAR EMAIL =================
+// ─────────────────────────────────────────
+//  REENVIAR EMAIL DE CONFIRMAÇÃO
+// ─────────────────────────────────────────
 const reenviarEmail = async (req, res) => {
   try {
     let { email } = req.body;
-
     email = normalizarEmail(email);
 
     if (!email) {
@@ -229,8 +226,7 @@ const reenviarEmail = async (req, res) => {
     }
 
     const resultado = await pool.query(
-      'SELECT id, nome, email_confirmado FROM usuarios WHERE email = $1',
-      [email]
+      'SELECT id, nome, email_confirmado FROM usuarios WHERE email = $1', [email]
     );
 
     if (resultado.rows.length === 0) {
@@ -243,25 +239,25 @@ const reenviarEmail = async (req, res) => {
       return res.status(400).json({ erro: 'Email já confirmado.' });
     }
 
-    const novoToken = crypto.randomBytes(32).toString('hex');
+    const novoToken   = crypto.randomBytes(32).toString('hex');
     const novaExpiracao = new Date(Date.now() + 1000 * 60 * 60 * 24);
 
     await pool.query(
-      `UPDATE usuarios
-       SET token_confirmacao = $1, token_expira_em = $2
-       WHERE id = $3`,
+      `UPDATE usuarios SET token_confirmacao = $1, token_expira_em = $2 WHERE id = $3`,
       [novoToken, novaExpiracao, usuario.id]
     );
 
     const link = `${FRONT_URL}/confirmar-email.html?token=${novoToken}`;
+    const html = templateEmail(
+      `Novo link de confirmação`,
+      'Você solicitou um novo link de confirmação de email. Clique abaixo para ativar sua conta.',
+      'Confirmar Email',
+      link
+    );
 
-    if (EMAIL_USER && EMAIL_PASS) {
-      await enviarEmailConfirmacao(email, usuario.nome, link);
-    } else {
-      console.warn("LINK DE REENVIO:", link);
-    }
+    await enviarEmail(email, 'Novo link de confirmação — Smart System', html);
 
-    return res.status(200).json({ mensagem: 'Email reenviado com sucesso.' });
+    return res.status(200).json({ mensagem: 'Email reenviado com sucesso! Verifique sua caixa de entrada.' });
 
   } catch (error) {
     console.error(error);
@@ -269,4 +265,146 @@ const reenviarEmail = async (req, res) => {
   }
 };
 
-module.exports = { register, login, confirmarEmail, reenviarEmail };
+// ─────────────────────────────────────────
+//  ESQUECI MINHA SENHA
+// ─────────────────────────────────────────
+const esquecerSenha = async (req, res) => {
+  try {
+    let { email } = req.body;
+    email = normalizarEmail(email);
+
+    if (!email) {
+      return res.status(400).json({ erro: 'Email é obrigatório.' });
+    }
+
+    const resultado = await pool.query(
+      'SELECT id, nome FROM usuarios WHERE email = $1', [email]
+    );
+
+    // Sempre retorna sucesso (segurança — não revela se email existe)
+    if (resultado.rows.length === 0) {
+      return res.status(200).json({
+        mensagem: 'Se este email estiver cadastrado, você receberá as instruções em breve.'
+      });
+    }
+
+    const usuario    = resultado.rows[0];
+    const token      = crypto.randomBytes(32).toString('hex');
+    const expiracao  = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
+
+    await pool.query(
+      `UPDATE usuarios SET token_recuperacao = $1, token_recuperacao_expira = $2 WHERE id = $3`,
+      [token, expiracao, usuario.id]
+    );
+
+    const link = `${FRONT_URL}/redefinir-senha.html?token=${token}`;
+    const html = templateEmail(
+      `Redefinir sua senha`,
+      `Olá, ${usuario.nome}! Recebemos uma solicitação para redefinir a senha da sua conta. Clique no botão abaixo para criar uma nova senha. O link expira em <strong>1 hora</strong>.`,
+      'Redefinir Senha',
+      link
+    );
+
+    await enviarEmail(email, 'Redefinição de senha — Smart System', html);
+
+    return res.status(200).json({
+      mensagem: 'Se este email estiver cadastrado, você receberá as instruções em breve.'
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno no servidor.' });
+  }
+};
+
+// ─────────────────────────────────────────
+//  REDEFINIR SENHA
+// ─────────────────────────────────────────
+const redefinirSenha = async (req, res) => {
+  try {
+    const { token, novaSenha } = req.body;
+
+    if (!token || !novaSenha) {
+      return res.status(400).json({ erro: 'Token e nova senha são obrigatórios.' });
+    }
+
+    if (novaSenha.length < 6) {
+      return res.status(400).json({ erro: 'A senha deve ter no mínimo 6 caracteres.' });
+    }
+
+    const resultado = await pool.query(
+      `SELECT id, token_recuperacao_expira FROM usuarios WHERE token_recuperacao = $1`,
+      [token]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(400).json({ erro: 'Token inválido ou já utilizado.' });
+    }
+
+    const usuario = resultado.rows[0];
+
+    if (!usuario.token_recuperacao_expira || new Date(usuario.token_recuperacao_expira) < new Date()) {
+      return res.status(400).json({ erro: 'Token expirado. Solicite um novo link.' });
+    }
+
+    const senhaHash = await bcrypt.hash(novaSenha, 10);
+
+    await pool.query(
+      `UPDATE usuarios
+       SET senha = $1, token_recuperacao = NULL, token_recuperacao_expira = NULL
+       WHERE id = $2`,
+      [senhaHash, usuario.id]
+    );
+
+    return res.status(200).json({ mensagem: 'Senha redefinida com sucesso! Faça login com a nova senha.' });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ erro: 'Erro interno no servidor.' });
+  }
+};
+
+// ─────────────────────────────────────────
+//  VALIDAR TOKEN DE RECUPERAÇÃO
+//  (frontend usa para verificar se token ainda é válido)
+// ─────────────────────────────────────────
+const validarTokenRecuperacao = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ valido: false, erro: 'Token não informado.' });
+    }
+
+    const resultado = await pool.query(
+      `SELECT id, token_recuperacao_expira FROM usuarios WHERE token_recuperacao = $1`,
+      [token]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(400).json({ valido: false, erro: 'Token inválido.' });
+    }
+
+    const usuario = resultado.rows[0];
+
+    if (!usuario.token_recuperacao_expira || new Date(usuario.token_recuperacao_expira) < new Date()) {
+      return res.status(400).json({ valido: false, erro: 'Token expirado.' });
+    }
+
+    return res.status(200).json({ valido: true });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ valido: false, erro: 'Erro interno no servidor.' });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  confirmarEmail,
+  reenviarEmail,
+  esquecerSenha,
+  redefinirSenha,
+  validarTokenRecuperacao,
+};  
