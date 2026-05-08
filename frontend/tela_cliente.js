@@ -2,6 +2,20 @@
 //  tela_cliente.js
 // ============================================================
 
+// ---------- HELPERS ----------
+function getHeaders() {
+  const token = localStorage.getItem('token');
+  return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+}
+
+function getUsuario() {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch { return null; }
+}
+
 // ---------- NAVEGAÇÃO ----------
 function trocarTela(tela) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -20,10 +34,7 @@ function getBadge(status) {
     recusado:  { cls: 'badge-rejected', icon: 'x',            label: 'Recusado'  },
   };
   const s = map[(status || '').toLowerCase()] ?? { cls: 'badge-pending', icon: 'clock', label: status };
-  return `<span class="badge ${s.cls}">
-            <i data-lucide="${s.icon}" style="width:11px;height:11px"></i>
-            ${s.label}
-          </span>`;
+  return `<span class="badge ${s.cls}"><i data-lucide="${s.icon}" style="width:11px;height:11px"></i> ${s.label}</span>`;
 }
 
 // ---------- GOOGLE CALENDAR ----------
@@ -32,42 +43,31 @@ function abrirGoogleCalendar(agendamento) {
   const fim    = new Date(inicio.getTime() + 60 * 60 * 1000);
   const fmt    = d => d.toISOString().replace(/-|:|\.\d{3}/g, '');
   const params = new URLSearchParams({
-    action:   'TEMPLATE',
-    text:     `Serviço: ${agendamento.servico}`,
-    dates:    `${fmt(inicio)}/${fmt(fim)}`,
-    details:  `Veículo: ${agendamento.veiculo?.modelo ?? ''} · ${agendamento.veiculo?.placa ?? ''}`,
+    action: 'TEMPLATE', text: `Serviço: ${agendamento.servico}`,
+    dates: `${fmt(inicio)}/${fmt(fim)}`,
+    details: `Veículo: ${agendamento.veiculo?.modelo ?? ''} · ${agendamento.veiculo?.placa ?? ''}`,
     location: 'Smart System'
   });
   window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank');
 }
 
-// ---------- APPLE CALENDAR ----------
 function baixarICS(agendamento) {
   const inicio  = new Date(agendamento.data);
   const fim     = new Date(inicio.getTime() + 60 * 60 * 1000);
   const fmt     = d => d.toISOString().replace(/-|:|\.\d{3}/g, '').slice(0, 15) + 'Z';
-  const uid     = `agendamento-${agendamento.id}@smartsystem`;
   const veiculo = `${agendamento.veiculo?.modelo ?? ''} · ${agendamento.veiculo?.placa ?? ''}`;
   const ics = [
-    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Smart System//PT',
-    'BEGIN:VEVENT',
-    `UID:${uid}`,
-    `DTSTAMP:${fmt(new Date())}`,
-    `DTSTART:${fmt(inicio)}`,
-    `DTEND:${fmt(fim)}`,
-    `SUMMARY:Serviço: ${agendamento.servico}`,
-    `DESCRIPTION:Veículo: ${veiculo}`,
-    'LOCATION:Smart System Auto',
-    'END:VEVENT', 'END:VCALENDAR'
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Smart System//PT','BEGIN:VEVENT',
+    `UID:agendamento-${agendamento.id}@smartsystem`,
+    `DTSTAMP:${fmt(new Date())}`,`DTSTART:${fmt(inicio)}`,`DTEND:${fmt(fim)}`,
+    `SUMMARY:Serviço: ${agendamento.servico}`,`DESCRIPTION:Veículo: ${veiculo}`,
+    'LOCATION:Smart System Auto','END:VEVENT','END:VCALENDAR'
   ].join('\r\n');
-  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = `agendamento-${agendamento.id}.ics`; a.click();
-  URL.revokeObjectURL(url);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+  a.download = `agendamento-${agendamento.id}.ics`; a.click();
 }
 
-// ---------- BOTÕES CALENDÁRIO ----------
 function getBotoesCalendario(agendamento) {
   if ((agendamento.status ?? '').toLowerCase() !== 'aprovado') return '';
   const dados = encodeURIComponent(JSON.stringify(agendamento));
@@ -97,33 +97,23 @@ async function carregarAgendamentos() {
     const tabela = document.getElementById('listaAgendamentos');
 
     if (!data.length) {
-      tabela.innerHTML = `
-        <tr>
-          <td colspan="5" class="py-10 text-center text-slate-500 italic">
-            Nenhum agendamento encontrado.
-          </td>
-        </tr>`;
+      tabela.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500 italic">Nenhum agendamento encontrado.</td></tr>`;
       return;
     }
 
     tabela.innerHTML = data.map(a => {
       const data_fmt = a.data ? new Date(a.data).toLocaleDateString('pt-BR') : '—';
       const hora     = a.hora ?? '—';
-      const servico  = a.servico ?? '—';
-      const veiculo  = a.veiculo ? `${a.veiculo.modelo} · ${a.veiculo.placa}` : '—';
-      return `
-        <tr>
-          <td>${data_fmt}</td>
-          <td>${hora}</td>
-          <td>${servico}</td>
-          <td>${veiculo}</td>
-          <td>${getBadge(a.status)}${getBotoesCalendario(a)}</td>
-        </tr>`;
+      return `<tr>
+        <td>${data_fmt}</td><td>${hora}</td>
+        <td>${a.servico ?? '—'}</td>
+        <td>${a.veiculo ? `${a.veiculo.modelo} · ${a.veiculo.placa}` : '—'}</td>
+        <td>${getBadge(a.status)}${getBotoesCalendario(a)}</td>
+      </tr>`;
     }).join('');
-
     lucide.createIcons();
   } catch (err) {
-    console.error('Erro ao carregar agendamentos:', err);
+    console.error(err);
     toast.erro('Não foi possível carregar seus agendamentos.');
   }
 }
@@ -152,31 +142,25 @@ async function carregarVeiculos() {
           </div>
         </div>
         <button onclick="confirmarExcluirVeiculo('${v.id}')"
-          class="text-slate-500 hover:text-red-400 transition-colors" title="Remover veículo">
+          class="text-slate-500 hover:text-red-400 transition-colors">
           <i data-lucide="trash-2" class="w-4 h-4"></i>
         </button>
       </div>
     `).join('');
-
     lucide.createIcons();
   } catch (err) {
-    console.error('Erro ao carregar veículos:', err);
+    console.error(err);
     toast.erro('Não foi possível carregar seus veículos.');
   }
 }
 
-// Guarda o id do veículo a excluir para usar no modal
 let _veiculoParaExcluir = null;
 
 function confirmarExcluirVeiculo(id) {
   _veiculoParaExcluir = id;
   const m = document.getElementById('modal-excluir-veiculo');
-  if (m) {
-    m.classList.remove('hidden'); m.classList.add('flex');
-  } else {
-    // fallback se o modal não existir na página
-    excluirVeiculoConfirmado(id);
-  }
+  if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+  else excluirVeiculoConfirmado(id);
 }
 
 async function excluirVeiculoConfirmado(id) {
@@ -186,19 +170,13 @@ async function excluirVeiculoConfirmado(id) {
   if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
 
   try {
-    const res = await fetch(`${API}/cliente/meus-veiculos/${idReal}`, {
-      method: 'DELETE', headers: getHeaders()
-    });
-    if (!res.ok) { const e = await res.json(); toast.erro(e.erro ?? 'Erro ao remover veículo.'); return; }
+    const res = await fetch(`${API}/cliente/meus-veiculos/${idReal}`, { method: 'DELETE', headers: getHeaders() });
+    if (!res.ok) { const e = await res.json(); toast.erro(e.erro ?? 'Erro ao remover.'); return; }
     toast.sucesso('Veículo removido com sucesso.');
     carregarVeiculos();
-  } catch (err) {
-    console.error(err);
-    toast.erro('Erro de conexão ao remover veículo.');
-  }
+  } catch { toast.erro('Erro de conexão.'); }
 }
 
-// ---------- CRIAR VEÍCULO (Ponto 8) ----------
 async function criarVeiculo() {
   const marca  = document.getElementById('marca').value.trim();
   const modelo = document.getElementById('modelo').value.trim();
@@ -219,22 +197,16 @@ async function criarVeiculo() {
       method: 'POST', headers: getHeaders(),
       body: JSON.stringify({ modelo, placa, ano, marca, cor })
     });
-
-    if (!res.ok) { const e = await res.json(); toast.erro(e.erro ?? 'Erro ao adicionar veículo.'); return; }
-
-    ['marca','modelo','placa','cor','ano'].forEach(id => { document.getElementById(id).value = ''; });
+    if (!res.ok) { const e = await res.json(); toast.erro(e.erro ?? 'Erro ao adicionar.'); return; }
+    ['marca','modelo','placa','cor','ano'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('placa-contador').textContent = '0/7';
     document.getElementById('placa-contador').classList.remove('limite');
-
     toast.sucesso('Veículo adicionado com sucesso!');
     carregarVeiculos();
-  } catch (err) {
-    console.error(err);
-    toast.erro('Erro de conexão ao adicionar veículo.');
-  }
+  } catch { toast.erro('Erro de conexão.'); }
 }
 
-// ---------- AGENDAMENTO (NOVO) ----------
+// ---------- AGENDAMENTO ----------
 let listaServicosCliente = [];
 
 async function carregarServicosParaAgendamento() {
@@ -274,9 +246,7 @@ function abrirFormAgendamento() {
 
 function fecharFormAgendamento() {
   document.getElementById('formAgendamentoCliente').style.display = 'none';
-  document.getElementById('agend-veiculo').value = '';
-  document.getElementById('agend-servico').value = '';
-  document.getElementById('agend-data').value    = '';
+  ['agend-veiculo','agend-servico','agend-data'].forEach(id => document.getElementById(id).value = '');
 }
 
 async function enviarAgendamento() {
@@ -285,7 +255,7 @@ async function enviarAgendamento() {
   const data       = document.getElementById('agend-data').value;
 
   if (!veiculo_id || !servico_id || !data) { toast.aviso('Preencha todos os campos.'); return; }
-  if (new Date(data) <= new Date())         { toast.aviso('Não é possível agendar em data passada.'); return; }
+  if (new Date(data) <= new Date()) { toast.aviso('Não é possível agendar em data passada.'); return; }
 
   try {
     const res     = await fetch(`${API}/cliente/agendar`, {
@@ -297,102 +267,201 @@ async function enviarAgendamento() {
     toast.sucesso('Agendamento criado! Aguarde a aprovação.');
     fecharFormAgendamento();
     carregarAgendamentos();
-  } catch (err) {
-    console.error(err);
-    toast.erro('Erro de conexão com o servidor.');
-  }
+  } catch { toast.erro('Erro de conexão com o servidor.'); }
 }
 
-// ---------- CONTA ----------
-async function preencherInfoConta() {
+// ---------- CONTA — DADOS ──────────────────────────────────────
+let _dadosConta = null;
+
+async function carregarDadosConta() {
   try {
     const usuario = getUsuario();
-    const email   = usuario?.email ?? 'cliente@email.com';
-    const nome    = usuario?.nome  ?? email.split('@')[0];
+    const nome    = usuario?.nome ?? usuario?.email?.split('@')[0] ?? 'Cliente';
     const inicial = nome.charAt(0).toUpperCase();
 
     const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    setEl('usuario-logado', nome);
+    setEl('user-initial',   inicial);
+    setEl('conta-avatar',   inicial);
+    setEl('conta-nome',     nome);
+    setEl('conta-email',    usuario?.email ?? '');
+    setEl('conta-nome-row', nome);
+    setEl('conta-email-row', usuario?.email ?? '');
 
-    setEl('usuario-logado',  nome);
-    setEl('user-initial',    inicial);
-    setEl('conta-avatar',    inicial);
-    setEl('conta-nome',      nome);
-    setEl('conta-email',     email);
-    setEl('conta-nome-row',  nome);
-    setEl('conta-email-row', email);
+    const res = await fetch(`${API}/cliente/minha-conta`, { headers: getHeaders() });
+    if (!res.ok) return;
+
+    const conta = await res.json();
+    _dadosConta = conta;
+
+    setEl('conta-telefone', conta.telefone || '—');
+    setEl('conta-nascimento', conta.data_nascimento
+      ? new Date(conta.data_nascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
+      : '—');
+
+    // Endereço
+    const partes = [conta.logradouro, conta.numero, conta.complemento, conta.bairro, conta.cidade, conta.estado]
+      .filter(Boolean);
+    setEl('conta-endereco', partes.length ? partes.join(', ') : '—');
+    setEl('conta-cep', conta.cep || '—');
 
     if (usuario?.iat) {
-      const d = new Date(usuario.iat * 1000).toLocaleDateString('pt-BR', {
-        month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo'
-      });
+      const d = new Date(usuario.iat * 1000).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' });
       setEl('conta-membro-desde', d.charAt(0).toUpperCase() + d.slice(1));
     }
 
-    const contaRes = await fetch(`${API}/cliente/minha-conta`, { headers: getHeaders() });
-    if (contaRes.ok) {
-      const conta = await contaRes.json();
-      setEl('conta-telefone', conta.telefone || '—');
+    // Badge perfil
+    const badge = document.getElementById('badge-perfil');
+    if (badge) {
+      if (conta.perfil_completo) {
+        badge.innerHTML = `<i data-lucide="shield-check" style="width:11px;height:11px"></i> Conta Verificada`;
+        badge.className = 'badge badge-approved mt-1';
+      } else {
+        badge.innerHTML = `<i data-lucide="alert-circle" style="width:11px;height:11px"></i> Perfil Incompleto`;
+        badge.className = 'badge badge-pending mt-1';
+      }
+      lucide.createIcons();
     }
+
   } catch (e) {
-    console.warn('Não foi possível preencher dados da conta:', e);
+    console.warn('Erro ao carregar conta:', e);
   }
 }
 
-// ---------- TELEFONE ----------
-function editarTelefone() {
-  document.getElementById('row-editar-telefone').style.display = 'flex';
-  document.getElementById('input-telefone').focus();
+// alias para compatibilidade com completar-perfil.js
+function preencherInfoConta() { carregarDadosConta(); }
+
+// ---------- CONTA — EDITAR ─────────────────────────────────────
+function abrirEdicaoPerfil() {
+  if (!_dadosConta) return;
+
+  const c = _dadosConta;
+
+  // Preenche os campos com dados atuais
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  set('edit-telefone',    c.telefone);
+  set('edit-nascimento',  c.data_nascimento ? c.data_nascimento.split('T')[0] : '');
+  set('edit-cep',         c.cep);
+  set('edit-logradouro',  c.logradouro);
+  set('edit-numero',      c.numero);
+  set('edit-complemento', c.complemento);
+  set('edit-bairro',      c.bairro);
+  set('edit-cidade',      c.cidade);
+  set('edit-estado',      c.estado);
+
+  // Atualiza contador do CEP se tiver
+  if (c.cep) {
+    const status = document.getElementById('edit-cep-status');
+    if (status) { status.textContent = ''; }
+  }
+
+  document.getElementById('form-editar-perfil').style.display = 'block';
+  document.getElementById('info-perfil-static').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function cancelarEdicaoTelefone() {
-  document.getElementById('row-editar-telefone').style.display = 'none';
-  document.getElementById('input-telefone').value = '';
+function cancelarEdicaoPerfil() {
+  document.getElementById('form-editar-perfil').style.display = 'none';
+  document.getElementById('info-perfil-static').style.display = 'block';
 }
 
-async function salvarTelefone() {
-  const telefone = document.getElementById('input-telefone').value.trim();
-  if (!telefone) { toast.aviso('Digite um telefone válido.'); return; }
+async function buscarCEPEdicao() {
+  const cep    = document.getElementById('edit-cep').value.replace(/\D/g, '');
+  const status = document.getElementById('edit-cep-status');
+  const btn    = document.getElementById('btn-buscar-cep');
+
+  if (cep.length !== 8) {
+    status.textContent = 'CEP inválido.';
+    status.style.color = '#ef4444';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = '...';
+  status.textContent = 'Buscando...'; status.style.color = '#94a3b8';
+
+  try {
+    const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const data = await res.json();
+
+    if (data.erro) {
+      status.textContent = 'CEP não encontrado.';
+      status.style.color = '#ef4444';
+      return;
+    }
+
+    document.getElementById('edit-logradouro').value  = data.logradouro  || '';
+    document.getElementById('edit-bairro').value      = data.bairro      || '';
+    document.getElementById('edit-cidade').value      = data.localidade  || '';
+    document.getElementById('edit-estado').value      = data.uf          || '';
+    document.getElementById('edit-complemento').value = data.complemento || '';
+
+    status.textContent = `✓ ${data.localidade} — ${data.uf}`;
+    status.style.color = '#22c55e';
+    document.getElementById('edit-numero').focus();
+
+  } catch {
+    status.textContent = 'Erro ao buscar CEP.';
+    status.style.color = '#ef4444';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Buscar';
+  }
+}
+
+async function salvarPerfil() {
+  const btn = document.getElementById('btn-salvar-perfil');
+
+  const telefone        = document.getElementById('edit-telefone').value.trim();
+  const data_nascimento = document.getElementById('edit-nascimento').value;
+  const cep             = document.getElementById('edit-cep').value.trim();
+  const logradouro      = document.getElementById('edit-logradouro').value.trim();
+  const numero          = document.getElementById('edit-numero').value.trim();
+  const complemento     = document.getElementById('edit-complemento').value.trim();
+  const bairro          = document.getElementById('edit-bairro').value.trim();
+  const cidade          = document.getElementById('edit-cidade').value.trim();
+  const estado          = document.getElementById('edit-estado').value.trim();
+
+  if (!telefone) { toast.aviso('Telefone é obrigatório.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Salvando...';
 
   try {
     const res  = await fetch(`${API}/cliente/minha-conta`, {
       method: 'PUT', headers: getHeaders(),
-      body: JSON.stringify({ telefone })
+      body: JSON.stringify({ telefone, data_nascimento, cep, logradouro, numero, complemento, bairro, cidade, estado })
     });
     const data = await res.json();
-    if (!res.ok) { toast.erro(data.erro ?? 'Erro ao salvar telefone.'); return; }
-    document.getElementById('conta-telefone').textContent = telefone;
-    cancelarEdicaoTelefone();
-    toast.sucesso('Telefone atualizado com sucesso!');
-  } catch (err) {
-    console.error(err);
-    toast.erro('Erro de conexão ao salvar telefone.');
-  }
+
+    if (!res.ok) { toast.erro(data.erro ?? 'Erro ao salvar.'); return; }
+
+    toast.sucesso('Perfil atualizado com sucesso!');
+    cancelarEdicaoPerfil();
+    carregarDadosConta();
+
+    // Remove banner de incompleto se existir
+    document.getElementById('cp-banner-incompleto')?.remove();
+
+  } catch { toast.erro('Erro de conexão.'); }
+  finally { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
 }
 
-// ---------- EXCLUIR CONTA (LGPD) — chamado pelo modal do HTML ----------
+// ---------- EXCLUIR CONTA ----------
 async function excluirConta() {
   try {
-    const res  = await fetch(`${API}/cliente/minha-conta`, {
-      method: 'DELETE', headers: getHeaders()
-    });
+    const res  = await fetch(`${API}/cliente/minha-conta`, { method: 'DELETE', headers: getHeaders() });
     const data = await res.json();
     if (!res.ok) { toast.erro(data.erro ?? 'Erro ao excluir conta.'); return; }
-
-    toast.sucesso('Conta excluída. Redirecionando...', { duracao: 2500 });
+    toast.sucesso('Conta excluída. Redirecionando...');
     setTimeout(() => {
       if (typeof logout === 'function') logout();
       else { localStorage.clear(); window.location.href = 'login.html'; }
     }, 2500);
-  } catch (err) {
-    console.error(err);
-    toast.erro('Erro de conexão ao excluir conta.');
-  }
+  } catch { toast.erro('Erro de conexão.'); }
 }
 
 // ---------- INIT ----------
 window.onload = () => {
   verificarLogin();
-  preencherInfoConta();
+  carregarDadosConta();
   carregarAgendamentos();
   carregarVeiculos();
 };

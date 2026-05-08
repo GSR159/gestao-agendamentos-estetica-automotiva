@@ -1,19 +1,11 @@
 /**
  * completar-perfil.js
- * ─────────────────────────────────────────────────────────────
- * Exibe um modal de conclusão de cadastro quando o cliente faz
- * login pela primeira vez (perfil_completo = false).
- * Inclui integração com ViaCEP para autopreenchimento de endereço.
- *
- * Como usar: adicione <script src="completar-perfil.js"></script>
- * em tela_cliente.html APÓS auth.js e config.js.
- * A função init() é chamada automaticamente.
- * ─────────────────────────────────────────────────────────────
+ * Modal de conclusão de cadastro + banner persistente se pular
  */
 
 (function () {
 
-  // ── Injeta estilos do modal ──────────────────────────────────
+  // ── Injeta estilos ───────────────────────────────────────────
   function injetarEstilos() {
     if (document.getElementById('cp-styles')) return;
     const style = document.createElement('style');
@@ -28,11 +20,7 @@
         padding: 1rem;
         animation: cpFadeIn 0.3s ease;
       }
-
-      @keyframes cpFadeIn {
-        from { opacity: 0; }
-        to   { opacity: 1; }
-      }
+      @keyframes cpFadeIn { from{opacity:0} to{opacity:1} }
 
       #cp-box {
         background: #0f172a;
@@ -45,165 +33,121 @@
         box-shadow: 0 30px 80px rgba(0,0,0,0.7);
         animation: cpSlide 0.35s cubic-bezier(0.34,1.56,0.64,1);
       }
-
       @keyframes cpSlide {
-        from { opacity: 0; transform: scale(0.93) translateY(16px); }
-        to   { opacity: 1; transform: scale(1) translateY(0); }
+        from{opacity:0;transform:scale(0.93) translateY(16px)}
+        to{opacity:1;transform:scale(1) translateY(0)}
       }
 
-      .cp-titulo {
-        font-size: 1.25rem; font-weight: 800;
-        color: #f8fafc; margin-bottom: 0.25rem;
-      }
+      .cp-titulo { font-size:1.25rem; font-weight:800; color:#f8fafc; margin-bottom:0.25rem; }
+      .cp-subtitulo { font-size:0.875rem; color:#64748b; margin-bottom:1.5rem; line-height:1.5; }
+      .cp-secao { font-size:0.7rem; font-weight:700; color:#3b82f6; text-transform:uppercase; letter-spacing:0.08em; margin:1.25rem 0 0.75rem; }
+      .cp-grid { display:grid; gap:0.75rem; }
+      .cp-grid-2 { grid-template-columns:1fr 1fr; }
+      .cp-grid-3 { grid-template-columns:1fr 1fr 1fr; }
+      .cp-label { display:block; font-size:0.7rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.35rem; }
+      .cp-input { background:#1e293b; border:1px solid #334155; color:#f8fafc; border-radius:0.65rem; padding:0.6rem 0.875rem; font-size:0.875rem; outline:none; width:100%; box-sizing:border-box; transition:border-color 0.2s; font-family:inherit; }
+      .cp-input:focus { border-color:#3b82f6; }
+      .cp-input::placeholder { color:#475569; }
+      .cp-input:disabled { opacity:0.5; cursor:not-allowed; }
+      .cp-cep-wrapper { position:relative; }
+      .cp-cep-wrapper .cp-input { padding-right:6rem; }
+      .cp-btn-cep { position:absolute; right:0.4rem; top:50%; transform:translateY(-50%); background:#1d4ed8; color:white; border:none; border-radius:0.5rem; padding:0.3rem 0.75rem; font-size:0.75rem; font-weight:700; cursor:pointer; transition:background 0.2s; }
+      .cp-btn-cep:hover { background:#2563eb; }
+      .cp-btn-cep:disabled { opacity:0.5; cursor:wait; }
+      .cp-cep-status { font-size:0.72rem; margin-top:0.3rem; min-height:1rem; }
+      .cp-cep-ok { color:#22c55e; }
+      .cp-cep-err { color:#ef4444; }
+      .cp-rodape { display:flex; gap:0.75rem; margin-top:1.75rem; padding-top:1.25rem; border-top:1px solid #1e293b; }
+      .cp-btn-pular { flex:1; padding:0.7rem; border-radius:0.75rem; border:1px solid #334155; background:transparent; color:#64748b; font-weight:700; font-size:0.875rem; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+      .cp-btn-pular:hover { color:#f8fafc; border-color:#475569; }
+      .cp-btn-salvar { flex:2; padding:0.7rem; border-radius:0.75rem; border:none; background:#3b82f6; color:white; font-weight:700; font-size:0.875rem; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+      .cp-btn-salvar:hover { background:#2563eb; }
+      .cp-btn-salvar:disabled { opacity:0.6; cursor:wait; }
+      .cp-lgpd { font-size:0.7rem; color:#475569; text-align:center; margin-top:0.75rem; line-height:1.5; }
 
-      .cp-subtitulo {
-        font-size: 0.875rem; color: #64748b;
-        margin-bottom: 1.5rem; line-height: 1.5;
-      }
+      /* Banner aniversário */
+      #cp-banner-aniversario { display:none; background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(245,158,11,.06)); border:1px solid rgba(251,191,36,.3); border-radius:1rem; padding:1rem 1.25rem; margin-bottom:1.5rem; text-align:center; }
+      #cp-banner-aniversario .cp-aniv-emoji { font-size:2rem; margin-bottom:0.5rem; }
+      #cp-banner-aniversario .cp-aniv-titulo { font-size:1rem; font-weight:800; color:#fbbf24; margin-bottom:0.25rem; }
+      #cp-banner-aniversario .cp-aniv-desc { font-size:0.8rem; color:#d97706; }
 
-      .cp-secao {
-        font-size: 0.7rem; font-weight: 700;
-        color: #3b82f6; text-transform: uppercase;
-        letter-spacing: 0.08em; margin: 1.25rem 0 0.75rem;
-      }
-
-      .cp-grid {
-        display: grid; gap: 0.75rem;
-      }
-
-      .cp-grid-2 { grid-template-columns: 1fr 1fr; }
-      .cp-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-
-      .cp-label {
-        display: block;
-        font-size: 0.7rem; font-weight: 700;
-        color: #64748b; text-transform: uppercase;
-        letter-spacing: 0.05em; margin-bottom: 0.35rem;
-      }
-
-      .cp-input {
-        background: #1e293b;
-        border: 1px solid #334155;
-        color: #f8fafc;
-        border-radius: 0.65rem;
-        padding: 0.6rem 0.875rem;
-        font-size: 0.875rem; outline: none;
-        width: 100%; box-sizing: border-box;
-        transition: border-color 0.2s;
-        font-family: inherit;
-      }
-
-      .cp-input:focus { border-color: #3b82f6; }
-      .cp-input::placeholder { color: #475569; }
-      .cp-input:disabled { opacity: 0.5; cursor: not-allowed; }
-
-      /* CEP com botão inline */
-      .cp-cep-wrapper { position: relative; }
-      .cp-cep-wrapper .cp-input { padding-right: 6rem; }
-
-      .cp-btn-cep {
-        position: absolute; right: 0.4rem; top: 50%;
-        transform: translateY(-50%);
-        background: #1d4ed8; color: white;
-        border: none; border-radius: 0.5rem;
-        padding: 0.3rem 0.75rem;
-        font-size: 0.75rem; font-weight: 700;
-        cursor: pointer; transition: background 0.2s;
-      }
-      .cp-btn-cep:hover { background: #2563eb; }
-      .cp-btn-cep:disabled { opacity: 0.5; cursor: wait; }
-
-      .cp-cep-status {
-        font-size: 0.72rem; margin-top: 0.3rem;
-        min-height: 1rem;
-      }
-      .cp-cep-ok  { color: #22c55e; }
-      .cp-cep-err { color: #ef4444; }
-
-      .cp-rodape {
-        display: flex; gap: 0.75rem;
-        margin-top: 1.75rem; padding-top: 1.25rem;
-        border-top: 1px solid #1e293b;
-      }
-
-      .cp-btn-pular {
-        flex: 1; padding: 0.7rem;
-        border-radius: 0.75rem;
-        border: 1px solid #334155;
-        background: transparent; color: #64748b;
-        font-weight: 700; font-size: 0.875rem;
-        cursor: pointer; transition: all 0.2s;
-        font-family: inherit;
-      }
-      .cp-btn-pular:hover { color: #f8fafc; border-color: #475569; }
-
-      .cp-btn-salvar {
-        flex: 2; padding: 0.7rem;
-        border-radius: 0.75rem; border: none;
-        background: #3b82f6; color: white;
-        font-weight: 700; font-size: 0.875rem;
-        cursor: pointer; transition: all 0.2s;
-        font-family: inherit;
-      }
-      .cp-btn-salvar:hover { background: #2563eb; }
-      .cp-btn-salvar:disabled { opacity: 0.6; cursor: wait; }
-
-      .cp-lgpd {
-        font-size: 0.7rem; color: #475569;
-        text-align: center; margin-top: 0.75rem;
-        line-height: 1.5;
-      }
-
-      /* Banner de aniversário */
-      #cp-banner-aniversario {
+      /* Banner persistente de perfil incompleto */
+      #cp-banner-incompleto {
         display: none;
-        background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(245,158,11,0.06));
-        border: 1px solid rgba(251,191,36,0.3);
+        position: fixed;
+        bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+        z-index: 7000;
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        border: 1px solid rgba(251,191,36,0.4);
         border-radius: 1rem;
-        padding: 1rem 1.25rem;
-        margin-bottom: 1.5rem;
-        text-align: center;
+        padding: 0.875rem 1.25rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        display: flex; align-items: center; gap: 0.875rem;
+        max-width: 480px; width: calc(100% - 2rem);
+        animation: cpBannerUp 0.4s cubic-bezier(0.34,1.56,0.64,1);
       }
+      @keyframes cpBannerUp { from{opacity:0;transform:translateX(-50%) translateY(20px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+      #cp-banner-incompleto .cp-banner-icon { font-size:1.5rem; flex-shrink:0; }
+      #cp-banner-incompleto .cp-banner-texto { flex:1; }
+      #cp-banner-incompleto .cp-banner-titulo { font-size:0.8rem; font-weight:800; color:#fbbf24; margin-bottom:0.15rem; }
+      #cp-banner-incompleto .cp-banner-desc { font-size:0.72rem; color:#94a3b8; }
+      #cp-banner-incompleto .cp-banner-btn {
+        background:#3b82f6; color:white; border:none;
+        border-radius:0.65rem; padding:0.5rem 1rem;
+        font-size:0.8rem; font-weight:700; cursor:pointer;
+        white-space:nowrap; flex-shrink:0; font-family:inherit;
+        transition:background 0.2s;
+      }
+      #cp-banner-incompleto .cp-banner-btn:hover { background:#2563eb; }
+      #cp-banner-incompleto .cp-banner-fechar {
+        background:transparent; border:none; color:#475569;
+        cursor:pointer; padding:0.25rem; flex-shrink:0;
+        font-size:1rem; line-height:1; transition:color 0.2s;
+      }
+      #cp-banner-incompleto .cp-banner-fechar:hover { color:#f8fafc; }
 
-      #cp-banner-aniversario .cp-aniv-emoji { font-size: 2rem; margin-bottom: 0.5rem; }
-      #cp-banner-aniversario .cp-aniv-titulo {
-        font-size: 1rem; font-weight: 800; color: #fbbf24; margin-bottom: 0.25rem;
-      }
-      #cp-banner-aniversario .cp-aniv-desc {
-        font-size: 0.8rem; color: #92400e; color: #d97706;
-      }
-
-      @media (max-width: 520px) {
-        .cp-grid-2, .cp-grid-3 { grid-template-columns: 1fr; }
-        #cp-box { padding: 1.5rem 1.25rem 1.25rem; }
+      @media(max-width:520px) {
+        .cp-grid-2, .cp-grid-3 { grid-template-columns:1fr; }
+        #cp-box { padding:1.5rem 1.25rem 1.25rem; }
       }
     `;
     document.head.appendChild(style);
   }
 
-  // ── Cria o HTML do modal ─────────────────────────────────────
+  // ── Cria banner persistente ──────────────────────────────────
+  function criarBannerPersistente() {
+    if (document.getElementById('cp-banner-incompleto')) return;
+    const div = document.createElement('div');
+    div.id = 'cp-banner-incompleto';
+    div.innerHTML = `
+      <span class="cp-banner-icon">⚠️</span>
+      <div class="cp-banner-texto">
+        <div class="cp-banner-titulo">Cadastro incompleto</div>
+        <div class="cp-banner-desc">Complete seu perfil para aproveitar todos os recursos do sistema.</div>
+      </div>
+      <button class="cp-banner-btn" onclick="window._cpAbrirModal()">Completar agora</button>
+      <button class="cp-banner-fechar" onclick="document.getElementById('cp-banner-incompleto').style.display='none'" title="Fechar">✕</button>
+    `;
+    document.body.appendChild(div);
+    // Garante exibição
+    setTimeout(() => { div.style.display = 'flex'; }, 100);
+  }
+
+  // ── Cria o modal ─────────────────────────────────────────────
   function criarModal() {
     const div = document.createElement('div');
     div.id = 'cp-overlay';
     div.innerHTML = `
       <div id="cp-box">
-
-        <!-- Banner de aniversário (oculto por padrão) -->
         <div id="cp-banner-aniversario">
           <div class="cp-aniv-emoji">🎂</div>
           <div class="cp-aniv-titulo">Feliz Aniversário!</div>
-          <div class="cp-aniv-desc">
-            No seu próximo agendamento você ganha <strong>15% de desconto</strong> + um brinde especial!
-          </div>
+          <div class="cp-aniv-desc">No seu próximo agendamento você ganha <strong>15% de desconto</strong> + um brinde especial!</div>
         </div>
 
         <div class="cp-titulo">Complete o seu cadastro</div>
-        <p class="cp-subtitulo">
-          Precisamos de mais alguns dados para personalizar o seu atendimento.
-          Todos os dados são protegidos pela <strong style="color:#94a3b8">LGPD</strong>.
-        </p>
+        <p class="cp-subtitulo">Precisamos de mais alguns dados para personalizar o seu atendimento. Todos os dados são protegidos pela <strong style="color:#94a3b8">LGPD</strong>.</p>
 
-        <!-- Dados pessoais -->
         <div class="cp-secao">📋 Dados Pessoais</div>
         <div class="cp-grid cp-grid-2">
           <div>
@@ -212,20 +156,15 @@
           </div>
           <div>
             <label class="cp-label">Data de Nascimento *</label>
-            <input id="cp-nascimento" class="cp-input" type="date"
-                   max="${new Date().toISOString().split('T')[0]}">
+            <input id="cp-nascimento" class="cp-input" type="date" max="${new Date().toISOString().split('T')[0]}">
           </div>
         </div>
 
-        <!-- Endereço -->
         <div class="cp-secao">📍 Endereço</div>
-
-        <!-- CEP com ViaCEP -->
         <div style="margin-bottom:0.75rem">
           <label class="cp-label">CEP *</label>
           <div class="cp-cep-wrapper">
-            <input id="cp-cep" class="cp-input" type="text"
-                   placeholder="00000-000" maxlength="9"
+            <input id="cp-cep" class="cp-input" type="text" placeholder="00000-000" maxlength="9"
                    oninput="window._cpFormatarCEP(this)">
             <button class="cp-btn-cep" onclick="window._cpBuscarCEP()">Buscar</button>
           </div>
@@ -233,8 +172,8 @@
         </div>
 
         <div class="cp-grid cp-grid-3" style="margin-bottom:0.75rem">
-          <div style="grid-column: span 2">
-            <label class="cp-label">Logradouro (Rua/Av.) *</label>
+          <div style="grid-column:span 2">
+            <label class="cp-label">Logradouro *</label>
             <input id="cp-logradouro" class="cp-input" placeholder="Rua das Flores">
           </div>
           <div>
@@ -258,7 +197,7 @@
           </div>
         </div>
 
-        <div style="margin-top:0.75rem; max-width: 120px">
+        <div style="margin-top:0.75rem;max-width:120px">
           <label class="cp-label">Estado *</label>
           <input id="cp-estado" class="cp-input" placeholder="SP" maxlength="2"
                  oninput="this.value=this.value.toUpperCase()">
@@ -266,32 +205,34 @@
 
         <div class="cp-rodape">
           <button class="cp-btn-pular" onclick="window._cpPular()">Pular por agora</button>
-          <button class="cp-btn-salvar" id="cp-btn-salvar" onclick="window._cpSalvar()">
-            Salvar e continuar
-          </button>
+          <button class="cp-btn-salvar" id="cp-btn-salvar" onclick="window._cpSalvar()">Salvar e continuar</button>
         </div>
 
-        <p class="cp-lgpd">
-          🔒 Seus dados são armazenados com segurança e não serão compartilhados.
-          Você pode removê-los a qualquer momento em "Minha Conta".
-        </p>
+        <p class="cp-lgpd">🔒 Seus dados são armazenados com segurança e não serão compartilhados.</p>
       </div>
     `;
     document.body.appendChild(div);
   }
 
-  // ── Formata CEP enquanto digita ──────────────────────────────
+  // ── Abre o modal (usado pelo banner) ─────────────────────────
+  window._cpAbrirModal = function () {
+    const banner = document.getElementById('cp-banner-incompleto');
+    if (banner) banner.style.display = 'none';
+    if (!document.getElementById('cp-overlay')) criarModal();
+  };
+
+  // ── Formata CEP ──────────────────────────────────────────────
   window._cpFormatarCEP = function (input) {
     let v = input.value.replace(/\D/g, '');
     if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5, 8);
     input.value = v;
   };
 
-  // ── Busca CEP na API ViaCEP ──────────────────────────────────
+  // ── Busca ViaCEP ─────────────────────────────────────────────
   window._cpBuscarCEP = async function () {
-    const cep     = document.getElementById('cp-cep').value.replace(/\D/g, '');
-    const status  = document.getElementById('cp-cep-status');
-    const btnCep  = document.querySelector('.cp-btn-cep');
+    const cep    = document.getElementById('cp-cep').value.replace(/\D/g, '');
+    const status = document.getElementById('cp-cep-status');
+    const btn    = document.querySelector('.cp-btn-cep');
 
     if (cep.length !== 8) {
       status.textContent = 'Digite um CEP válido com 8 dígitos.';
@@ -299,22 +240,19 @@
       return;
     }
 
-    btnCep.disabled    = true;
-    btnCep.textContent = '...';
-    status.textContent = 'Buscando...';
-    status.className   = 'cp-cep-status';
+    btn.disabled = true; btn.textContent = '...';
+    status.textContent = 'Buscando...'; status.className = 'cp-cep-status';
 
     try {
       const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
       const data = await res.json();
 
       if (data.erro) {
-        status.textContent = 'CEP não encontrado. Verifique e tente novamente.';
+        status.textContent = 'CEP não encontrado.';
         status.className   = 'cp-cep-status cp-cep-err';
         return;
       }
 
-      // Preenche os campos automaticamente
       document.getElementById('cp-logradouro').value  = data.logradouro  || '';
       document.getElementById('cp-bairro').value      = data.bairro      || '';
       document.getElementById('cp-cidade').value      = data.localidade  || '';
@@ -323,36 +261,30 @@
 
       status.textContent = `✓ ${data.localidade} — ${data.uf}`;
       status.className   = 'cp-cep-status cp-cep-ok';
-
-      // Foca no número após preencher
       document.getElementById('cp-numero').focus();
 
-    } catch (err) {
-      status.textContent = 'Erro ao buscar CEP. Tente novamente.';
+    } catch {
+      status.textContent = 'Erro ao buscar CEP.';
       status.className   = 'cp-cep-status cp-cep-err';
     } finally {
-      btnCep.disabled    = false;
-      btnCep.textContent = 'Buscar';
+      btn.disabled = false; btn.textContent = 'Buscar';
     }
   };
 
-  // Busca ao pressionar Enter no campo CEP
   document.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && document.activeElement?.id === 'cp-cep') {
-      window._cpBuscarCEP();
-    }
+    if (e.key === 'Enter' && document.activeElement?.id === 'cp-cep') window._cpBuscarCEP();
   });
 
-  // ── Pular cadastro ───────────────────────────────────────────
+  // ── Pular → mostra banner ────────────────────────────────────
   window._cpPular = function () {
     const overlay = document.getElementById('cp-overlay');
     if (overlay) overlay.remove();
+    criarBannerPersistente();
   };
 
   // ── Salvar perfil ────────────────────────────────────────────
   window._cpSalvar = async function () {
-    const btn = document.getElementById('cp-btn-salvar');
-
+    const btn            = document.getElementById('cp-btn-salvar');
     const telefone       = document.getElementById('cp-telefone').value.trim();
     const data_nascimento = document.getElementById('cp-nascimento').value;
     const cep            = document.getElementById('cp-cep').value.trim();
@@ -363,18 +295,12 @@
     const cidade         = document.getElementById('cp-cidade').value.trim();
     const estado         = document.getElementById('cp-estado').value.trim();
 
-    // Validações mínimas
     if (!telefone || !data_nascimento || !cep || !logradouro || !cidade || !estado) {
-      if (typeof toast !== 'undefined') {
-        toast.aviso('Preencha os campos obrigatórios (*) antes de continuar.');
-      } else {
-        alert('Preencha os campos obrigatórios.');
-      }
+      toast?.aviso('Preencha os campos obrigatórios (*).') ?? alert('Preencha os campos obrigatórios.');
       return;
     }
 
-    btn.disabled    = true;
-    btn.textContent = 'Salvando...';
+    btn.disabled = true; btn.textContent = 'Salvando...';
 
     try {
       const token = localStorage.getItem('token');
@@ -387,26 +313,23 @@
       const data = await res.json();
 
       if (!res.ok) {
-        if (typeof toast !== 'undefined') toast.erro(data.erro ?? 'Erro ao salvar dados.');
-        else alert(data.erro ?? 'Erro ao salvar dados.');
+        toast?.erro(data.erro ?? 'Erro ao salvar.') ?? alert(data.erro ?? 'Erro ao salvar.');
         return;
       }
 
-      if (typeof toast !== 'undefined') toast.sucesso('Cadastro concluído com sucesso! 🎉');
+      toast?.sucesso('Cadastro concluído com sucesso! 🎉');
 
-      // Fecha modal
-      const overlay = document.getElementById('cp-overlay');
-      if (overlay) overlay.remove();
+      // Remove modal e banner
+      document.getElementById('cp-overlay')?.remove();
+      document.getElementById('cp-banner-incompleto')?.remove();
 
-      // Recarrega informações da conta se a função existir
       if (typeof preencherInfoConta === 'function') preencherInfoConta();
+      if (typeof carregarDadosConta === 'function') carregarDadosConta();
 
-    } catch (err) {
-      console.error(err);
-      if (typeof toast !== 'undefined') toast.erro('Erro de conexão. Tente novamente.');
+    } catch {
+      toast?.erro('Erro de conexão.') ?? alert('Erro de conexão.');
     } finally {
-      btn.disabled    = false;
-      btn.textContent = 'Salvar e continuar';
+      btn.disabled = false; btn.textContent = 'Salvar e continuar';
     }
   };
 
@@ -416,40 +339,27 @@
     if (banner) banner.style.display = 'block';
   }
 
-  // ── Verificar se precisa mostrar o modal ─────────────────────
+  // ── Verifica perfil ao carregar ──────────────────────────────
   async function verificarPerfil() {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const res  = await fetch(`${window.API}/cliente/minha-conta`, {
+      const res = await fetch(`${window.API}/cliente/minha-conta`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
       if (!res.ok) return;
 
       const conta = await res.json();
 
-      // Mostra banner de aniversário em qualquer caso
-      if (conta.aniversario_hoje) {
-        // Se o modal for aberto, mostra lá dentro
-        // Senão, mostra como toast
-        if (!conta.perfil_completo) {
-          // vai mostrar no modal abaixo
-        } else if (typeof toast !== 'undefined') {
-          toast.sucesso(
-            '🎂 Feliz Aniversário! Seu próximo agendamento tem 15% de desconto + brinde!',
-            { duracao: 8000, titulo: 'Parabéns! 🎉' }
-          );
-        }
+      if (conta.aniversario_hoje && conta.perfil_completo) {
+        toast?.sucesso('🎂 Feliz Aniversário! Seu próximo agendamento tem 15% de desconto!', { duracao: 8000 });
       }
 
-      // Só abre modal se perfil incompleto
       if (conta.perfil_completo) return;
 
       injetarEstilos();
       criarModal();
-
       if (conta.aniversario_hoje) mostrarBannerAniversario();
 
     } catch (err) {
@@ -457,11 +367,9 @@
     }
   }
 
-  // ── Init — aguarda o DOM estar pronto ───────────────────────
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', verificarPerfil);
   } else {
-    // DOM já carregado, aguarda 800ms para o auth.js terminar
     setTimeout(verificarPerfil, 800);
   }
 
