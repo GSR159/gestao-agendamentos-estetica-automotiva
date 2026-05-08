@@ -1,19 +1,36 @@
-const pool   = require('../config/db');
-const bcrypt = require('bcrypt');
-const jwt    = require('jsonwebtoken');
-const crypto = require('crypto');
-const { Resend } = require('resend');
+const pool       = require('../config/db');
+const bcrypt     = require('bcrypt');
+const jwt        = require('jsonwebtoken');
+const crypto     = require('crypto');
+const nodemailer = require('nodemailer');
 const { normalizarEmail } = require('../utils/normalizar');
 
-const SECRET       = process.env.JWT_SECRET   || 'segredo_super_forte';
-const FRONT_URL    = process.env.FRONT_URL    || 'http://127.0.0.1:5500';
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const EMAIL_FROM   = process.env.EMAIL_USER   || 'onboarding@resend.dev';
+const SECRET     = process.env.JWT_SECRET || 'segredo_super_forte';
+const FRONT_URL  = process.env.FRONT_URL  || 'http://127.0.0.1:5500';
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASS = process.env.EMAIL_PASS;
 
 // ─────────────────────────────────────────
-//  RESEND CLIENT
+//  TRANSPORTER — Gmail com TLS porta 587
 // ─────────────────────────────────────────
-const resend = new Resend(RESEND_API_KEY);
+function criarTransporter() {
+  return nodemailer.createTransport({
+    host:   'smtp.gmail.com',
+    port:   587,
+    secure: false,
+    auth: {
+      user: EMAIL_USER,
+      pass: EMAIL_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false,
+      minVersion: 'TLSv1.2',
+    },
+    connectionTimeout: 10000,
+    greetingTimeout:   10000,
+    socketTimeout:     15000,
+  });
+}
 
 // ─────────────────────────────────────────
 //  TEMPLATE DE EMAIL
@@ -35,7 +52,7 @@ function templateEmail(titulo, corpo, linkTexto, linkHref) {
         </a>
       </div>
       <p style="color:#475569;font-size:0.8rem;text-align:center;">
-        Se não foi você quem solicitou, ignore este email.<br>
+        Se não foi você quem solicitou, ignore este e-mail.<br>
         O link expira em <strong style="color:#94a3b8;">24 horas</strong>.
       </p>
       <hr style="border:none;border-top:1px solid #1e293b;margin:20px 0;">
@@ -45,29 +62,27 @@ function templateEmail(titulo, corpo, linkTexto, linkHref) {
 }
 
 // ─────────────────────────────────────────
-//  ENVIAR EMAIL VIA RESEND
+//  ENVIAR EMAIL
 // ─────────────────────────────────────────
 async function enviarEmail(para, assunto, html) {
-  if (!RESEND_API_KEY) {
-    console.warn('[EMAIL NÃO ENVIADO — sem RESEND_API_KEY]');
+  if (!EMAIL_USER || !EMAIL_PASS) {
+    console.warn('[EMAIL] Sem credenciais — email não enviado');
     return;
   }
 
+  const transporter = criarTransporter();
+
   try {
-    const { data, error } = await resend.emails.send({
-      from: `Smart System <${EMAIL_FROM}>`,
-      to:   para,
+    const info = await transporter.sendMail({
+      from:    `"Smart System" <${EMAIL_USER}>`,
+      to:      para,
       subject: assunto,
       html,
     });
-
-    if (error) {
-      console.error('[RESEND ERROR]', error);
-    } else {
-      console.log('[EMAIL ENVIADO]', data?.id);
-    }
+    console.log('[EMAIL ENVIADO]', info.messageId);
   } catch (err) {
-    console.error('[RESEND EXCEPTION]', err);
+    console.error('[EMAIL ERRO]', err.message);
+    // Não lança exceção — o cadastro continua mesmo se o email falhar
   }
 }
 
@@ -121,7 +136,8 @@ const register = async (req, res) => {
       link
     );
 
-    await enviarEmail(email, 'Confirme seu e-mail — Smart System', html);
+    // Envia em background — não bloqueia a resposta
+    enviarEmail(email, 'Confirme seu e-mail — Smart System', html);
 
     return res.status(201).json({
       mensagem: 'Cadastro realizado! Verifique seu e-mail para ativar a conta.'
@@ -227,7 +243,7 @@ const confirmarEmail = async (req, res) => {
 };
 
 // ─────────────────────────────────────────
-//  REENVIAR EMAIL DE CONFIRMAÇÃO
+//  REENVIAR EMAIL
 // ─────────────────────────────────────────
 const reenviarEmail = async (req, res) => {
   try {
@@ -268,7 +284,7 @@ const reenviarEmail = async (req, res) => {
       link
     );
 
-    await enviarEmail(email, 'Novo link de confirmação — Smart System', html);
+    enviarEmail(email, 'Novo link de confirmação — Smart System', html);
 
     return res.status(200).json({ mensagem: 'E-mail reenviado com sucesso! Verifique sua caixa de entrada.' });
 
@@ -302,7 +318,7 @@ const esquecerSenha = async (req, res) => {
 
     const usuario   = resultado.rows[0];
     const token     = crypto.randomBytes(32).toString('hex');
-    const expiracao = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
+    const expiracao = new Date(Date.now() + 1000 * 60 * 60);
 
     await pool.query(
       `UPDATE usuarios SET token_recuperacao = $1, token_recuperacao_expira = $2 WHERE id = $3`,
@@ -312,12 +328,12 @@ const esquecerSenha = async (req, res) => {
     const link = `${FRONT_URL}/redefinir-senha.html?token=${token}`;
     const html = templateEmail(
       `Redefinir sua senha`,
-      `Olá, ${usuario.nome}! Recebemos uma solicitação para redefinir a senha da sua conta. Clique no botão abaixo para criar uma nova senha. O link expira em <strong>1 hora</strong>.`,
+      `Olá, ${usuario.nome}! Recebemos uma solicitação para redefinir a senha da sua conta. O link expira em <strong>1 hora</strong>.`,
       'Redefinir Senha',
       link
     );
 
-    await enviarEmail(email, 'Redefinição de senha — Smart System', html);
+    enviarEmail(email, 'Redefinição de senha — Smart System', html);
 
     return res.status(200).json({
       mensagem: 'Se este e-mail estiver cadastrado, você receberá as instruções em breve.'
