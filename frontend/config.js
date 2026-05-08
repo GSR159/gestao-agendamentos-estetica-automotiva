@@ -1,2 +1,2 @@
 // config.js
-window.API = "https://gestao-agendamentos-estetica-automotiva.onrender.com";
+window.API = "gestao-agendamentos-estetica-automotiva-production.up.railway.app";
