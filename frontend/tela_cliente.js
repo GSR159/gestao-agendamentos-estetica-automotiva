@@ -2,7 +2,6 @@
 //  tela_cliente.js
 // ============================================================
 
-// ---------- HELPERS ----------
 function getHeaders() {
   const token = localStorage.getItem('token');
   return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
@@ -133,7 +132,7 @@ async function carregarVeiculos() {
     lista.innerHTML = data.map(v => `
       <div class="vehicle-card">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+          <div class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center flex-shrink-0">
             <i data-lucide="car-front" class="w-5 h-5"></i>
           </div>
           <div>
@@ -142,7 +141,7 @@ async function carregarVeiculos() {
           </div>
         </div>
         <button onclick="confirmarExcluirVeiculo('${v.id}')"
-          class="text-slate-500 hover:text-red-400 transition-colors">
+          class="text-slate-500 hover:text-red-400 transition-colors flex-shrink-0">
           <i data-lucide="trash-2" class="w-4 h-4"></i>
         </button>
       </div>
@@ -217,7 +216,7 @@ async function carregarServicosParaAgendamento() {
     if (!select) return;
     select.innerHTML = `<option value="">Selecione o serviço</option>` +
       listaServicosCliente.map(s =>
-        `<option value="${s.id}">${s.nome} (${s.duracao_minutos} min) — R$ ${Number(s.preco).toFixed(2).replace('.', ',')}</option>`
+        `<option value="${s.id}">${s.nome} (${s.duracao_minutos} min) — R$ ${Number(s.preco).toFixed(2).replace('.',',')}</option>`
       ).join('');
   } catch (err) { console.error(err); }
 }
@@ -270,38 +269,46 @@ async function enviarAgendamento() {
   } catch { toast.erro('Erro de conexão com o servidor.'); }
 }
 
-// ---------- CONTA — DADOS ──────────────────────────────────────
+// ---------- CONTA ----------
 let _dadosConta = null;
 
 async function carregarDadosConta() {
   try {
+    // Primeiro preenche com dados do token (imediato)
     const usuario = getUsuario();
-    const nome    = usuario?.nome ?? usuario?.email?.split('@')[0] ?? 'Cliente';
-    const inicial = nome.charAt(0).toUpperCase();
+    const emailToken = usuario?.email ?? '';
 
-    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-    setEl('usuario-logado', nome);
-    setEl('user-initial',   inicial);
-    setEl('conta-avatar',   inicial);
-    setEl('conta-nome',     nome);
-    setEl('conta-email',    usuario?.email ?? '');
-    setEl('conta-nome-row', nome);
-    setEl('conta-email-row', usuario?.email ?? '');
-
+    // Busca dados completos da API
     const res = await fetch(`${API}/cliente/minha-conta`, { headers: getHeaders() });
     if (!res.ok) return;
 
     const conta = await res.json();
     _dadosConta = conta;
 
-    setEl('conta-telefone', conta.telefone || '—');
+    // ── Nome: usa o nome real do banco, não o do token ──────────
+    const nome    = conta.nome || emailToken.split('@')[0] || 'Cliente';
+    const inicial = nome.charAt(0).toUpperCase();
+
+    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+    // Sidebar
+    setEl('usuario-logado', nome);
+    setEl('user-initial',   inicial);
+
+    // Cabeçalho da conta
+    setEl('conta-avatar',    inicial);
+    setEl('conta-nome',      nome);
+    setEl('conta-email',     conta.email || emailToken);
+    setEl('conta-nome-row',  nome);
+    setEl('conta-email-row', conta.email || emailToken);
+
+    // Dados do perfil
+    setEl('conta-telefone',  conta.telefone || '—');
     setEl('conta-nascimento', conta.data_nascimento
       ? new Date(conta.data_nascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
       : '—');
 
-    // Endereço
-    const partes = [conta.logradouro, conta.numero, conta.complemento, conta.bairro, conta.cidade, conta.estado]
-      .filter(Boolean);
+    const partes = [conta.logradouro, conta.numero, conta.complemento, conta.bairro, conta.cidade, conta.estado].filter(Boolean);
     setEl('conta-endereco', partes.length ? partes.join(', ') : '—');
     setEl('conta-cep', conta.cep || '—');
 
@@ -328,16 +335,12 @@ async function carregarDadosConta() {
   }
 }
 
-// alias para compatibilidade com completar-perfil.js
 function preencherInfoConta() { carregarDadosConta(); }
 
-// ---------- CONTA — EDITAR ─────────────────────────────────────
+// ---------- EDITAR PERFIL ----------
 function abrirEdicaoPerfil() {
   if (!_dadosConta) return;
-
   const c = _dadosConta;
-
-  // Preenche os campos com dados atuais
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
   set('edit-telefone',    c.telefone);
   set('edit-nascimento',  c.data_nascimento ? c.data_nascimento.split('T')[0] : '');
@@ -348,12 +351,6 @@ function abrirEdicaoPerfil() {
   set('edit-bairro',      c.bairro);
   set('edit-cidade',      c.cidade);
   set('edit-estado',      c.estado);
-
-  // Atualiza contador do CEP se tiver
-  if (c.cep) {
-    const status = document.getElementById('edit-cep-status');
-    if (status) { status.textContent = ''; }
-  }
 
   document.getElementById('form-editar-perfil').style.display = 'block';
   document.getElementById('info-perfil-static').style.display = 'none';
@@ -370,11 +367,7 @@ async function buscarCEPEdicao() {
   const status = document.getElementById('edit-cep-status');
   const btn    = document.getElementById('btn-buscar-cep');
 
-  if (cep.length !== 8) {
-    status.textContent = 'CEP inválido.';
-    status.style.color = '#ef4444';
-    return;
-  }
+  if (cep.length !== 8) { status.textContent = 'CEP inválido.'; status.style.color = '#ef4444'; return; }
 
   btn.disabled = true; btn.textContent = '...';
   status.textContent = 'Buscando...'; status.style.color = '#94a3b8';
@@ -382,26 +375,16 @@ async function buscarCEPEdicao() {
   try {
     const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
     const data = await res.json();
-
-    if (data.erro) {
-      status.textContent = 'CEP não encontrado.';
-      status.style.color = '#ef4444';
-      return;
-    }
-
+    if (data.erro) { status.textContent = 'CEP não encontrado.'; status.style.color = '#ef4444'; return; }
     document.getElementById('edit-logradouro').value  = data.logradouro  || '';
     document.getElementById('edit-bairro').value      = data.bairro      || '';
     document.getElementById('edit-cidade').value      = data.localidade  || '';
     document.getElementById('edit-estado').value      = data.uf          || '';
     document.getElementById('edit-complemento').value = data.complemento || '';
-
-    status.textContent = `✓ ${data.localidade} — ${data.uf}`;
-    status.style.color = '#22c55e';
+    status.textContent = `✓ ${data.localidade} — ${data.uf}`; status.style.color = '#22c55e';
     document.getElementById('edit-numero').focus();
-
   } catch {
-    status.textContent = 'Erro ao buscar CEP.';
-    status.style.color = '#ef4444';
+    status.textContent = 'Erro ao buscar CEP.'; status.style.color = '#ef4444';
   } finally {
     btn.disabled = false; btn.textContent = 'Buscar';
   }
@@ -409,7 +392,6 @@ async function buscarCEPEdicao() {
 
 async function salvarPerfil() {
   const btn = document.getElementById('btn-salvar-perfil');
-
   const telefone        = document.getElementById('edit-telefone').value.trim();
   const data_nascimento = document.getElementById('edit-nascimento').value;
   const cep             = document.getElementById('edit-cep').value.trim();
@@ -430,16 +412,11 @@ async function salvarPerfil() {
       body: JSON.stringify({ telefone, data_nascimento, cep, logradouro, numero, complemento, bairro, cidade, estado })
     });
     const data = await res.json();
-
     if (!res.ok) { toast.erro(data.erro ?? 'Erro ao salvar.'); return; }
-
     toast.sucesso('Perfil atualizado com sucesso!');
     cancelarEdicaoPerfil();
     carregarDadosConta();
-
-    // Remove banner de incompleto se existir
     document.getElementById('cp-banner-incompleto')?.remove();
-
   } catch { toast.erro('Erro de conexão.'); }
   finally { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
 }
