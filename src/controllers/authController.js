@@ -1,36 +1,19 @@
-const pool       = require('../config/db');
-const bcrypt     = require('bcrypt');
-const jwt        = require('jsonwebtoken');
-const crypto     = require('crypto');
-const nodemailer = require('nodemailer');
+const pool   = require('../config/db');
+const bcrypt = require('bcrypt');
+const jwt    = require('jsonwebtoken');
+const crypto = require('crypto');
+const { Resend } = require('resend');
 const { normalizarEmail } = require('../utils/normalizar');
 
-const SECRET     = process.env.JWT_SECRET || 'segredo_super_forte';
-const FRONT_URL  = process.env.FRONT_URL  || 'http://127.0.0.1:5500';
-const EMAIL_USER = process.env.EMAIL_USER;
-const EMAIL_PASS = process.env.EMAIL_PASS;
+const SECRET         = process.env.JWT_SECRET    || 'segredo_super_forte';
+const FRONT_URL      = process.env.FRONT_URL     || 'http://127.0.0.1:5500';
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const EMAIL_FROM     = process.env.EMAIL_USER    || 'noreply@smartsystemauto.com.br';
 
 // ─────────────────────────────────────────
-//  TRANSPORTER — Gmail com TLS porta 587
+//  RESEND CLIENT
 // ─────────────────────────────────────────
-function criarTransporter() {
-  return nodemailer.createTransport({
-    host:   'smtp.gmail.com',
-    port:   587,
-    secure: false,
-    auth: {
-      user: EMAIL_USER,
-      pass: EMAIL_PASS,
-    },
-    tls: {
-      rejectUnauthorized: false,
-      minVersion: 'TLSv1.2',
-    },
-    connectionTimeout: 10000,
-    greetingTimeout:   10000,
-    socketTimeout:     15000,
-  });
-}
+const resend = new Resend(RESEND_API_KEY);
 
 // ─────────────────────────────────────────
 //  TEMPLATE DE EMAIL
@@ -62,27 +45,27 @@ function templateEmail(titulo, corpo, linkTexto, linkHref) {
 }
 
 // ─────────────────────────────────────────
-//  ENVIAR EMAIL
+//  ENVIAR EMAIL VIA RESEND
 // ─────────────────────────────────────────
 async function enviarEmail(para, assunto, html) {
-  if (!EMAIL_USER || !EMAIL_PASS) {
-    console.warn('[EMAIL] Sem credenciais — email não enviado');
+  if (!RESEND_API_KEY) {
+    console.warn('[EMAIL] Sem RESEND_API_KEY — email não enviado');
     return;
   }
 
-  const transporter = criarTransporter();
-
   try {
-    const info = await transporter.sendMail({
-      from:    `"Smart System" <${EMAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from:    `Smart System <${EMAIL_FROM}>`,
       to:      para,
       subject: assunto,
       html,
     });
-    console.log('[EMAIL ENVIADO]', info.messageId);
+
+    if (error) console.error('[RESEND ERROR]', error);
+    else       console.log('[EMAIL ENVIADO]', data?.id);
+
   } catch (err) {
-    console.error('[EMAIL ERRO]', err.message);
-    // Não lança exceção — o cadastro continua mesmo se o email falhar
+    console.error('[RESEND EXCEPTION]', err.message);
   }
 }
 
