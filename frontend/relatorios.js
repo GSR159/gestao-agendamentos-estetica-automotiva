@@ -17,9 +17,9 @@ async function carregarRelatorios() {
 
     // ── Evolução temporal ──
     const labelsReceita = (data.evolucao || []).map(e => {
-    const [dia, mes] = e.dia.split('/');
-    return `${dia}/${mes}`;
-});
+    const d = new Date(e.dia);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    });
     const dadosReceita = (data.evolucao || []).map(e => e.total);
 
     // ── Mix de serviços ──
