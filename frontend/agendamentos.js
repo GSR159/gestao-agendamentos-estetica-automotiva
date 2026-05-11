@@ -1,6 +1,4 @@
-// =====================================================
 //  agendamentos.js — com suporte a funcionários
-// =====================================================
 
 window.abrirFormulario = function () {
   document.getElementById('formAgendamento').style.display = 'block';
@@ -11,7 +9,7 @@ window.fecharFormulario = function () {
   document.getElementById('formAgendamento').style.display = 'none';
 };
 
-// ── Clientes ──────────────────────────────────────────
+// ── Clientes 
 async function carregarClientes() {
   const res   = await fetch(`${API}/clientes`, { headers: getHeaders() });
   const dados = await res.json();
@@ -26,7 +24,7 @@ async function carregarClientes() {
   carregarVeiculosDoCliente();
 }
 
-// ── Veículos ──────────────────────────────────────────
+// ── Veículos 
 window.carregarVeiculosDoCliente = async function () {
   const cliente_id = document.getElementById('cliente_id').value;
   const res   = await fetch(`${API}/veiculos`, { headers: getHeaders() });
@@ -38,7 +36,7 @@ window.carregarVeiculosDoCliente = async function () {
     filtrados.map(v => `<option value="${v.id}">${v.modelo} — ${v.placa}</option>`).join('');
 };
 
-// ── Serviços ──────────────────────────────────────────
+// ── Serviços 
 let listaServicos = [];
 
 async function carregarServicos() {
@@ -49,7 +47,7 @@ async function carregarServicos() {
     listaServicos.map(s => `<option value="${s.id}">${s.nome} (${s.duracao_minutos} min)</option>`).join('');
 }
 
-// ── Funcionários ──────────────────────────────────────
+// ── Funcionários 
 async function carregarFuncionariosSelect() {
   try {
     const res   = await fetch(`${API}/funcionarios/ativos`, { headers: getHeaders() });
@@ -64,7 +62,7 @@ async function carregarFuncionariosSelect() {
   }
 }
 
-// ── Criar agendamento ─────────────────────────────────
+// ── Criar agendamento 
 window.criarAgendamento = async function () {
   const cliente_id    = document.getElementById('cliente_id').value;
   const veiculo_id    = document.getElementById('veiculo_id').value;
@@ -100,7 +98,7 @@ window.criarAgendamento = async function () {
   }
 };
 
-// ── Atualizar status (+ atribuir funcionário) ─────────
+// ── Atualizar status (atribuir funcionário)
 window.atualizarStatus = async function (id, status) {
   try {
     const res = await fetch(`${API}/agendamentos/${id}`, {
@@ -122,7 +120,7 @@ window.atualizarStatus = async function (id, status) {
   }
 };
 
-// ── Atribuir funcionário inline ───────────────────────
+// ── Atribuir funcionário inline 
 window.atribuirFuncionario = async function (agendamentoId, funcionarioId) {
   try {
     const res = await fetch(`${API}/agendamentos/${agendamentoId}`, {
@@ -143,7 +141,7 @@ window.atribuirFuncionario = async function (agendamentoId, funcionarioId) {
   }
 };
 
-// ── Listar agendamentos ───────────────────────────────
+// ── Listar agendamentos 
 let _listaFuncionarios = [];
 
 window.carregarAgendamentos = async function () {
@@ -227,7 +225,7 @@ window.carregarAgendamentos = async function () {
   lucide.createIcons();
 };
 
-// ── Deletar ───────────────────────────────────────────
+// ── Deletar 
 window.deletar = async function (id) {
   if (!confirm('Excluir este agendamento?')) return;
   const res = await fetch(`${API}/agendamentos/${id}`, {
@@ -237,7 +235,7 @@ window.deletar = async function (id) {
   else toast.erro('Erro ao excluir agendamento.');
 };
 
-// ── Init ──────────────────────────────────────────────
+// ── Init 
 carregarClientes();
 carregarServicos();
 carregarAgendamentos();
