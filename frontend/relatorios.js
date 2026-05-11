@@ -16,10 +16,10 @@ async function carregarRelatorios() {
       (data.fidelizacao || 0) + '%';
 
     // ── Evolução temporal ──
-    const labelsReceita = (data.evolucao || []).map(e =>
-      new Date(e.dia + '/2024').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
-        .replace(' de ', ' ')
-    );
+    const labelsReceita = (data.evolucao || []).map(e => {
+    const [dia, mes] = e.dia.split('/');
+    return `${dia}/${mes}`;
+});
     const dadosReceita = (data.evolucao || []).map(e => e.total);
 
     // ── Mix de serviços ──
