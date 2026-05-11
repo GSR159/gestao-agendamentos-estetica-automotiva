@@ -11,7 +11,7 @@ const obterRelatorios = async (req, res) => {
     `);
     const receitaTotal = Number(receitaResult.rows[0].total);
 
-    // Ticket médio
+    // Ticket Médio
     const totalAgendamentos = await pool.query(`
       SELECT COUNT(*) AS qtd FROM agendamentos
       WHERE status IN ('aprovado', 'concluido')
