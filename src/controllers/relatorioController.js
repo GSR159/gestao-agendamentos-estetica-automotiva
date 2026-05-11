@@ -98,6 +98,7 @@ const obterRelatorios = async (req, res) => {
     });
 
   } catch (error) {
+    console.log('VERSAO NOVA DO CONTROLLER RODANDO');
     console.error('Erro ao obter relatórios:', error);
     res.status(500).json({ erro: error.message });
   }
