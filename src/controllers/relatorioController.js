@@ -1,6 +1,7 @@
 const pool = require('../config/db');
 
 const obterRelatorios = async (req, res) => {
+  console.log('VERSAO NOVA DO CONTROLLER RODANDO');
   try {
     // Receita total
     const receitaResult = await pool.query(`
@@ -98,7 +99,6 @@ const obterRelatorios = async (req, res) => {
     });
 
   } catch (error) {
-    console.log('VERSAO NOVA DO CONTROLLER RODANDO');
     console.error('Erro ao obter relatórios:', error);
     res.status(500).json({ erro: error.message });
   }
