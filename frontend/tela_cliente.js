@@ -1,6 +1,4 @@
-// ============================================================
-//  tela_cliente.js
-// ============================================================
+//  TELA CLIENTE
 
 function getHeaders() {
   const token = localStorage.getItem('token');
@@ -15,7 +13,7 @@ function getUsuario() {
   } catch { return null; }
 }
 
-// ---------- NAVEGAÇÃO ----------
+// NAVEGAÇÃO
 function trocarTela(tela) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -24,7 +22,7 @@ function trocarTela(tela) {
   lucide.createIcons();
 }
 
-// ---------- BADGES ----------
+// BADGES 
 function getBadge(status) {
   const map = {
     pendente:  { cls: 'badge-pending',  icon: 'clock',        label: 'Pendente'  },
@@ -36,7 +34,7 @@ function getBadge(status) {
   return `<span class="badge ${s.cls}"><i data-lucide="${s.icon}" style="width:11px;height:11px"></i> ${s.label}</span>`;
 }
 
-// ---------- GOOGLE CALENDAR ----------
+// GOOGLE CALENDAR
 function abrirGoogleCalendar(agendamento) {
   const inicio = new Date(agendamento.data);
   const fim    = new Date(inicio.getTime() + 60 * 60 * 1000);
@@ -45,11 +43,12 @@ function abrirGoogleCalendar(agendamento) {
     action: 'TEMPLATE', text: `Serviço: ${agendamento.servico}`,
     dates: `${fmt(inicio)}/${fmt(fim)}`,
     details: `Veículo: ${agendamento.veiculo?.modelo ?? ''} · ${agendamento.veiculo?.placa ?? ''}`,
-    location: 'Smart System'
+    location: '140 R. José Borges do Canto'
   });
   window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank');
 }
 
+// CALENDARIO APPLE
 function baixarICS(agendamento) {
   const inicio  = new Date(agendamento.data);
   const fim     = new Date(inicio.getTime() + 60 * 60 * 1000);
@@ -60,7 +59,7 @@ function baixarICS(agendamento) {
     `UID:agendamento-${agendamento.id}@smartsystem`,
     `DTSTAMP:${fmt(new Date())}`,`DTSTART:${fmt(inicio)}`,`DTEND:${fmt(fim)}`,
     `SUMMARY:Serviço: ${agendamento.servico}`,`DESCRIPTION:Veículo: ${veiculo}`,
-    'LOCATION:Smart System Auto','END:VEVENT','END:VCALENDAR'
+    'LOCATION:140 R. José Borges do Canto','END:VEVENT','END:VCALENDAR'
   ].join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
@@ -83,7 +82,7 @@ function getBotoesCalendario(agendamento) {
     </div>`;
 }
 
-// ---------- AGENDAMENTOS ----------
+// AGENDAMENTOS
 async function carregarAgendamentos() {
   try {
     const res  = await fetch(`${API}/cliente/meus-agendamentos`, { headers: getHeaders() });
@@ -117,7 +116,7 @@ async function carregarAgendamentos() {
   }
 }
 
-// ---------- VEÍCULOS ----------
+// VEÍCULOS 
 async function carregarVeiculos() {
   try {
     const res   = await fetch(`${API}/cliente/meus-veiculos`, { headers: getHeaders() });
@@ -205,7 +204,7 @@ async function criarVeiculo() {
   } catch { toast.erro('Erro de conexão.'); }
 }
 
-// ---------- AGENDAMENTO ----------
+// AGENDAMENTO
 let listaServicosCliente = [];
 
 async function carregarServicosParaAgendamento() {
@@ -269,12 +268,12 @@ async function enviarAgendamento() {
   } catch { toast.erro('Erro de conexão com o servidor.'); }
 }
 
-// ---------- CONTA ----------
+// CONTA 
 let _dadosConta = null;
 
 async function carregarDadosConta() {
   try {
-    // Primeiro preenche com dados do token (imediato)
+    // Primeiro preenche com dados do token 
     const usuario = getUsuario();
     const emailToken = usuario?.email ?? '';
 
@@ -285,7 +284,7 @@ async function carregarDadosConta() {
     const conta = await res.json();
     _dadosConta = conta;
 
-    // ── Nome: usa o nome real do banco, não o do token ──────────
+    // ── Nome: usa o nome real do banco
     const nome    = conta.nome || emailToken.split('@')[0] || 'Cliente';
     const inicial = nome.charAt(0).toUpperCase();
 
@@ -337,7 +336,7 @@ async function carregarDadosConta() {
 
 function preencherInfoConta() { carregarDadosConta(); }
 
-// ---------- EDITAR PERFIL ----------
+// EDITAR PERFIL 
 function abrirEdicaoPerfil() {
   if (!_dadosConta) return;
   const c = _dadosConta;
@@ -421,7 +420,7 @@ async function salvarPerfil() {
   finally { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
 }
 
-// ---------- EXCLUIR CONTA ----------
+// EXCLUIR CONTA
 async function excluirConta() {
   try {
     const res  = await fetch(`${API}/cliente/minha-conta`, { method: 'DELETE', headers: getHeaders() });
@@ -435,7 +434,7 @@ async function excluirConta() {
   } catch { toast.erro('Erro de conexão.'); }
 }
 
-// ---------- INIT ----------
+// INIT
 window.onload = () => {
   verificarLogin();
   carregarDadosConta();
