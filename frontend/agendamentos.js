@@ -1,4 +1,4 @@
-//  agendamentos.js — com suporte a funcionários
+//  agendamentos.js — com suporte a funcionários e status concluido
 
 window.abrirFormulario = function () {
   document.getElementById('formAgendamento').style.display = 'block';
@@ -9,12 +9,11 @@ window.fecharFormulario = function () {
   document.getElementById('formAgendamento').style.display = 'none';
 };
 
-// ── Clientes 
+// ── Clientes
 async function carregarClientes() {
   const res   = await fetch(`${API}/clientes`, { headers: getHeaders() });
   const dados = await res.json();
 
-  // Filtra anonimizados
   const ativos = dados.filter(c => c.nome !== 'Usuário Removido' && c.email !== null);
 
   const select = document.getElementById('cliente_id');
@@ -24,7 +23,7 @@ async function carregarClientes() {
   carregarVeiculosDoCliente();
 }
 
-// ── Veículos 
+// ── Veículos
 window.carregarVeiculosDoCliente = async function () {
   const cliente_id = document.getElementById('cliente_id').value;
   const res   = await fetch(`${API}/veiculos`, { headers: getHeaders() });
@@ -36,7 +35,7 @@ window.carregarVeiculosDoCliente = async function () {
     filtrados.map(v => `<option value="${v.id}">${v.modelo} — ${v.placa}</option>`).join('');
 };
 
-// ── Serviços 
+// ── Serviços
 let listaServicos = [];
 
 async function carregarServicos() {
@@ -47,7 +46,7 @@ async function carregarServicos() {
     listaServicos.map(s => `<option value="${s.id}">${s.nome} (${s.duracao_minutos} min)</option>`).join('');
 }
 
-// ── Funcionários 
+// ── Funcionários
 async function carregarFuncionariosSelect() {
   try {
     const res   = await fetch(`${API}/funcionarios/ativos`, { headers: getHeaders() });
@@ -62,12 +61,12 @@ async function carregarFuncionariosSelect() {
   }
 }
 
-// ── Criar agendamento 
+// ── Criar agendamento
 window.criarAgendamento = async function () {
-  const cliente_id    = document.getElementById('cliente_id').value;
-  const veiculo_id    = document.getElementById('veiculo_id').value;
-  const servico_id    = document.getElementById('servico_id').value;
-  const data          = document.getElementById('data').value;
+  const cliente_id     = document.getElementById('cliente_id').value;
+  const veiculo_id     = document.getElementById('veiculo_id').value;
+  const servico_id     = document.getElementById('servico_id').value;
+  const data           = document.getElementById('data').value;
   const funcionario_id = document.getElementById('funcionario_id')?.value || null;
 
   if (!cliente_id || !veiculo_id || !servico_id || !data) {
@@ -98,7 +97,7 @@ window.criarAgendamento = async function () {
   }
 };
 
-// ── Atualizar status (atribuir funcionário)
+// ── Atualizar status
 window.atualizarStatus = async function (id, status) {
   try {
     const res = await fetch(`${API}/agendamentos/${id}`, {
@@ -107,8 +106,13 @@ window.atualizarStatus = async function (id, status) {
     });
 
     if (res.ok) {
-      const labels = { aprovado: 'Agendamento aprovado!', recusado: 'Agendamento recusado.' };
-      toast[status === 'aprovado' ? 'sucesso' : 'aviso'](labels[status] ?? `Status: ${status}`);
+      const labels = {
+        aprovado:  'Agendamento aprovado!',
+        recusado:  'Agendamento recusado.',
+        concluido: 'Serviço marcado como concluído!'
+      };
+      const tipo = status === 'aprovado' || status === 'concluido' ? 'sucesso' : 'aviso';
+      toast[tipo](labels[status] ?? `Status: ${status}`);
       carregarAgendamentos();
     } else {
       const erro = await res.json();
@@ -120,7 +124,7 @@ window.atualizarStatus = async function (id, status) {
   }
 };
 
-// ── Atribuir funcionário inline 
+// ── Atribuir funcionário inline
 window.atribuirFuncionario = async function (agendamentoId, funcionarioId) {
   try {
     const res = await fetch(`${API}/agendamentos/${agendamentoId}`, {
@@ -141,11 +145,10 @@ window.atribuirFuncionario = async function (agendamentoId, funcionarioId) {
   }
 };
 
-// ── Listar agendamentos 
+// ── Listar agendamentos
 let _listaFuncionarios = [];
 
 window.carregarAgendamentos = async function () {
-  // Carrega funcionários ativos para os selects inline
   try {
     const fRes = await fetch(`${API}/funcionarios/ativos`, { headers: getHeaders() });
     _listaFuncionarios = fRes.ok ? await fRes.json() : [];
@@ -169,9 +172,10 @@ window.carregarAgendamentos = async function () {
   }
 
   const badgeMap = {
-    pendente: '<span style="background:rgba(251,191,36,.12);color:#fbbf24;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700">PENDENTE</span>',
-    aprovado: '<span style="background:rgba(34,197,94,.12);color:#22c55e;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700">APROVADO</span>',
-    recusado: '<span style="background:rgba(239,68,68,.12);color:#ef4444;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700">RECUSADO</span>',
+    pendente:  '<span style="background:rgba(251,191,36,.12);color:#fbbf24;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700">PENDENTE</span>',
+    aprovado:  '<span style="background:rgba(34,197,94,.12);color:#22c55e;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700">APROVADO</span>',
+    recusado:  '<span style="background:rgba(239,68,68,.12);color:#ef4444;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700">RECUSADO</span>',
+    concluido: '<span style="background:rgba(14,165,233,.12);color:#0ea5e9;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700">CONCLUÍDO</span>',
   };
 
   const opsFuncionarios = `<option value="">— Nenhum —</option>` +
@@ -185,7 +189,6 @@ window.carregarAgendamentos = async function () {
       hour: '2-digit', minute: '2-digit', hour12: false
     });
 
-    // Select de funcionário com valor atual pré-selecionado
     const selectFunc = `
       <select onchange="atribuirFuncionario(${a.id}, this.value)"
         style="background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:.3rem .6rem;border-radius:.5rem;font-size:.75rem;outline:none;min-width:130px;">
@@ -199,6 +202,25 @@ window.carregarAgendamentos = async function () {
       ? `<span title="Desconto de aniversário" style="margin-left:.25rem;font-size:.75rem">🎂</span>`
       : '';
 
+    // Botões de ação por status
+    const botoesAcao = () => {
+      if (a.status === 'pendente') {
+        return `
+          <button onclick="atualizarStatus(${a.id}, 'aprovado')"
+            class="text-xs font-bold px-3 py-1.5 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors border border-green-500/20">Aprovar</button>
+          <button onclick="atualizarStatus(${a.id}, 'recusado')"
+            class="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors border border-red-500/20">Recusar</button>
+        `;
+      }
+      if (a.status === 'aprovado') {
+        return `
+          <button onclick="atualizarStatus(${a.id}, 'concluido')"
+            class="text-xs font-bold px-3 py-1.5 rounded-lg bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-colors border border-sky-500/20">Concluir</button>
+        `;
+      }
+      return '';
+    };
+
     tr.innerHTML = `
       <td class="text-slate-200">${a.cliente}</td>
       <td class="text-slate-400">${a.veiculo}</td>
@@ -208,12 +230,7 @@ window.carregarAgendamentos = async function () {
       <td>${selectFunc}</td>
       <td class="text-right">
         <div class="flex items-center justify-end gap-2">
-          ${a.status === 'pendente' ? `
-            <button onclick="atualizarStatus(${a.id}, 'aprovado')"
-              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors border border-green-500/20">Aprovar</button>
-            <button onclick="atualizarStatus(${a.id}, 'recusado')"
-              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors border border-red-500/20">Recusar</button>
-          ` : ''}
+          ${botoesAcao()}
           <button onclick="deletar(${a.id})"
             class="text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-700/50 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors border border-slate-600/30">Excluir</button>
         </div>
@@ -225,7 +242,7 @@ window.carregarAgendamentos = async function () {
   lucide.createIcons();
 };
 
-// ── Deletar 
+// ── Deletar
 window.deletar = async function (id) {
   if (!confirm('Excluir este agendamento?')) return;
   const res = await fetch(`${API}/agendamentos/${id}`, {
@@ -235,7 +252,7 @@ window.deletar = async function (id) {
   else toast.erro('Erro ao excluir agendamento.');
 };
 
-// ── Init 
+// ── Init
 carregarClientes();
 carregarServicos();
 carregarAgendamentos();

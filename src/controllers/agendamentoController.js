@@ -89,12 +89,16 @@ function emailBase({ titulo, subtitulo, corpo, btnTexto, btnHref, rodape, acento
 //  TEMPLATE NOTIFICAÇÃO AGENDAMENTO
 // ─────────────────────────────────────────
 function emailAgendamento(nomeCliente, status, ag) {
-  const aprovado = status === 'aprovado';
-  const cor      = aprovado ? '#16a34a' : '#dc2626';
-  const icone    = aprovado ? '✅' : '❌';
-  const titulo   = aprovado ? 'Agendamento confirmado' : 'Agendamento não confirmado';
+  const aprovado  = status === 'aprovado';
+  const concluido = status === 'concluido';
+  const cor       = aprovado ? '#16a34a' : concluido ? '#0ea5e9' : '#dc2626';
+  const titulo    = aprovado  ? 'Agendamento confirmado'
+                  : concluido ? 'Serviço concluído!'
+                  : 'Agendamento não confirmado';
   const subtitulo = aprovado
     ? `Olá, ${nomeCliente}! Seu agendamento foi aprovado.`
+    : concluido
+    ? `Olá, ${nomeCliente}! Seu serviço foi concluído com sucesso.`
     : `Olá, ${nomeCliente}. Infelizmente seu agendamento não pôde ser confirmado.`;
 
   const dataFormatada = new Date(ag.data).toLocaleString('pt-BR', {
@@ -107,6 +111,8 @@ function emailAgendamento(nomeCliente, status, ag) {
     <p style="margin:0 0 20px;font-size:15px;color:#334155;line-height:1.7;">
       ${aprovado
         ? 'Seu veículo está confirmado para atendimento. Confira os detalhes abaixo:'
+        : concluido
+        ? 'Obrigado por escolher a Smart System! Seu veículo está pronto.'
         : 'Entre em contato conosco para mais informações ou para reagendar.'}
     </p>
 
@@ -144,8 +150,8 @@ function emailAgendamento(nomeCliente, status, ag) {
     titulo,
     subtitulo,
     corpo,
-    btnTexto: aprovado ? 'Ver meus agendamentos' : null,
-    btnHref:  aprovado ? `${FRONT_URL}/tela_cliente.html` : null,
+    btnTexto: (aprovado || concluido) ? 'Ver meus agendamentos' : null,
+    btnHref:  (aprovado || concluido) ? `${FRONT_URL}/tela_cliente.html` : null,
     acento:   cor,
     rodape:   'Você está recebendo este e-mail pois possui uma conta no Smart System.'
   });
@@ -157,10 +163,9 @@ function emailAgendamento(nomeCliente, status, ag) {
 async function notificarCliente(emailCliente, nomeCliente, status, agendamento) {
   if (!process.env.RESEND_API_KEY) return;
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const aprovado = status === 'aprovado';
-  const assunto  = aprovado
-    ? '✅ Agendamento confirmado — Smart System'
-    : '❌ Agendamento não confirmado — Smart System';
+  const assunto = status === 'aprovado'  ? '✅ Agendamento confirmado — Smart System'
+                : status === 'concluido' ? '🏁 Serviço concluído — Smart System'
+                : '❌ Agendamento não confirmado — Smart System';
   try {
     const { data, error } = await resend.emails.send({
       from:    `Smart System <${EMAIL_FROM}>`,
@@ -275,7 +280,8 @@ const atualizarStatus = async (req, res) => {
   const { id }                     = req.params;
   const { status, funcionario_id } = req.body;
 
-  const statusValidos = ['pendente', 'aprovado', 'recusado'];
+  // ← concluido adicionado aqui
+  const statusValidos = ['pendente', 'aprovado', 'recusado', 'concluido'];
   if (!statusValidos.includes(status)) return res.status(400).json({ erro: 'Status inválido.' });
 
   try {
@@ -293,7 +299,8 @@ const atualizarStatus = async (req, res) => {
 
     const agendamento = resultado.rows[0];
 
-    if (status === 'aprovado' || status === 'recusado') {
+    // ← concluido também notifica por email
+    if (status === 'aprovado' || status === 'recusado' || status === 'concluido') {
       try {
         const dadosRes = await pool.query(`
           SELECT u.email, c.nome AS nome_cliente,
