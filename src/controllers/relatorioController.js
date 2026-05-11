@@ -2,7 +2,7 @@ const pool = require('../config/db');
 
 const obterRelatorios = async (req, res) => {
   try {
-    // RECEITA TOTAL (só agendamentos aprovados/concluídos)
+    // Receita total
     const receitaResult = await pool.query(`
       SELECT COALESCE(SUM(s.preco), 0) AS total
       FROM agendamentos a
@@ -11,21 +11,19 @@ const obterRelatorios = async (req, res) => {
     `);
     const receitaTotal = Number(receitaResult.rows[0].total);
 
-    // TICKET MÉDIO
+    // Ticket médio
     const totalAgendamentos = await pool.query(`
-      SELECT COUNT(*) AS qtd
-      FROM agendamentos
+      SELECT COUNT(*) AS qtd FROM agendamentos
       WHERE status IN ('aprovado', 'concluido')
     `);
     const qtd = Number(totalAgendamentos.rows[0].qtd);
     const ticketMedio = qtd > 0 ? receitaTotal / qtd : 0;
 
-    // FIDELIZAÇÃO — % de clientes com mais de 1 agendamento
+    // Fidelização
     const fidelizacaoResult = await pool.query(`
-      SELECT 
-        ROUND(
-          100.0 * COUNT(*) FILTER (WHERE total > 1) / NULLIF(COUNT(*), 0)
-        , 0) AS pct
+      SELECT ROUND(
+        100.0 * COUNT(*) FILTER (WHERE total > 1) / NULLIF(COUNT(*), 0)
+      , 0) AS pct
       FROM (
         SELECT cliente_id, COUNT(*) AS total
         FROM agendamentos
@@ -35,9 +33,9 @@ const obterRelatorios = async (req, res) => {
     `);
     const fidelizacao = Number(fidelizacaoResult.rows[0].pct || 0);
 
-    // EVOLUÇÃO TEMPORAL (últimos 30 dias)
+    // Evolução temporal (últimos 30 dias)
     const evolucaoResult = await pool.query(`
-      SELECT 
+      SELECT
         TO_CHAR(a.data, 'DD/MM') AS dia,
         COALESCE(SUM(s.preco), 0) AS total
       FROM agendamentos a
@@ -48,11 +46,11 @@ const obterRelatorios = async (req, res) => {
       ORDER BY DATE_TRUNC('day', a.data) ASC
     `);
     const evolucao = evolucaoResult.rows.map(r => ({
-      dia: r.dia,
+      dia:   r.dia,
       total: Number(r.total)
     }));
 
-    // Serviços Realizados
+    // Mix de serviços
     const servicosResult = await pool.query(`
       SELECT s.nome, COUNT(*) AS total
       FROM agendamentos a
@@ -62,27 +60,29 @@ const obterRelatorios = async (req, res) => {
       ORDER BY total DESC
     `);
     const servicos = servicosResult.rows.map(r => ({
-      nome: r.nome,
+      nome:  r.nome,
       total: Number(r.total)
     }));
 
-    // RANKING DE CLIENTES — mostra "Usuário Removido" se usuário excluir a conta
+    // Ranking de clientes com lista de serviços realizados
     const clientesResult = await pool.query(`
-      SELECT 
+      SELECT
         COALESCE(c.nome, 'Usuário Removido') AS nome,
-        COUNT(a.id) AS qtd,
-        COALESCE(SUM(s.preco), 0) AS total
+        COUNT(a.id)                           AS qtd,
+        COALESCE(SUM(s.preco), 0)             AS total,
+        STRING_AGG(DISTINCT s.nome, ', ' ORDER BY s.nome) AS servicos_realizados
       FROM agendamentos a
-      LEFT JOIN clientes c ON c.id = a.cliente_id
-      JOIN servicos s ON s.id = a.servico_id
+      LEFT JOIN clientes  c ON c.id = a.cliente_id
+      JOIN      servicos  s ON s.id = a.servico_id
       WHERE a.status IN ('aprovado', 'concluido')
       GROUP BY c.nome
       ORDER BY total DESC
     `);
     const clientes = clientesResult.rows.map(r => ({
-      nome: r.nome,
-      qtd: Number(r.qtd),
-      total: Number(r.total)
+      nome:               r.nome,
+      qtd:                Number(r.qtd),
+      total:              Number(r.total),
+      servicos_realizados: r.servicos_realizados || '—'
     }));
 
     res.status(200).json({

@@ -6,229 +6,109 @@
   <title>Smart System - Criar Conta</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-
   <style>
     :root {
-      --bg-deep: #020617;
-      --bg-surface: #0f172a;
-      --bg-card: #1e293b;
-      --border: #334155;
-      --primary: #3b82f6;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
+      --bg-deep: #020617; --bg-surface: #0f172a; --bg-card: #1e293b;
+      --border: #334155; --primary: #3b82f6;
+      --text-main: #f8fafc; --text-muted: #94a3b8;
     }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background-color: var(--bg-deep);
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      overflow-x: hidden;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-deep); color: var(--text-main);
+      min-height: 100vh; overflow-x: hidden;
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 2rem 1rem;
     }
-
     .bg-glow {
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(2, 6, 23, 0) 70%);
-      border-radius: 50%;
-      z-index: -1;
-      filter: blur(60px);
+      position: fixed; width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(59,130,246,.15) 0%, rgba(2,6,23,0) 70%);
+      border-radius: 50%; z-index: -1; filter: blur(60px);
     }
-
     .register-container {
-      width: 100%;
-      max-width: 420px;
-      padding: 1.5rem;
-      animation: fadeIn 0.5s ease-out;
-      z-index: 10;
+      width: 100%; max-width: 460px;
+      animation: fadeIn 0.5s ease-out; z-index: 10;
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
     .register-box {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 1.5rem;
-      padding: 2.5rem;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 1.5rem; padding: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,.5);
     }
-
-    .input-group {
-      margin-bottom: 1.25rem;
-    }
-
+    .input-group { margin-bottom: 1.25rem; }
     .input-label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.5rem;
+      display: block; font-size: .75rem; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: .05em; margin-bottom: .5rem;
     }
-
-    .input-wrapper {
-      position: relative;
-    }
-
+    .input-wrapper { position: relative; }
     .input-icon {
-      position: absolute;
-      left: 1.25rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      pointer-events: none;
-      z-index: 10;
+      position: absolute; left: 1.25rem; top: 50%;
+      transform: translateY(-50%); color: var(--text-muted);
+      pointer-events: none; z-index: 10;
     }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="password"] {
+    input[type="text"], input[type="email"], input[type="password"] {
       background: var(--bg-card) !important;
       border: 1px solid var(--border) !important;
       color: var(--text-main) !important;
-      padding-top: 0.875rem !important;
-      padding-bottom: 0.875rem !important;
-      padding-left: 3.5rem !important;
-      padding-right: 1rem !important;
-      border-radius: 0.75rem;
-      outline: none;
-      width: 100%;
-      box-sizing: border-box;
-      transition: all 0.2s;
+      padding: .875rem 1rem .875rem 3.5rem !important;
+      border-radius: .75rem; outline: none;
+      width: 100%; transition: all .2s;
     }
-
-    .input-with-eye {
-      padding-right: 3.5rem !important;
-    }
-
-    input:focus {
-      border-color: var(--primary) !important;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-    }
-
+    .input-with-eye { padding-right: 3.5rem !important; }
+    input:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 2px rgba(59,130,246,.1); }
     .toggle-password {
-      position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      cursor: pointer;
-      background: none;
-      border: none;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.2s;
+      position: absolute; right: 1rem; top: 50%;
+      transform: translateY(-50%); color: var(--text-muted);
+      cursor: pointer; background: none; border: none; padding: 0;
+      display: flex; align-items: center; transition: color .2s;
     }
-
-    .toggle-password:hover {
-      color: var(--text-main);
-    }
-
-    .rule-item {
-      display: flex;
-      align-items: center;
-      gap: 0.375rem;
-      transition: all 0.3s ease;
-    }
-
-    .rule-item svg {
-      transition: all 0.3s ease;
-    }
-
-    .rule-valid {
-      color: #22c55e !important;
-      transform: translateX(4px);
-    }
-
-    .checkbox-lgpd {
-      accent-color: var(--primary);
-      width: 1rem;
-      height: 1rem;
-      cursor: pointer;
-      margin-top: 0.125rem;
-    }
-
+    .toggle-password:hover { color: var(--text-main); }
+    .rule-item { display: flex; align-items: center; gap: .375rem; transition: all .3s; }
+    .rule-valid { color: #22c55e !important; transform: translateX(4px); }
+    .checkbox-lgpd { accent-color: var(--primary); width: 1rem; height: 1rem; cursor: pointer; margin-top: .125rem; flex-shrink: 0; }
     .btn-register {
-      background: var(--primary);
-      color: white;
-      width: 100%;
-      padding: 0.875rem;
-      border-radius: 0.75rem;
-      font-weight: 700;
-      font-size: 1rem;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-top: 1.5rem;
-      border: none;
-      cursor: pointer;
+      background: var(--primary); color: white; width: 100%;
+      padding: .875rem; border-radius: .75rem; font-weight: 700;
+      font-size: 1rem; transition: all .2s;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      margin-top: 1.5rem; border: none; cursor: pointer; font-family: inherit;
     }
+    .btn-register:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,.3); }
+    .btn-register:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+    .login-link { text-align: center; margin-top: 1.5rem; font-size: .875rem; color: var(--text-muted); }
+    .login-link a { color: var(--primary); font-weight: 600; text-decoration: none; }
+    .login-link a:hover { text-decoration: underline; }
+    .alerta { padding: .75rem; border-radius: .5rem; font-size: .875rem; text-align: left; margin-top: 1rem; display: none; flex-direction: column; gap: .5rem; }
+    .alerta.erro    { background: rgba(239,68,68,.1); color: #ef4444; border: 1px solid rgba(239,68,68,.2); }
+    .alerta.sucesso { background: rgba(34,197,94,.1);  color: #22c55e; border: 1px solid rgba(34,197,94,.2); text-align: center; }
 
-    .btn-register:hover {
-      background: #2563eb;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    /* Botão voltar ao topo */
+    #btn-topo {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      width: 44px; height: 44px;
+      background: var(--primary); color: white;
+      border: none; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 9999;
+      box-shadow: 0 4px 12px rgba(59,130,246,.4);
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s, transform .3s;
     }
+    #btn-topo.visivel { opacity: 1; pointer-events: auto; }
+    #btn-topo:hover { transform: translateY(-3px); }
 
-    .login-link {
-      text-align: center;
-      margin-top: 2rem;
-      font-size: 0.875rem;
-      color: var(--text-muted);
-    }
-
-    .login-link a {
-      color: var(--primary);
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .login-link a:hover {
-      text-decoration: underline;
-    }
-
-    .alerta {
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      text-align: left;
-      margin-top: 1.5rem;
-      display: none;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .alerta.erro {
-      background: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-
-    .alerta.sucesso {
-      background: rgba(34, 197, 94, 0.1);
-      color: #22c55e;
-      border: 1px solid rgba(34, 197, 94, 0.2);
-      text-align: center;
+    /* Responsivo mobile */
+    @media (max-width: 480px) {
+      body { padding: 1rem .75rem; align-items: flex-start; }
+      .register-box { padding: 1.5rem 1.25rem; }
     }
   </style>
 </head>
 <body>
-
-  <div class="bg-glow" style="top: -100px; right: -100px;"></div>
-  <div class="bg-glow" style="bottom: -100px; left: -100px; opacity: 0.5;"></div>
+  <div class="bg-glow" style="top:-100px;right:-100px;"></div>
+  <div class="bg-glow" style="bottom:-100px;left:-100px;opacity:.5;"></div>
 
   <div class="register-container">
     <div class="text-center mb-6">
@@ -251,52 +131,55 @@
 
       <!-- EMAIL -->
       <div class="input-group">
-        <label class="input-label" for="email">Endereço de Email</label>
+        <label class="input-label" for="email">E-mail</label>
         <div class="input-wrapper">
           <i data-lucide="mail" class="w-5 h-5 input-icon"></i>
-          <input id="email" type="email" placeholder="exemplo@email.com" oninput="this.value = this.value.toLowerCase()">
+          <input id="email" type="email" placeholder="exemplo@email.com"
+                 oninput="this.value=this.value.toLowerCase()">
         </div>
       </div>
 
       <!-- CONFIRMAR EMAIL -->
       <div class="input-group">
-        <label class="input-label" for="confirmar_email">Confirme o Email</label>
+        <label class="input-label" for="confirmar_email">Confirme o E-mail</label>
         <div class="input-wrapper">
           <i data-lucide="mail-check" class="w-5 h-5 input-icon"></i>
-          <input id="confirmar_email" type="email" placeholder="Digite novamente o email" oninput="this.value = this.value.toLowerCase()">
+          <input id="confirmar_email" type="email" placeholder="Digite novamente o e-mail"
+                 oninput="this.value=this.value.toLowerCase()">
         </div>
       </div>
 
       <!-- SENHA -->
       <div class="input-group">
-        <label class="input-label" for="senha">Defina uma Palavra-passe</label>
+        <label class="input-label" for="senha">Senha</label>
         <div class="input-wrapper">
           <i data-lucide="lock" class="w-5 h-5 input-icon"></i>
-          <input id="senha" type="password" placeholder="No mínimo 6 caracteres" class="input-with-eye" oninput="avaliarSenha(this.value)">
-          <button type="button" class="toggle-password" onclick="togglePassword('senha', 'icon-eye-1', 'icon-eye-off-1')" aria-label="Mostrar senha">
-            <i data-lucide="eye" id="icon-eye-1" class="w-5 h-5 block"></i>
+          <input id="senha" type="password" placeholder="No mínimo 6 caracteres"
+                 class="input-with-eye" oninput="avaliarSenha(this.value)">
+          <button type="button" class="toggle-password"
+                  onclick="togglePassword('senha','icon-eye-1','icon-eye-off-1')">
+            <i data-lucide="eye"     id="icon-eye-1"     class="w-5 h-5 block"></i>
             <i data-lucide="eye-off" id="icon-eye-off-1" class="w-5 h-5 hidden"></i>
           </button>
         </div>
-
         <ul class="mt-3 space-y-1 text-[11px] font-medium text-slate-500">
           <li id="rule-length" class="rule-item">
-            <i data-lucide="x" class="w-3 h-3 icon-invalid"></i>
+            <i data-lucide="x"     class="w-3 h-3 icon-invalid"></i>
             <i data-lucide="check" class="w-3 h-3 icon-valid hidden"></i>
             <span>Mínimo de 6 caracteres</span>
           </li>
           <li id="rule-upper" class="rule-item">
-            <i data-lucide="x" class="w-3 h-3 icon-invalid"></i>
+            <i data-lucide="x"     class="w-3 h-3 icon-invalid"></i>
             <i data-lucide="check" class="w-3 h-3 icon-valid hidden"></i>
             <span>Pelo menos 1 letra maiúscula</span>
           </li>
           <li id="rule-lower" class="rule-item">
-            <i data-lucide="x" class="w-3 h-3 icon-invalid"></i>
+            <i data-lucide="x"     class="w-3 h-3 icon-invalid"></i>
             <i data-lucide="check" class="w-3 h-3 icon-valid hidden"></i>
             <span>Pelo menos 1 letra minúscula</span>
           </li>
           <li id="rule-special" class="rule-item">
-            <i data-lucide="x" class="w-3 h-3 icon-invalid"></i>
+            <i data-lucide="x"     class="w-3 h-3 icon-invalid"></i>
             <i data-lucide="check" class="w-3 h-3 icon-valid hidden"></i>
             <span>1 caractere especial (!@#$%)</span>
           </li>
@@ -305,12 +188,14 @@
 
       <!-- CONFIRMAR SENHA -->
       <div class="input-group">
-        <label class="input-label" for="confirmar_senha">Confirme a Palavra-passe</label>
+        <label class="input-label" for="confirmar_senha">Confirme a Senha</label>
         <div class="input-wrapper">
           <i data-lucide="shield-check" class="w-5 h-5 input-icon"></i>
-          <input id="confirmar_senha" type="password" placeholder="Repita a senha" class="input-with-eye">
-          <button type="button" class="toggle-password" onclick="togglePassword('confirmar_senha', 'icon-eye-2', 'icon-eye-off-2')" aria-label="Mostrar senha">
-            <i data-lucide="eye" id="icon-eye-2" class="w-5 h-5 block"></i>
+          <input id="confirmar_senha" type="password" placeholder="Repita a senha"
+                 class="input-with-eye">
+          <button type="button" class="toggle-password"
+                  onclick="togglePassword('confirmar_senha','icon-eye-2','icon-eye-off-2')">
+            <i data-lucide="eye"     id="icon-eye-2"     class="w-5 h-5 block"></i>
             <i data-lucide="eye-off" id="icon-eye-off-2" class="w-5 h-5 hidden"></i>
           </button>
         </div>
@@ -320,159 +205,145 @@
       <div class="flex items-start gap-3 mt-6 mb-4">
         <input type="checkbox" id="lgpd" class="checkbox-lgpd">
         <label for="lgpd" class="text-xs text-slate-400 leading-tight cursor-pointer">
-          Li e concordo com os 
-          <a href="termos.html" class="text-blue-500 hover:underline">Termos de Uso</a> e autorizo o tratamento dos meus dados conforme a 
-          <a href="LGPD.html" class="text-blue-500 hover:underline">Política de Privacidade (LGPD)</a>.
+          Li e concordo com os
+          <a href="termos.html" target="_blank" class="text-blue-500 hover:underline">Termos de Uso</a>
+          e autorizo o tratamento dos meus dados conforme a
+          <a href="LGPD.html" target="_blank" class="text-blue-500 hover:underline">Política de Privacidade (LGPD)</a>.
         </label>
       </div>
 
-      <button class="btn-register" onclick="executarCadastro()">
+      <button class="btn-register" id="btn-cadastrar" onclick="executarCadastro()">
         <span>Criar Minha Conta</span>
         <i data-lucide="check" class="w-5 h-5"></i>
       </button>
 
-      <div id="alerta-erro" class="alerta erro"></div>
-
+      <div id="alerta-erro"    class="alerta erro"></div>
       <div id="alerta-sucesso" class="alerta sucesso">
-        <strong><i data-lucide="mail-check" class="w-6 h-6 mx-auto mb-2"></i> Cadastro Realizado!</strong>
-        Um link de confirmação foi enviado para o seu email. Por favor, verifique a sua caixa de entrada para ativar a conta.
+        <strong>✅ Cadastro Realizado!</strong>
+        Um link de confirmação foi enviado para o seu e-mail. Verifique sua caixa de entrada para ativar a conta.
       </div>
 
       <div class="login-link">
-        Já possui uma conta?
-        <a href="login.html">Faça login agora</a>
+        Já possui uma conta? <a href="login.html">Faça login agora</a>
       </div>
     </div>
   </div>
+
+  <!-- BOTÃO VOLTAR AO TOPO -->
+  <button id="btn-topo" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">
+    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+  </button>
+
   <script src="config.js"></script>
   <script src="register.js"></script>
 
   <script>
     lucide.createIcons();
 
-    function togglePassword(inputId, eyeId, eyeOffId) {
-      const input = document.getElementById(inputId);
-      const iconEye = document.getElementById(eyeId);
-      const iconEyeOff = document.getElementById(eyeOffId);
+    // ── Botão voltar ao topo ──────────────────────────────────
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('btn-topo');
+      btn.classList.toggle('visivel', window.scrollY > 300);
+    });
 
+    // ── Toggle senha ──────────────────────────────────────────
+    function togglePassword(inputId, eyeId, eyeOffId) {
+      const input  = document.getElementById(inputId);
+      const eye    = document.getElementById(eyeId);
+      const eyeOff = document.getElementById(eyeOffId);
       if (input.type === 'password') {
         input.type = 'text';
-        iconEye.classList.remove('block');
-        iconEye.classList.add('hidden');
-        iconEyeOff.classList.remove('hidden');
-        iconEyeOff.classList.add('block');
+        eye.classList.add('hidden'); eyeOff.classList.remove('hidden');
       } else {
         input.type = 'password';
-        iconEye.classList.remove('hidden');
-        iconEye.classList.add('block');
-        iconEyeOff.classList.remove('block');
-        iconEyeOff.classList.add('hidden');
+        eye.classList.remove('hidden'); eyeOff.classList.add('hidden');
       }
     }
 
+    // ── Avalia senha ──────────────────────────────────────────
     function avaliarSenha(senha) {
       const regras = [
-        { id: 'rule-length', valid: senha.length >= 6 },
-        { id: 'rule-upper', valid: /[A-Z]/.test(senha) },
-        { id: 'rule-lower', valid: /[a-z]/.test(senha) },
+        { id: 'rule-length',  valid: senha.length >= 6 },
+        { id: 'rule-upper',   valid: /[A-Z]/.test(senha) },
+        { id: 'rule-lower',   valid: /[a-z]/.test(senha) },
         { id: 'rule-special', valid: /[!@#$%^&*(),.?":{}|<>]/.test(senha) }
       ];
-
-      regras.forEach(regra => {
-        const item = document.getElementById(regra.id);
-        const iconInvalid = item.querySelector('.icon-invalid');
-        const iconValid = item.querySelector('.icon-valid');
-
-        if (regra.valid) {
-          item.classList.add('rule-valid');
-          iconInvalid.classList.add('hidden');
-          iconValid.classList.remove('hidden');
-        } else {
-          item.classList.remove('rule-valid');
-          iconInvalid.classList.remove('hidden');
-          iconValid.classList.add('hidden');
-        }
+      regras.forEach(({ id, valid }) => {
+        const item = document.getElementById(id);
+        item.querySelector('.icon-invalid').classList.toggle('hidden', valid);
+        item.querySelector('.icon-valid').classList.toggle('hidden', !valid);
+        item.classList.toggle('rule-valid', valid);
       });
     }
 
     function senhaTotalmenteValida(senha) {
-      return senha.length >= 6 &&
-             /[A-Z]/.test(senha) &&
-             /[a-z]/.test(senha) &&
-             /[!@#$%^&*(),.?":{}|<>]/.test(senha);
+      return senha.length >= 6 && /[A-Z]/.test(senha) &&
+             /[a-z]/.test(senha) && /[!@#$%^&*(),.?":{}|<>]/.test(senha);
     }
 
-    function executarCadastro() {
-      const erroDiv = document.getElementById('alerta-erro');
+    // ── Executar cadastro ─────────────────────────────────────
+    async function executarCadastro() {
+      const erroDiv    = document.getElementById('alerta-erro');
       const sucessoDiv = document.getElementById('alerta-sucesso');
+      const btn        = document.getElementById('btn-cadastrar');
 
-      erroDiv.style.display = 'none';
+      erroDiv.style.display    = 'none';
       sucessoDiv.style.display = 'none';
-      erroDiv.innerHTML = '';
+      erroDiv.innerHTML        = '';
 
-      const nome = document.getElementById('nome').value.trim();
-      const email = document.getElementById('email').value.trim();
+      const nome           = document.getElementById('nome').value.trim();
+      const email          = document.getElementById('email').value.trim();
       const confirmarEmail = document.getElementById('confirmar_email').value.trim();
-      const senha = document.getElementById('senha').value;
+      const senha          = document.getElementById('senha').value;
       const confirmarSenha = document.getElementById('confirmar_senha').value;
-      const lgpdCheck = document.getElementById('lgpd').checked;
+      const lgpdCheck      = document.getElementById('lgpd').checked;
 
-      let erros = [];
+      const erros = [];
 
-      if (!nome || !email || !confirmarEmail || !senha || !confirmarSenha) {
-        erros.push("Por favor, preencha todos os campos.");
-      }
-
-      if (email && !email.includes('@')) {
-        erros.push("Por favor, insira um endereço de email válido.");
-      }
-
-      if (confirmarEmail && !confirmarEmail.includes('@')) {
-        erros.push("Por favor, confirme com um endereço de email válido.");
-      }
-
-      if (email && confirmarEmail && email !== confirmarEmail) {
-        erros.push("Os emails não coincidem. Verifique e tente novamente.");
-      }
-
-      if (!lgpdCheck) {
-        erros.push("Você precisa aceitar os Termos de Uso e a Política de Privacidade.");
-      }
-
-      if (senha && confirmarSenha && senha !== confirmarSenha) {
-        erros.push("As palavras-passe não coincidem. Tente novamente.");
-      }
-
-      if (senha && !senhaTotalmenteValida(senha)) {
-        erros.push("A palavra-passe não cumpre todos os requisitos da lista.");
-      }
+      if (!nome || !email || !confirmarEmail || !senha || !confirmarSenha)
+        erros.push('Por favor, preencha todos os campos.');
+      if (email && !email.includes('@'))
+        erros.push('Insira um e-mail válido.');
+      if (email && confirmarEmail && email !== confirmarEmail)
+        erros.push('Os e-mails não coincidem.');
+      if (!lgpdCheck)
+        erros.push('Você precisa aceitar os Termos de Uso e a Política de Privacidade.');
+      if (senha && confirmarSenha && senha !== confirmarSenha)
+        erros.push('As senhas não coincidem.');
+      if (senha && !senhaTotalmenteValida(senha))
+        erros.push('A senha não cumpre todos os requisitos.');
 
       if (erros.length > 0) {
         erroDiv.innerHTML =
-          "<strong>Atenção:</strong><ul style='margin-left: 1rem; list-style-type: disc;'>" +
-          erros.map(e => `<li>${e}</li>`).join('') +
-          "</ul>";
+          "<strong>Atenção:</strong><ul style='margin-left:1rem;list-style-type:disc;margin-top:.5rem'>" +
+          erros.map(e => `<li>${e}</li>`).join('') + '</ul>';
         erroDiv.style.display = 'flex';
         return;
       }
 
-      sucessoDiv.style.display = 'flex';
+      btn.disabled = true;
+      btn.innerHTML = '<span>Criando conta...</span>';
 
-      setTimeout(() => {
-        if (typeof cadastrar === 'function') {
-          cadastrar();
-        } else {
-          console.warn("Função 'cadastrar' não encontrada em register.js.");
-        }
-      }, 1000);
+      try {
+        await cadastrar();
+        sucessoDiv.style.display = 'flex';
+        // Limpa o formulário após sucesso
+        ['nome','email','confirmar_email','senha','confirmar_senha'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('lgpd').checked = false;
+      } catch (err) {
+        // erro já tratado no register.js
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Criar Minha Conta</span><i data-lucide="check" class="w-5 h-5"></i>';
+        lucide.createIcons();
+      }
     }
 
-    document.addEventListener('keypress', function (e) {
-      if (e.key === 'Enter') {
-        executarCadastro();
-      }
+    document.addEventListener('keypress', e => {
+      if (e.key === 'Enter') executarCadastro();
     });
   </script>
-
 </body>
 </html>

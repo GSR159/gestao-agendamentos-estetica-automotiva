@@ -22,9 +22,6 @@
     .stat-icon{padding:.5rem;border-radius:.5rem;width:fit-content;margin-bottom:.5rem}
     .stat-value{font-size:2rem;font-weight:800;letter-spacing:-.025em}
     .chart-container,.table-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:1rem;padding:1.5rem}
-    table{width:100%;border-collapse:collapse}
-    thead th{background:rgba(30,41,59,.5);padding:1rem 1.5rem;text-align:left;font-size:.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;border-bottom:1px solid var(--border)}
-    tbody td{padding:1rem 1.5rem;border-bottom:1px solid var(--border);font-size:.875rem}
     .user-footer{margin-top:auto;padding-top:1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
     .avatar{width:32px;height:32px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:.8rem}
     .modal-overlay{position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.85);backdrop-filter:blur(6px);align-items:center;justify-content:center}
@@ -38,6 +35,13 @@
     .btn-mc:hover{background:rgba(255,255,255,.05);color:#f8fafc}
     .btn-ms{flex:1;padding:.7rem 1rem;border-radius:.75rem;background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25);font-weight:700;font-size:.875rem;cursor:pointer;transition:all .2s;font-family:inherit}
     .btn-ms:hover{background:rgba(251,191,36,.22)}
+
+    /* Agenda scroll */
+    #agendaHoje { max-height: 340px; overflow-y: auto; padding-right: 4px; }
+    #agendaHoje::-webkit-scrollbar { width: 4px; }
+    #agendaHoje::-webkit-scrollbar-track { background: transparent; }
+    #agendaHoje::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
     @media(max-width:1024px){.sidebar{width:80px;padding:1.5rem .75rem}.sidebar span,.logo span{display:none}.main-content{margin-left:80px}}
   </style>
 </head>
@@ -71,36 +75,68 @@
       <p class="text-slate-400 text-sm">Bem-vindo de volta! Aqui está o resumo da sua operação.</p>
     </header>
 
+    <!-- STAT CARDS -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div class="stat-card"><div class="stat-icon bg-blue-500/10 text-blue-500"><i data-lucide="layers"></i></div><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total</span><div class="stat-value" id="total">0</div></div>
-      <div class="stat-card"><div class="stat-icon bg-amber-500/10 text-amber-500"><i data-lucide="clock"></i></div><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pendentes</span><div class="stat-value" id="pendentes">0</div></div>
-      <div class="stat-card"><div class="stat-icon bg-green-500/10 text-green-500"><i data-lucide="check-circle"></i></div><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Aprovados</span><div class="stat-value" id="aprovados">0</div></div>
-      <div class="stat-card"><div class="stat-icon bg-red-500/10 text-red-500"><i data-lucide="x-circle"></i></div><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Recusados</span><div class="stat-value" id="recusados">0</div></div>
+      <div class="stat-card">
+        <div class="stat-icon bg-blue-500/10 text-blue-500"><i data-lucide="layers"></i></div>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total</span>
+        <div class="stat-value" id="total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon bg-amber-500/10 text-amber-500"><i data-lucide="clock"></i></div>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pendentes</span>
+        <div class="stat-value" id="pendentes">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon bg-green-500/10 text-green-500"><i data-lucide="check-circle"></i></div>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Aprovados</span>
+        <div class="stat-value" id="aprovados">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon bg-red-500/10 text-red-500"><i data-lucide="x-circle"></i></div>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Recusados</span>
+        <div class="stat-value" id="recusados">0</div>
+      </div>
     </div>
 
+    <!-- GRÁFICO + AGENDA -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- GRÁFICO -->
       <div class="lg:col-span-2">
         <div class="chart-container shadow-2xl">
-          <h2 class="text-lg font-bold mb-6 flex items-center gap-2"><i data-lucide="trending-up" class="text-blue-500 w-5 h-5"></i> Agendamentos por dia</h2>
+          <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+            <i data-lucide="trending-up" class="text-blue-500 w-5 h-5"></i> Agendamentos por dia
+          </h2>
           <canvas id="grafico" height="150"></canvas>
         </div>
       </div>
+
+      <!-- AGENDA DE HOJE -->
       <div class="lg:col-span-1">
-        <div class="table-card shadow-2xl h-full">
-          <h2 class="text-lg font-bold mb-6 flex items-center gap-2"><i data-lucide="calendar" class="text-blue-500 w-5 h-5"></i> Agenda de Hoje</h2>
-          <div class="overflow-x-auto">
-            <table>
-              <thead><tr><th>Hora</th><th>Cliente</th><th>Serviço</th></tr></thead>
-              <tbody id="agendaHoje"><tr><td colspan="3" class="py-10 text-center text-slate-500 italic">Nenhum serviço para hoje.</td></tr></tbody>
-            </table>
+        <div class="table-card shadow-2xl h-full flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold flex items-center gap-2">
+              <i data-lucide="calendar" class="text-blue-500 w-5 h-5"></i> Agenda de Hoje
+            </h2>
+            <span id="contador-hoje" class="text-xs font-bold text-slate-500 bg-slate-800 px-2 py-1 rounded-full"></span>
           </div>
-          <button onclick="window.location.href='agendamentos.html'" class="w-full mt-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-bold transition-all">Ver Agenda Completa</button>
+
+          <!-- Cards da agenda -->
+          <div id="agendaHoje" class="flex-1"></div>
+
+          <button onclick="window.location.href='agendamentos.html'"
+            class="w-full mt-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-bold transition-all">
+            Ver Agenda Completa →
+          </button>
         </div>
       </div>
+
     </div>
   </main>
 </div>
 
+<!-- MODAL — Logout -->
 <div id="modal-logout" class="modal-overlay hidden" onclick="if(event.target===this)fecharModalLogout()">
   <div class="modal-box">
     <div class="modal-icone"><i data-lucide="log-out" class="w-6 h-6"></i></div>
@@ -126,7 +162,13 @@
   window.onload=()=>{
     try{
       if(typeof verificarLogin==='function')verificarLogin();
-      if(typeof mostrarUsuario==='function'){mostrarUsuario();setTimeout(()=>{const s=document.getElementById('usuario-logado');if(s&&s.innerText!=='Usuário')document.getElementById('user-initial').innerText=s.innerText.charAt(0).toUpperCase()},300)}
+      if(typeof mostrarUsuario==='function'){
+        mostrarUsuario();
+        setTimeout(()=>{
+          const s=document.getElementById('usuario-logado');
+          if(s&&s.innerText!=='Usuário')document.getElementById('user-initial').innerText=s.innerText.charAt(0).toUpperCase()
+        },300)
+      }
       if(typeof ocultarParaCliente==='function')ocultarParaCliente();
     }catch(e){console.error(e)}
   };

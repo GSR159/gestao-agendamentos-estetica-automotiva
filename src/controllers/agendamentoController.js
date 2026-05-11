@@ -1,7 +1,6 @@
 const pool = require('../config/db');
 const { Resend } = require('resend');
 
-const resend     = new Resend(process.env.RESEND_API_KEY);
 const EMAIL_FROM = process.env.EMAIL_USER || 'noreply@smartsystemauto.com.br';
 const FRONT_URL  = process.env.FRONT_URL  || 'http://127.0.0.1:5500';
 
@@ -157,6 +156,7 @@ function emailAgendamento(nomeCliente, status, ag) {
 // ─────────────────────────────────────────
 async function notificarCliente(emailCliente, nomeCliente, status, agendamento) {
   if (!process.env.RESEND_API_KEY) return;
+  const resend = new Resend(process.env.RESEND_API_KEY);
   const aprovado = status === 'aprovado';
   const assunto  = aprovado
     ? '✅ Agendamento confirmado — Smart System'
