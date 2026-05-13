@@ -16,11 +16,8 @@ async function carregarRelatorios() {
       (data.fidelizacao || 0) + '%';
 
     // ── Evolução temporal ──
-    const labelsReceita = (data.evolucao || []).map(e => {
-    const d = new Date(e.dia);
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-    });
-    const dadosReceita = (data.evolucao || []).map(e => e.total);
+    const labelsReceita = (data.evolucao || []).map(e => e.dia);
+    const dadosReceita  = (data.evolucao || []).map(e => e.total);
 
     // ── Mix de serviços ──
     const labelsServicos = (data.servicos || []).map(s => s.nome);
@@ -33,13 +30,14 @@ async function carregarRelatorios() {
     tbody.innerHTML = '';
 
     if (!data.clientes || !data.clientes.length) {
-      tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500">Nenhum dado disponível.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500">Nenhum dado disponível.</td></tr>`;
       return;
     }
 
     data.clientes.forEach(cliente => {
       const tr = document.createElement('tr');
 
+      // Badges de serviços
       const servicosBadges = (cliente.servicos_realizados || '—')
         .split(', ')
         .map(s =>
@@ -48,13 +46,25 @@ async function carregarRelatorios() {
             : `<span style="background:rgba(59,130,246,.12);color:#60a5fa;padding:2px 8px;border-radius:9999px;font-size:.72rem;font-weight:600;white-space:nowrap;">${s}</span>`
         ).join('');
 
-      const funcionarioNome = cliente.funcionario || '—';
+      // Badge de funcionários
+      const funcionarioNome  = cliente.funcionario || '—';
       const funcionarioBadge = funcionarioNome !== '—'
         ? `<span style="background:rgba(16,185,129,.12);color:#34d399;padding:2px 10px;border-radius:9999px;font-size:.72rem;font-weight:600;white-space:nowrap;">👤 ${funcionarioNome}</span>`
         : `<span style="color:#64748b">—</span>`;
 
+      // Badge(s) de veículos
+      const veiculosNome  = cliente.veiculos || '—';
+      const veiculosBadge = veiculosNome !== '—'
+        ? veiculosNome.split(', ').map(v =>
+            `<span style="background:rgba(245,158,11,.1);color:#fbbf24;padding:2px 10px;border-radius:9999px;font-size:.72rem;font-weight:600;white-space:nowrap;">🚗 ${v}</span>`
+          ).join('')
+        : `<span style="color:#64748b">—</span>`;
+
       tr.innerHTML = `
         <td class="font-medium text-white">${cliente.nome}</td>
+        <td>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">${veiculosBadge}</div>
+        </td>
         <td>${cliente.qtd}</td>
         <td>
           <div style="display:flex;flex-wrap:wrap;gap:4px;">${servicosBadges}</div>
@@ -73,7 +83,7 @@ async function carregarRelatorios() {
     console.error('Erro ao carregar relatórios:', err);
     const tbody = document.getElementById('rankingClientesBody');
     if (tbody) {
-      tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-400">Erro ao carregar dados. Verifique a conexão.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-red-400">Erro ao carregar dados. Verifique a conexão.</td></tr>`;
     }
   }
 }

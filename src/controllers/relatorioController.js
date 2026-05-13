@@ -65,28 +65,40 @@ const obterRelatorios = async (req, res) => {
       total: Number(r.total)
     }));
 
-    // Ranking de clientes com serviços e funcionário responsável
+    // Ranking de clientes com serviços, funcionário e veículo
     const clientesResult = await pool.query(`
       SELECT
-        COALESCE(c.nome, 'Usuário Removido')               AS nome,
-        COUNT(a.id)                                         AS qtd,
-        COALESCE(SUM(s.preco), 0)                           AS total,
-        STRING_AGG(DISTINCT s.nome, ', ' ORDER BY s.nome)  AS servicos_realizados,
-        STRING_AGG(DISTINCT f.nome, ', ' ORDER BY f.nome)  AS funcionario
+        COALESCE(c.nome, 'Usuário Removido')                          AS nome,
+        COUNT(a.id)                                                    AS qtd,
+        COALESCE(SUM(s.preco), 0)                                      AS total,
+        STRING_AGG(DISTINCT s.nome,  ', ' ORDER BY s.nome)            AS servicos_realizados,
+        STRING_AGG(DISTINCT f.nome,  ', ' ORDER BY f.nome)            AS funcionario,
+        STRING_AGG(
+          DISTINCT
+          CASE
+            WHEN v.marca IS NOT NULL OR v.modelo IS NOT NULL
+            THEN TRIM(COALESCE(v.marca, '') || ' ' || COALESCE(v.modelo, ''))
+            ELSE NULL
+          END,
+          ', '
+        )                                                              AS veiculos
       FROM agendamentos a
       LEFT JOIN clientes     c ON c.id = a.cliente_id
       LEFT JOIN servicos     s ON s.id = a.servico_id
       LEFT JOIN funcionarios f ON f.id = a.funcionario_id
+      LEFT JOIN veiculos     v ON v.id = a.veiculo_id
       WHERE a.status IN ('aprovado', 'concluido')
       GROUP BY c.nome
       ORDER BY total DESC
     `);
+
     const clientes = clientesResult.rows.map(r => ({
       nome:                r.nome,
       qtd:                 Number(r.qtd),
       total:               Number(r.total),
       servicos_realizados: r.servicos_realizados || '—',
-      funcionario:         r.funcionario         || '—'
+      funcionario:         r.funcionario         || '—',
+      veiculos:            r.veiculos            || '—',
     }));
 
     res.status(200).json({
