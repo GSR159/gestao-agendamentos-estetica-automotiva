@@ -1,4 +1,8 @@
-// Salva os dados no sessionStorage ao sair da página
+// ─────────────────────────────────────────
+//  RASCUNHO — sessionStorage
+// ─────────────────────────────────────────
+const RASCUNHO_KEY = 'register_rascunho';
+
 function salvarRascunho() {
   const dados = {
     nome:            document.getElementById('nome')?.value            || '',
@@ -6,40 +10,40 @@ function salvarRascunho() {
     confirmar_email: document.getElementById('confirmar_email')?.value || '',
     lgpd:            document.getElementById('lgpd')?.checked          || false,
   };
-  sessionStorage.setItem('register_rascunho', JSON.stringify(dados));
+  sessionStorage.setItem(RASCUNHO_KEY, JSON.stringify(dados));
 }
 
-// Restaura os dados ao voltar para a página
 function restaurarRascunho() {
   try {
-    const raw = sessionStorage.getItem('register_rascunho');
+    const raw = sessionStorage.getItem(RASCUNHO_KEY);
     if (!raw) return;
-
     const dados = JSON.parse(raw);
-
     if (dados.nome)            document.getElementById('nome').value            = dados.nome;
     if (dados.email)           document.getElementById('email').value           = dados.email;
     if (dados.confirmar_email) document.getElementById('confirmar_email').value = dados.confirmar_email;
-    if (dados.lgpd)            document.getElementById('lgpd').checked          = dados.lgpd;
-
+    if (dados.lgpd)            document.getElementById('lgpd').checked          = true;
   } catch (e) {
     console.warn('Erro ao restaurar rascunho:', e);
   }
 }
 
-// Limpa o rascunho após cadastro bem-sucedido
 function limparRascunho() {
-  sessionStorage.removeItem('register_rascunho');
+  sessionStorage.removeItem(RASCUNHO_KEY);
 }
 
-// Salva automaticamente a cada mudança nos campos
+// ─────────────────────────────────────────
+//  INICIALIZAÇÃO
+// ─────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // Restaura campos ao voltar da página LGPD / Termos
   restaurarRascunho();
 
+  // Salva automaticamente a cada interação nos campos relevantes
   ['nome', 'email', 'confirmar_email', 'lgpd'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener('change', salvarRascunho);
-    if (el) el.addEventListener('input',  salvarRascunho);
+    if (!el) return;
+    el.addEventListener('input',  salvarRascunho);
+    el.addEventListener('change', salvarRascunho);
   });
 });
 
@@ -58,28 +62,27 @@ async function cadastrar() {
 
   if (!nome || !email || !senha) {
     erroDiv.innerText = 'Preencha todos os campos';
-    erroDiv.style.display = 'block';
+    erroDiv.style.display = 'flex';
     throw new Error('Validação falhou');
   }
 
-  try {
-    const res = await fetch(`${API}/auth/register`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ nome, email, senha, telefone })
-    });
+  const res = await fetch(`${API}/auth/register`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ nome, email, senha, telefone })
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    if (!res.ok) throw new Error(data.erro || 'Erro ao cadastrar usuário.');
-
-    limparRascunho();
-    return data;
-
-  } catch (error) {
-    console.error(error);
-    erroDiv.innerText = error.message || 'Erro ao conectar com servidor';
-    erroDiv.style.display = 'block';
-    throw error;
+  if (!res.ok) {
+    erroDiv.innerHTML =
+      `<strong>Atenção:</strong><ul style='margin-left:1rem;list-style-type:disc;margin-top:.5rem'>` +
+      `<li>${data.erro || 'Erro ao cadastrar usuário.'}</li></ul>`;
+    erroDiv.style.display = 'flex';
+    throw new Error(data.erro || 'Erro ao cadastrar usuário.');
   }
+
+  // Sucesso — apaga o rascunho salvo
+  limparRascunho();
+  return data;
 }
