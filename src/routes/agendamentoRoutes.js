@@ -1,7 +1,7 @@
-const express = require('express');
-const router  = express.Router();
-
-const verificarToken = require('../middlewares/authMiddleware');
+const express        = require('express');
+const router         = express.Router();
+const verificarToken  = require('../middlewares/authMiddleware');
+const verificarAdmin  = require('../middlewares/adminMiddleware');
 
 const {
   listarAgendamentos,
@@ -10,10 +10,12 @@ const {
   deletarAgendamento,
 } = require('../controllers/agendamentoController');
 
-// Todas as rotas de agendamento exigem autenticação
-router.get   ('/',    verificarToken, listarAgendamentos);
-router.post  ('/',    verificarToken, criarAgendamento);
-router.put   ('/:id', verificarToken, atualizarStatus);
-router.delete('/:id', verificarToken, deletarAgendamento);
+// Listagem e criação — qualquer usuário autenticado
+router.get ('/', verificarToken, listarAgendamentos);
+router.post('/', verificarToken, criarAgendamento);
+
+// Alteração de status e exclusão — somente admin
+router.put   ('/:id', verificarToken, verificarAdmin, atualizarStatus);
+router.delete('/:id', verificarToken, verificarAdmin, deletarAgendamento);
 
 module.exports = router;

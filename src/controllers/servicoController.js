@@ -69,7 +69,7 @@ const criarServico = async (req, res) => {
     res.status(201).json(resultado.rows[0]);
   } catch (error) {
     console.error('Erro ao criar serviço:', error);
-    res.status(500).json({ erro: error.message });
+    res.status(500).json({ erro: 'Erro ao criar serviço.' });
   }
 };
 

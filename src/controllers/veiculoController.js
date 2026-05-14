@@ -30,7 +30,7 @@ const listarVeiculos = async (req, res) => {
     res.status(200).json(resultado.rows);
   } catch (error) {
     console.error('Erro ao listar veículos:', error);
-    res.status(500).json({ erro: error.message });
+    res.status(500).json({ erro: 'Erro ao listar veículos.' });
   }
 };
 
@@ -61,7 +61,7 @@ const buscarVeiculoPorId = async (req, res) => {
     res.status(200).json(resultado.rows[0]);
   } catch (error) {
     console.error('Erro ao buscar veículo:', error);
-    res.status(500).json({ erro: error.message });
+    res.status(500).json({ erro: 'Erro ao buscar veículo.' });
   }
 };
 
@@ -99,7 +99,7 @@ const criarVeiculo = async (req, res) => {
     res.status(201).json(resultado.rows[0]);
   } catch (error) {
     console.error('Erro ao criar veículo:', error);
-    res.status(500).json({ erro: error.message });
+    res.status(500).json({ erro: 'Erro ao criar veículo.' });
   }
 };
 
@@ -142,14 +142,17 @@ const atualizarVeiculo = async (req, res) => {
     res.status(200).json(resultado.rows[0]);
   } catch (error) {
     console.error('Erro ao atualizar veículo:', error);
-    res.status(500).json({ erro: error.message });
+    res.status(500).json({ erro: 'Erro ao atualizar veículo.' });
   }
 };
 
 // 🔹 DELETAR
 const deletarVeiculo = async (req, res) => {
   const { id } = req.params;
-  await pool.query('DELETE FROM veiculos WHERE id=$1', [id]);
+  const resultado = await pool.query('DELETE FROM veiculos WHERE id=$1 RETURNING *', [id]);
+  if (resultado.rows.length === 0) {
+    return res.status(404).json({ erro: 'Veículo não encontrado.' });
+  }
   res.status(200).json({ ok: true });
 };
 

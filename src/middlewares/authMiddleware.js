@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 
-const SECRET = "segredo_super_forte";
+const SECRET = process.env.JWT_SECRET;
+
+if (!SECRET) {
+  throw new Error('[SEGURANÇA] JWT_SECRET não definido nas variáveis de ambiente.');
+}
 
 const verificarToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -13,8 +17,7 @@ const verificarToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, SECRET);
-
-    req.usuario = decoded; // 🔥 salva info do usuário
+    req.usuario = decoded;
     next();
   } catch (error) {
     return res.status(403).json({ erro: 'Token inválido' });

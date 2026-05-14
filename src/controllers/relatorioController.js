@@ -1,7 +1,6 @@
 const pool = require('../config/db');
 
 const obterRelatorios = async (req, res) => {
-  console.log('VERSAO NOVA DO CONTROLLER RODANDO');
   try {
     // Receita total
     const receitaResult = await pool.query(`
@@ -111,8 +110,9 @@ const obterRelatorios = async (req, res) => {
     });
 
   } catch (error) {
+    // Nunca expor detalhes internos do banco para o cliente
     console.error('Erro ao obter relatórios:', error);
-    res.status(500).json({ erro: error.message });
+    res.status(500).json({ erro: 'Erro interno ao gerar relatórios.' });
   }
 };
 

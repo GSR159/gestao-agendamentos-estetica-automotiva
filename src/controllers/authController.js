@@ -5,7 +5,8 @@ const crypto = require('crypto');
 const { Resend } = require('resend');
 const { normalizarEmail } = require('../utils/normalizar');
 
-const SECRET         = process.env.JWT_SECRET    || 'segredo_super_forte';
+const SECRET         = process.env.JWT_SECRET;
+if (!SECRET) throw new Error('[SEGURANÇA] JWT_SECRET não definido nas variáveis de ambiente.');
 const FRONT_URL      = process.env.FRONT_URL     || 'http://127.0.0.1:5500';
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const EMAIL_FROM     = process.env.EMAIL_USER    || 'noreply@smartsystemauto.com.br';
@@ -203,6 +204,13 @@ const register = async (req, res) => {
     if (!nome || !email || !senha)
       return res.status(400).json({ erro: 'Nome, email e senha são obrigatórios.' });
 
+    if (senha.length < 8)
+      return res.status(400).json({ erro: 'A senha deve ter no mínimo 8 caracteres.' });
+
+    const senhaForte = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(senha);
+    if (!senhaForte)
+      return res.status(400).json({ erro: 'A senha deve conter letras maiúsculas, minúsculas e pelo menos um número.' });
+
     const existe = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email]);
     if (existe.rows.length > 0)
       return res.status(400).json({ erro: 'Email já cadastrado.' });
@@ -210,7 +218,7 @@ const register = async (req, res) => {
     const senhaHash   = await bcrypt.hash(senha, 10);
     const token       = crypto.randomBytes(32).toString('hex');
     const expiracao   = new Date(Date.now() + 1000 * 60 * 60 * 24);
-    const tipoUsuario = tipo || 'cliente';
+    const tipoUsuario = 'cliente'; // tipo ignorado do body — auto-cadastro é sempre cliente
 
     const novoUsuario = await pool.query(
       `INSERT INTO usuarios (nome, email, senha, telefone, tipo, email_confirmado, token_confirmacao, token_expira_em)
@@ -381,7 +389,11 @@ const redefinirSenha = async (req, res) => {
   try {
     const { token, novaSenha } = req.body;
     if (!token || !novaSenha) return res.status(400).json({ erro: 'Token e nova senha são obrigatórios.' });
-    if (novaSenha.length < 6) return res.status(400).json({ erro: 'A senha deve ter no mínimo 6 caracteres.' });
+    if (novaSenha.length < 8) return res.status(400).json({ erro: 'A senha deve ter no mínimo 8 caracteres.' });
+
+    const senhaForte = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(novaSenha);
+    if (!senhaForte)
+      return res.status(400).json({ erro: 'A senha deve conter letras maiúsculas, minúsculas e pelo menos um número.' });
 
     const resultado = await pool.query(
       `SELECT id, token_recuperacao_expira FROM usuarios WHERE token_recuperacao = $1`, [token]

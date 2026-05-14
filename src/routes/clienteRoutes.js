@@ -1,5 +1,7 @@
-const express = require('express');
-const router = express.Router();
+const express       = require('express');
+const router        = express.Router();
+const verificarToken = require('../middlewares/authMiddleware');
+const verificarAdmin = require('../middlewares/adminMiddleware');
 
 const {
   listarClientes,
@@ -9,9 +11,12 @@ const {
   deletarCliente
 } = require('../controllers/ClienteController');
 
-router.get('/', listarClientes);
+// Todas as rotas exigem token + perfil admin
+router.use(verificarToken, verificarAdmin);
+
+router.get('/',    listarClientes);
 router.get('/:id', buscarClientePorId);
-router.post('/', criarCliente);
+router.post('/',   criarCliente);
 router.put('/:id', atualizarCliente);
 router.delete('/:id', deletarCliente);
 
