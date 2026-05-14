@@ -7,14 +7,14 @@ const obterRelatorios = async (req, res) => {
       SELECT COALESCE(SUM(s.preco), 0) AS total
       FROM agendamentos a
       JOIN servicos s ON s.id = a.servico_id
-      WHERE a.status IN ('aprovado', 'concluido')
+      WHERE a.status IN ('concluido')
     `);
     const receitaTotal = Number(receitaResult.rows[0].total);
 
     // Ticket Médio
     const totalAgendamentos = await pool.query(`
       SELECT COUNT(*) AS qtd FROM agendamentos
-      WHERE status IN ('aprovado', 'concluido')
+      WHERE status IN ('concluido')
     `);
     const qtd = Number(totalAgendamentos.rows[0].qtd);
     const ticketMedio = qtd > 0 ? receitaTotal / qtd : 0;
@@ -27,7 +27,7 @@ const obterRelatorios = async (req, res) => {
       FROM (
         SELECT cliente_id, COUNT(*) AS total
         FROM agendamentos
-        WHERE status IN ('aprovado', 'concluido')
+        WHERE status IN ('concluido')
         GROUP BY cliente_id
       ) sub
     `);
@@ -40,7 +40,7 @@ const obterRelatorios = async (req, res) => {
         COALESCE(SUM(s.preco), 0) AS total
       FROM agendamentos a
       JOIN servicos s ON s.id = a.servico_id
-      WHERE a.status IN ('aprovado', 'concluido')
+      WHERE a.status IN ('concluido')
         AND a.data >= NOW() - INTERVAL '30 days'
       GROUP BY TO_CHAR(a.data, 'DD/MM'), DATE_TRUNC('day', a.data)
       ORDER BY DATE_TRUNC('day', a.data) ASC
@@ -55,7 +55,7 @@ const obterRelatorios = async (req, res) => {
       SELECT s.nome, COUNT(*) AS total
       FROM agendamentos a
       JOIN servicos s ON s.id = a.servico_id
-      WHERE a.status IN ('aprovado', 'concluido')
+      WHERE a.status IN ('concluido')
       GROUP BY s.nome
       ORDER BY total DESC
     `);
@@ -86,7 +86,7 @@ const obterRelatorios = async (req, res) => {
       LEFT JOIN servicos     s ON s.id = a.servico_id
       LEFT JOIN funcionarios f ON f.id = a.funcionario_id
       LEFT JOIN veiculos     v ON v.id = a.veiculo_id
-      WHERE a.status IN ('aprovado', 'concluido')
+      WHERE a.status IN ('concluido')
       GROUP BY c.nome
       ORDER BY total DESC
     `);
@@ -110,7 +110,6 @@ const obterRelatorios = async (req, res) => {
     });
 
   } catch (error) {
-    // Nunca expor detalhes internos do banco para o cliente
     console.error('Erro ao obter relatórios:', error);
     res.status(500).json({ erro: 'Erro interno ao gerar relatórios.' });
   }
