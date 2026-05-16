@@ -35,15 +35,34 @@ function limparRascunho() {
 //  INICIALIZAÇÃO
 // ─────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Restaura campos ao voltar da página LGPD / Termos
+  // Restaura campos ao voltar (mesma aba) ou recarregar a página
   restaurarRascunho();
 
-  // Salva automaticamente a cada interação nos campos relevantes
+  // Salva a cada interação nos campos relevantes
   ['nome', 'email', 'confirmar_email', 'lgpd'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('input',  salvarRascunho);
     el.addEventListener('change', salvarRascunho);
+  });
+
+  // ✅ CORREÇÃO PRINCIPAL: salva ANTES de sair da página
+  // Cobre casos onde o link abre na mesma aba (mobile, etc.)
+  window.addEventListener('beforeunload', salvarRascunho);
+
+  // ✅ CORREÇÃO SECUNDÁRIA: intercepta cliques nos links dos termos
+  // e força salvar antes de navegar (mesmo com target="_blank")
+  document.querySelectorAll('a[href="termos.html"], a[href="LGPD.html"]').forEach(link => {
+    link.addEventListener('click', salvarRascunho);
+  });
+
+  // ✅ CORREÇÃO TERCIÁRIA: restaura ao voltar via histórico do browser
+  // (evento pageshow cobre bfcache — back/forward cache do navegador)
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+      // Página veio do cache de navegação (back/forward)
+      restaurarRascunho();
+    }
   });
 });
 
