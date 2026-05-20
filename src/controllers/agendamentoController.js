@@ -4,9 +4,7 @@ const { Resend } = require('resend');
 const EMAIL_FROM = process.env.EMAIL_USER || 'noreply@smartsystemauto.com.br';
 const FRONT_URL  = process.env.FRONT_URL  || 'http://127.0.0.1:5500';
 
-// ─────────────────────────────────────────
-//  TEMPLATE BASE
-// ─────────────────────────────────────────
+//  TEMPLATE BASE EMAIL
 function emailBase({ titulo, subtitulo, corpo, btnTexto, btnHref, rodape, acento }) {
   const cor = acento || '#3b82f6';
   return `<!DOCTYPE html>
@@ -85,9 +83,7 @@ function emailBase({ titulo, subtitulo, corpo, btnTexto, btnHref, rodape, acento
 </html>`;
 }
 
-// ─────────────────────────────────────────
 //  TEMPLATE NOTIFICAÇÃO AGENDAMENTO
-// ─────────────────────────────────────────
 function emailAgendamento(nomeCliente, status, ag) {
   const aprovado  = status === 'aprovado';
   const concluido = status === 'concluido';
@@ -157,9 +153,7 @@ function emailAgendamento(nomeCliente, status, ag) {
   });
 }
 
-// ─────────────────────────────────────────
-//  ENVIAR EMAIL
-// ─────────────────────────────────────────
+//  ENVIAR EMAIL COM CONFIRMAÇÃO
 async function notificarCliente(emailCliente, nomeCliente, status, agendamento) {
   if (!process.env.RESEND_API_KEY) return;
   const resend = new Resend(process.env.RESEND_API_KEY);
@@ -180,9 +174,7 @@ async function notificarCliente(emailCliente, nomeCliente, status, agendamento) 
   }
 }
 
-// ─────────────────────────────────────────
 //  LISTAR + EXPIRAÇÃO AUTOMÁTICA
-// ─────────────────────────────────────────
 const listarAgendamentos = async (req, res) => {
   try {
     await pool.query(`
@@ -207,9 +199,7 @@ const listarAgendamentos = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
 //  CRIAR AGENDAMENTO
-// ─────────────────────────────────────────
 const criarAgendamento = async (req, res) => {
   const { cliente_id, veiculo_id, servico_id, data, funcionario_id } = req.body;
   if (!cliente_id || !veiculo_id || !servico_id || !data)
@@ -273,14 +263,14 @@ const criarAgendamento = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
+
 //  ATUALIZAR STATUS + NOTIFICAR
-// ─────────────────────────────────────────
+
 const atualizarStatus = async (req, res) => {
   const { id }                     = req.params;
   const { status, funcionario_id } = req.body;
 
-  // ← concluido adicionado aqui
+  // status 
   const statusValidos = ['pendente', 'aprovado', 'recusado', 'concluido'];
   if (!statusValidos.includes(status)) return res.status(400).json({ erro: 'Status inválido.' });
 
@@ -299,7 +289,7 @@ const atualizarStatus = async (req, res) => {
 
     const agendamento = resultado.rows[0];
 
-    // ← concluido também notifica por email
+    //Notificação por email
     if (status === 'aprovado' || status === 'recusado' || status === 'concluido') {
       try {
         const dadosRes = await pool.query(`
@@ -333,9 +323,7 @@ const atualizarStatus = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-//  DELETAR
-// ─────────────────────────────────────────
+// Deletar Agendamento
 const deletarAgendamento = async (req, res) => {
   const { id } = req.params;
   try {
