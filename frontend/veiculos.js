@@ -216,7 +216,7 @@ async function executarDeleteVeiculo(id) {
       toast.erro("Erro ao deletar o veículo.");
     }
 
-    carregarVeiculos();
+    carregarVeiculos(); 
   } catch (erro) {
     console.error(erro);
     toast.erro("Erro de conexão ao tentar deletar.");

@@ -1,4 +1,4 @@
-//  TELA CLIENTE
+// tela_cliente.js — Área do Cliente (completo)
 
 function getHeaders() {
   const token = localStorage.getItem('token');
@@ -13,7 +13,7 @@ function getUsuario() {
   } catch { return null; }
 }
 
-// NAVEGAÇÃO
+// ── NAVEGAÇÃO ────────────────────────────────────────
 function trocarTela(tela) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -22,7 +22,7 @@ function trocarTela(tela) {
   lucide.createIcons();
 }
 
-// BADGES 
+// ── BADGES ──────────────────────────────────────────
 function getBadge(status) {
   const map = {
     pendente:  { cls: 'badge-pending',  icon: 'clock',        label: 'Pendente'  },
@@ -34,36 +34,63 @@ function getBadge(status) {
   return `<span class="badge ${s.cls}"><i data-lucide="${s.icon}" style="width:11px;height:11px"></i> ${s.label}</span>`;
 }
 
-// GOOGLE CALENDAR
+// ── GOOGLE CALENDAR ──────────────────────────────────
 function abrirGoogleCalendar(agendamento) {
   const inicio = new Date(agendamento.data);
   const fim    = new Date(inicio.getTime() + 60 * 60 * 1000);
   const fmt    = d => d.toISOString().replace(/-|:|\.\d{3}/g, '');
+
+  const endereco = _dadosConta
+    ? [_dadosConta.logradouro, _dadosConta.numero, _dadosConta.bairro, _dadosConta.cidade, _dadosConta.estado]
+        .filter(Boolean).join(', ')
+    : '140 R. José Borges do Canto';
+
   const params = new URLSearchParams({
-    action: 'TEMPLATE', text: `Serviço: ${agendamento.servico}`,
-    dates: `${fmt(inicio)}/${fmt(fim)}`,
-    details: `Veículo: ${agendamento.veiculo?.modelo ?? ''} · ${agendamento.veiculo?.placa ?? ''}`,
-    location: '140 R. José Borges do Canto'
+    action:   'TEMPLATE',
+    text:     `Serviço: ${agendamento.servico}`,
+    dates:    `${fmt(inicio)}/${fmt(fim)}`,
+    details:  `Veículo: ${agendamento.veiculo?.modelo ?? ''} · ${agendamento.veiculo?.placa ?? ''}`,
+    location: endereco,
   });
   window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank');
 }
 
-// CALENDARIO APPLE
+// ── APPLE CALENDAR (ICS) ─────────────────────────────
+// RFC 5545 §3.3.11 — vírgulas no campo LOCATION devem ser escapadas como \,
 function baixarICS(agendamento) {
   const inicio  = new Date(agendamento.data);
   const fim     = new Date(inicio.getTime() + 60 * 60 * 1000);
   const fmt     = d => d.toISOString().replace(/-|:|\.\d{3}/g, '').slice(0, 15) + 'Z';
   const veiculo = `${agendamento.veiculo?.modelo ?? ''} · ${agendamento.veiculo?.placa ?? ''}`;
+
+  const enderecoRaw = _dadosConta
+    ? [_dadosConta.logradouro, _dadosConta.numero, _dadosConta.bairro, _dadosConta.cidade, _dadosConta.estado, _dadosConta.cep]
+        .filter(Boolean).join(', ')
+    : '140 R. José Borges do Canto';
+  const enderecoICS = enderecoRaw.replace(/,/g, '\\,');
+
   const ics = [
-    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Smart System//PT','BEGIN:VEVENT',
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Smart System//PT',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
     `UID:agendamento-${agendamento.id}@smartsystem`,
-    `DTSTAMP:${fmt(new Date())}`,`DTSTART:${fmt(inicio)}`,`DTEND:${fmt(fim)}`,
-    `SUMMARY:Serviço: ${agendamento.servico}`,`DESCRIPTION:Veículo: ${veiculo}`,
-    'LOCATION:140 R. José Borges do Canto','END:VEVENT','END:VCALENDAR'
+    `DTSTAMP:${fmt(new Date())}`,
+    `DTSTART:${fmt(inicio)}`,
+    `DTEND:${fmt(fim)}`,
+    `SUMMARY:Serviço: ${agendamento.servico}`,
+    `DESCRIPTION:Veículo: ${veiculo}`,
+    `LOCATION:${enderecoICS}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
   ].join('\r\n');
+
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
-  a.download = `agendamento-${agendamento.id}.ics`; a.click();
+  a.download = `agendamento-${agendamento.id}.ics`;
+  a.click();
 }
 
 function getBotoesCalendario(agendamento) {
@@ -82,7 +109,7 @@ function getBotoesCalendario(agendamento) {
     </div>`;
 }
 
-// AGENDAMENTOS
+// ── AGENDAMENTOS ─────────────────────────────────────
 async function carregarAgendamentos() {
   try {
     const res  = await fetch(`${API}/cliente/meus-agendamentos`, { headers: getHeaders() });
@@ -93,12 +120,10 @@ async function carregarAgendamentos() {
     document.getElementById('stat-concluidos').textContent = data.filter(a => ['aprovado','concluido'].includes(a.status?.toLowerCase())).length;
 
     const tabela = document.getElementById('listaAgendamentos');
-
     if (!data.length) {
       tabela.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500 italic">Nenhum agendamento encontrado.</td></tr>`;
       return;
     }
-
     tabela.innerHTML = data.map(a => {
       const data_fmt = a.data ? new Date(a.data).toLocaleDateString('pt-BR') : '—';
       const hora     = a.hora ?? '—';
@@ -116,7 +141,178 @@ async function carregarAgendamentos() {
   }
 }
 
-// VEÍCULOS 
+// ── SLOT PICKER ──────────────────────────────────────
+let _horarioSelecionado = null;
+let _slotDebounce       = null;
+
+function onMudaServicouOuData() {
+  const servico_id = document.getElementById('agend-servico').value;
+  const data       = document.getElementById('agend-data').value;
+
+  // Reseta seleção anterior
+  _horarioSelecionado = null;
+  document.getElementById('btn-confirmar-agend').disabled = true;
+
+  if (!servico_id || !data) {
+    document.getElementById('slots-container').style.display = 'none';
+    return;
+  }
+
+  // Debounce para não disparar múltiplas chamadas ao digitar data
+  clearTimeout(_slotDebounce);
+  _slotDebounce = setTimeout(() => carregarSlots(data, servico_id), 300);
+}
+
+async function carregarSlots(data, servico_id) {
+  const container = document.getElementById('slots-container');
+  const content   = document.getElementById('slots-content');
+
+  container.style.display = 'block';
+  content.innerHTML = `<p class="slots-loading">⏳ Verificando disponibilidade...</p>`;
+
+  try {
+    const res  = await fetch(`${API}/agenda/slots?data=${data}&servico_id=${servico_id}`, { headers: getHeaders() });
+    const data_resp = await res.json();
+
+    if (!data_resp.aberto) {
+      content.innerHTML = `
+        <div class="slots-aviso">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          ${data_resp.motivo || 'Loja fechada neste dia. Escolha outra data.'}
+        </div>`;
+      return;
+    }
+
+    const slots = data_resp.slots ?? [];
+    const disponiveis = slots.filter(s => s.disponivel);
+
+    if (!slots.length) {
+      content.innerHTML = `<div class="slots-aviso">⚠️ Nenhum horário disponível para esta data.</div>`;
+      return;
+    }
+
+    if (!disponiveis.length) {
+      content.innerHTML = `<div class="slots-aviso">⚠️ Todos os horários estão ocupados. Tente outra data.</div>`;
+      return;
+    }
+
+    content.innerHTML = `<div class="slots-grid">
+      ${slots.map(s => `
+        <button
+          class="slot-btn${!s.disponivel ? '' : ''}"
+          ${!s.disponivel ? 'disabled' : ''}
+          onclick="selecionarSlot('${s.horario}', this)"
+          title="${s.disponivel ? `${s.livres} de ${s.total} funcionário(s) livre(s)` : 'Horário ocupado'}"
+        >${s.horario}</button>
+      `).join('')}
+    </div>`;
+  } catch (e) {
+    console.error(e);
+    content.innerHTML = `<div class="slots-aviso">❌ Erro ao buscar horários. Tente novamente.</div>`;
+  }
+}
+
+function selecionarSlot(horario, btn) {
+  // Remove seleção anterior
+  document.querySelectorAll('.slot-btn.selecionado').forEach(b => b.classList.remove('selecionado'));
+  btn.classList.add('selecionado');
+  _horarioSelecionado = horario;
+  document.getElementById('btn-confirmar-agend').disabled = false;
+}
+
+// ── FORM AGENDAMENTO ─────────────────────────────────
+let listaServicosCliente = [];
+
+async function carregarServicosParaAgendamento() {
+  try {
+    const res = await fetch(`${API}/servicos`, { headers: getHeaders() });
+    listaServicosCliente = await res.json();
+    const select = document.getElementById('agend-servico');
+    if (!select) return;
+    select.innerHTML = `<option value="">Selecione o serviço</option>` +
+      listaServicosCliente.map(s =>
+        `<option value="${s.id}">${s.nome} (${s.duracao_minutos} min) — R$ ${Number(s.preco).toFixed(2).replace('.',',')}</option>`
+      ).join('');
+  } catch (err) { console.error(err); }
+}
+
+async function carregarVeiculosParaAgendamento() {
+  try {
+    const res   = await fetch(`${API}/cliente/meus-veiculos`, { headers: getHeaders() });
+    const dados = await res.json();
+    const select = document.getElementById('agend-veiculo');
+    if (!select) return;
+    select.innerHTML = `<option value="">Selecione o veículo</option>` +
+      dados.map(v => `<option value="${v.id}">${v.modelo} — ${v.placa}</option>`).join('');
+  } catch (err) { console.error(err); }
+}
+
+function abrirFormAgendamento() {
+  // Data mínima = hoje
+  const hoje = new Date().toISOString().slice(0, 10);
+  document.getElementById('agend-data').min = hoje;
+
+  carregarVeiculosParaAgendamento();
+  carregarServicosParaAgendamento();
+
+  // Reset slots
+  _horarioSelecionado = null;
+  document.getElementById('slots-container').style.display = 'none';
+  document.getElementById('btn-confirmar-agend').disabled = true;
+
+  document.getElementById('formAgendamentoCliente').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  lucide.createIcons();
+}
+
+function fecharFormAgendamento() {
+  document.getElementById('formAgendamentoCliente').style.display = 'none';
+  document.getElementById('slots-container').style.display = 'none';
+  _horarioSelecionado = null;
+  ['agend-veiculo','agend-servico','agend-data'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('btn-confirmar-agend').disabled = true;
+}
+
+async function enviarAgendamento() {
+  const veiculo_id = document.getElementById('agend-veiculo').value;
+  const servico_id = document.getElementById('agend-servico').value;
+  const data       = document.getElementById('agend-data').value;
+
+  if (!veiculo_id || !servico_id || !data) { toast.aviso('Preencha todos os campos.'); return; }
+  if (!_horarioSelecionado) { toast.aviso('Selecione um horário disponível.'); return; }
+
+  // Monta datetime combinando data + horário selecionado
+  const dataHora = `${data}T${_horarioSelecionado}:00`;
+
+  const btn = document.getElementById('btn-confirmar-agend');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API}/cliente/agendar`, {
+      method: 'POST', headers: getHeaders(),
+      body: JSON.stringify({ veiculo_id, servico_id, data: dataHora })
+    });
+    const resposta = await res.json();
+    if (!res.ok) {
+      toast.erro(resposta.erro ?? 'Erro ao criar agendamento.');
+      btn.disabled = false;
+      return;
+    }
+    toast.sucesso('Agendamento criado! Aguarde a aprovação.');
+    fecharFormAgendamento();
+    carregarAgendamentos();
+  } catch {
+    toast.erro('Erro de conexão com o servidor.');
+    btn.disabled = false;
+  }
+}
+
+// ── VEÍCULOS ─────────────────────────────────────────
+let _veiculoEditandoId = null;
+
 async function carregarVeiculos() {
   try {
     const res   = await fetch(`${API}/cliente/meus-veiculos`, { headers: getHeaders() });
@@ -131,7 +327,7 @@ async function carregarVeiculos() {
     lista.innerHTML = data.map(v => `
       <div class="vehicle-card">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center flex-shrink-0">
+          <div class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex-shrink-0" style="display:flex;align-items:center;justify-content:center;">
             <i data-lucide="car-front" class="w-5 h-5"></i>
           </div>
           <div>
@@ -139,10 +335,16 @@ async function carregarVeiculos() {
             <p class="text-xs text-slate-500">${v.placa ?? '—'}${v.ano ? ' · ' + v.ano : ''}</p>
           </div>
         </div>
-        <button onclick="confirmarExcluirVeiculo('${v.id}')"
-          class="text-slate-500 hover:text-red-400 transition-colors flex-shrink-0">
-          <i data-lucide="trash-2" class="w-4 h-4"></i>
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="abrirEdicaoVeiculo(${v.id},'${(v.marca||'').replace(/'/g,"\\'")}','${(v.modelo||'').replace(/'/g,"\\'")}','${(v.placa||'').replace(/'/g,"\\'")}','${(v.cor||'').replace(/'/g,"\\'")}','${v.ano||''}')"
+            class="text-slate-500 hover:text-blue-400 transition-colors flex-shrink-0" title="Editar">
+            <i data-lucide="pencil" class="w-4 h-4"></i>
+          </button>
+          <button onclick="confirmarExcluirVeiculo('${v.id}')"
+            class="text-slate-500 hover:text-red-400 transition-colors flex-shrink-0" title="Remover">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
       </div>
     `).join('');
     lucide.createIcons();
@@ -150,6 +352,51 @@ async function carregarVeiculos() {
     console.error(err);
     toast.erro('Não foi possível carregar seus veículos.');
   }
+}
+
+function abrirEdicaoVeiculo(id, marca, modelo, placa, cor, ano) {
+  _veiculoEditandoId = id;
+
+  document.getElementById('marca').value  = marca;
+  document.getElementById('modelo').value = modelo;
+  document.getElementById('placa').value  = placa;
+  document.getElementById('cor').value    = cor;
+  document.getElementById('ano').value    = ano;
+
+  const placaLimpa = placa.replace(/[^A-Z0-9]/g, '');
+  const contador   = document.getElementById('placa-contador');
+  if (contador) { contador.textContent = `${placaLimpa.length}/7`; contador.classList.toggle('limite', placaLimpa.length >= 7); }
+
+  const titulo = document.getElementById('form-veiculo-titulo');
+  if (titulo) titulo.innerHTML = '<i data-lucide="pencil" class="text-blue-500 w-4 h-4"></i> Editar Veículo';
+
+  const btnSalvar = document.getElementById('btn-salvar-veiculo');
+  if (btnSalvar) btnSalvar.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Salvar Alterações';
+
+  const btnCancelar = document.getElementById('btn-cancelar-edicao-veiculo');
+  if (btnCancelar) btnCancelar.style.display = 'inline-flex';
+
+  lucide.createIcons();
+  document.querySelector('#veiculos .card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cancelarEdicaoVeiculo() {
+  _veiculoEditandoId = null;
+  ['marca','modelo','placa','cor','ano'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+  const contador = document.getElementById('placa-contador');
+  if (contador) { contador.textContent = '0/7'; contador.classList.remove('limite'); }
+
+  const titulo = document.getElementById('form-veiculo-titulo');
+  if (titulo) titulo.innerHTML = '<i data-lucide="plus-circle" class="text-blue-500 w-4 h-4"></i> Adicionar Novo Veículo';
+
+  const btnSalvar = document.getElementById('btn-salvar-veiculo');
+  if (btnSalvar) btnSalvar.innerHTML = '<i data-lucide="plus" class="w-4 h-4"></i> Adicionar';
+
+  const btnCancelar = document.getElementById('btn-cancelar-edicao-veiculo');
+  if (btnCancelar) btnCancelar.style.display = 'none';
+
+  lucide.createIcons();
 }
 
 let _veiculoParaExcluir = null;
@@ -186,10 +433,26 @@ async function criarVeiculo() {
 
   const placaLimpa = placa.replace(/[^A-Z0-9]/g, '');
   if (placaLimpa.length < 6 || placaLimpa.length > 7) {
-    toast.erro('Placa inválida. Use o formato ABC-1234 ou Mercosul (7 caracteres).');
+    toast.erro('Placa inválida. Use ABC-1234 ou Mercosul (7 caracteres).');
     return;
   }
 
+  // ── EDIÇÃO ──
+  if (_veiculoEditandoId) {
+    try {
+      const res = await fetch(`${API}/cliente/meus-veiculos/${_veiculoEditandoId}`, {
+        method: 'PUT', headers: getHeaders(),
+        body: JSON.stringify({ modelo, placa, ano, marca, cor })
+      });
+      if (!res.ok) { const e = await res.json(); toast.erro(e.erro ?? 'Erro ao atualizar.'); return; }
+      toast.sucesso('Veículo atualizado com sucesso!');
+      cancelarEdicaoVeiculo();
+      carregarVeiculos();
+    } catch { toast.erro('Erro de conexão.'); }
+    return;
+  }
+
+  // ── CRIAÇÃO ──
   try {
     const res = await fetch(`${API}/cliente/meus-veiculos`, {
       method: 'POST', headers: getHeaders(),
@@ -204,105 +467,33 @@ async function criarVeiculo() {
   } catch { toast.erro('Erro de conexão.'); }
 }
 
-// AGENDAMENTO
-let listaServicosCliente = [];
-
-async function carregarServicosParaAgendamento() {
-  try {
-    const res = await fetch(`${API}/servicos`, { headers: getHeaders() });
-    listaServicosCliente = await res.json();
-    const select = document.getElementById('agend-servico');
-    if (!select) return;
-    select.innerHTML = `<option value="">Selecione o serviço</option>` +
-      listaServicosCliente.map(s =>
-        `<option value="${s.id}">${s.nome} (${s.duracao_minutos} min) — R$ ${Number(s.preco).toFixed(2).replace('.',',')}</option>`
-      ).join('');
-  } catch (err) { console.error(err); }
-}
-
-async function carregarVeiculosParaAgendamento() {
-  try {
-    const res   = await fetch(`${API}/cliente/meus-veiculos`, { headers: getHeaders() });
-    const dados = await res.json();
-    const select = document.getElementById('agend-veiculo');
-    if (!select) return;
-    select.innerHTML = `<option value="">Selecione o veículo</option>` +
-      dados.map(v => `<option value="${v.id}">${v.modelo} — ${v.placa}</option>`).join('');
-  } catch (err) { console.error(err); }
-}
-
-function abrirFormAgendamento() {
-  const agora  = new Date();
-  const minimo = new Date(agora.getTime() - agora.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-  document.getElementById('agend-data').min = minimo;
-  carregarVeiculosParaAgendamento();
-  carregarServicosParaAgendamento();
-  document.getElementById('formAgendamentoCliente').style.display = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  lucide.createIcons();
-}
-
-function fecharFormAgendamento() {
-  document.getElementById('formAgendamentoCliente').style.display = 'none';
-  ['agend-veiculo','agend-servico','agend-data'].forEach(id => document.getElementById(id).value = '');
-}
-
-async function enviarAgendamento() {
-  const veiculo_id = document.getElementById('agend-veiculo').value;
-  const servico_id = document.getElementById('agend-servico').value;
-  const data       = document.getElementById('agend-data').value;
-
-  if (!veiculo_id || !servico_id || !data) { toast.aviso('Preencha todos os campos.'); return; }
-  if (new Date(data) <= new Date()) { toast.aviso('Não é possível agendar em data passada.'); return; }
-
-  try {
-    const res     = await fetch(`${API}/cliente/agendar`, {
-      method: 'POST', headers: getHeaders(),
-      body: JSON.stringify({ veiculo_id, servico_id, data })
-    });
-    const resposta = await res.json();
-    if (!res.ok) { toast.erro(resposta.erro ?? 'Erro ao criar agendamento.'); return; }
-    toast.sucesso('Agendamento criado! Aguarde a aprovação.');
-    fecharFormAgendamento();
-    carregarAgendamentos();
-  } catch { toast.erro('Erro de conexão com o servidor.'); }
-}
-
-// CONTA 
+// ── CONTA ────────────────────────────────────────────
 let _dadosConta = null;
 
 async function carregarDadosConta() {
   try {
-    // Primeiro preenche com dados do token 
-    const usuario = getUsuario();
+    const usuario    = getUsuario();
     const emailToken = usuario?.email ?? '';
 
-    // Busca dados completos da API
     const res = await fetch(`${API}/cliente/minha-conta`, { headers: getHeaders() });
     if (!res.ok) return;
 
     const conta = await res.json();
     _dadosConta = conta;
 
-    // ── Nome: usa o nome real do banco
     const nome    = conta.nome || emailToken.split('@')[0] || 'Cliente';
     const inicial = nome.charAt(0).toUpperCase();
 
     const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
-    // Sidebar
     setEl('usuario-logado', nome);
     setEl('user-initial',   inicial);
-
-    // Cabeçalho da conta
-    setEl('conta-avatar',    inicial);
-    setEl('conta-nome',      nome);
-    setEl('conta-email',     conta.email || emailToken);
-    setEl('conta-nome-row',  nome);
-    setEl('conta-email-row', conta.email || emailToken);
-
-    // Dados do perfil
-    setEl('conta-telefone',  conta.telefone || '—');
+    setEl('conta-avatar',   inicial);
+    setEl('conta-nome',     nome);
+    setEl('conta-email',    conta.email || emailToken);
+    setEl('conta-nome-row', nome);
+    setEl('conta-email-row',conta.email || emailToken);
+    setEl('conta-telefone', conta.telefone || '—');
     setEl('conta-nascimento', conta.data_nascimento
       ? new Date(conta.data_nascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
       : '—');
@@ -316,7 +507,6 @@ async function carregarDadosConta() {
       setEl('conta-membro-desde', d.charAt(0).toUpperCase() + d.slice(1));
     }
 
-    // Badge perfil
     const badge = document.getElementById('badge-perfil');
     if (badge) {
       if (conta.perfil_completo) {
@@ -328,7 +518,6 @@ async function carregarDadosConta() {
       }
       lucide.createIcons();
     }
-
   } catch (e) {
     console.warn('Erro ao carregar conta:', e);
   }
@@ -336,10 +525,10 @@ async function carregarDadosConta() {
 
 function preencherInfoConta() { carregarDadosConta(); }
 
-// EDITAR PERFIL 
+// ── EDITAR PERFIL ────────────────────────────────────
 function abrirEdicaoPerfil() {
   if (!_dadosConta) return;
-  const c = _dadosConta;
+  const c   = _dadosConta;
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
   set('edit-telefone',    c.telefone);
   set('edit-nascimento',  c.data_nascimento ? c.data_nascimento.split('T')[0] : '');
@@ -350,7 +539,6 @@ function abrirEdicaoPerfil() {
   set('edit-bairro',      c.bairro);
   set('edit-cidade',      c.cidade);
   set('edit-estado',      c.estado);
-
   document.getElementById('form-editar-perfil').style.display = 'block';
   document.getElementById('info-perfil-static').style.display = 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -365,12 +553,9 @@ async function buscarCEPEdicao() {
   const cep    = document.getElementById('edit-cep').value.replace(/\D/g, '');
   const status = document.getElementById('edit-cep-status');
   const btn    = document.getElementById('btn-buscar-cep');
-
   if (cep.length !== 8) { status.textContent = 'CEP inválido.'; status.style.color = '#ef4444'; return; }
-
   btn.disabled = true; btn.textContent = '...';
   status.textContent = 'Buscando...'; status.style.color = '#94a3b8';
-
   try {
     const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
     const data = await res.json();
@@ -390,7 +575,7 @@ async function buscarCEPEdicao() {
 }
 
 async function salvarPerfil() {
-  const btn = document.getElementById('btn-salvar-perfil');
+  const btn             = document.getElementById('btn-salvar-perfil');
   const telefone        = document.getElementById('edit-telefone').value.trim();
   const data_nascimento = document.getElementById('edit-nascimento').value;
   const cep             = document.getElementById('edit-cep').value.trim();
@@ -400,11 +585,8 @@ async function salvarPerfil() {
   const bairro          = document.getElementById('edit-bairro').value.trim();
   const cidade          = document.getElementById('edit-cidade').value.trim();
   const estado          = document.getElementById('edit-estado').value.trim();
-
   if (!telefone) { toast.aviso('Telefone é obrigatório.'); return; }
-
   btn.disabled = true; btn.textContent = 'Salvando...';
-
   try {
     const res  = await fetch(`${API}/cliente/minha-conta`, {
       method: 'PUT', headers: getHeaders(),
@@ -420,7 +602,7 @@ async function salvarPerfil() {
   finally { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
 }
 
-// EXCLUIR CONTA
+// ── EXCLUIR CONTA ────────────────────────────────────
 async function excluirConta() {
   try {
     const res  = await fetch(`${API}/cliente/minha-conta`, { method: 'DELETE', headers: getHeaders() });
@@ -434,7 +616,7 @@ async function excluirConta() {
   } catch { toast.erro('Erro de conexão.'); }
 }
 
-// INIT
+// ── INIT ─────────────────────────────────────────────
 window.onload = () => {
   verificarLogin();
   carregarDadosConta();

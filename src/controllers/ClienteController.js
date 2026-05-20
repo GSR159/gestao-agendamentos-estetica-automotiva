@@ -2,7 +2,10 @@ const pool = require('../config/db');
 
 const listarClientes = async (req, res) => {
   try {
-    const resultado = await pool.query('SELECT * FROM clientes ORDER BY id ASC');
+    // Filtra apenas clientes ativos (não anonimizados via LGPD)
+    const resultado = await pool.query(
+      'SELECT * FROM clientes WHERE ativo = true ORDER BY id ASC'
+    );
     res.status(200).json(resultado.rows);
   } catch (error) {
     console.error('Erro ao listar clientes:', error);
@@ -13,7 +16,10 @@ const listarClientes = async (req, res) => {
 const buscarClientePorId = async (req, res) => {
   const { id } = req.params;
   try {
-    const resultado = await pool.query('SELECT * FROM clientes WHERE id = $1', [id]);
+    const resultado = await pool.query(
+      'SELECT * FROM clientes WHERE id = $1 AND ativo = true',
+      [id]
+    );
     if (resultado.rows.length === 0) {
       return res.status(404).json({ erro: 'Cliente não encontrado' });
     }
@@ -29,7 +35,7 @@ const criarCliente = async (req, res) => {
   email = email.toLowerCase().trim();
   try {
     const resultado = await pool.query(
-      'INSERT INTO clientes (nome, telefone, email) VALUES ($1, $2, $3) RETURNING *',
+      'INSERT INTO clientes (nome, telefone, email, ativo) VALUES ($1, $2, $3, true) RETURNING *',
       [nome, telefone, email]
     );
     res.status(201).json(resultado.rows[0]);
@@ -45,7 +51,7 @@ const atualizarCliente = async (req, res) => {
   email = email.toLowerCase().trim();
   try {
     const resultado = await pool.query(
-      'UPDATE clientes SET nome = $1, telefone = $2, email = $3 WHERE id = $4 RETURNING *',
+      'UPDATE clientes SET nome = $1, telefone = $2, email = $3 WHERE id = $4 AND ativo = true RETURNING *',
       [nome, telefone, email, id]
     );
     if (resultado.rows.length === 0) {
@@ -62,7 +68,6 @@ const atualizarCliente = async (req, res) => {
 const deletarCliente = async (req, res) => {
   const { id } = req.params;
   try {
-    // Busca o usuario_id antes de anonimizar
     const clienteResult = await pool.query(
       'SELECT usuario_id FROM clientes WHERE id = $1',
       [id]
@@ -74,13 +79,14 @@ const deletarCliente = async (req, res) => {
 
     const usuario_id = clienteResult.rows[0].usuario_id;
 
-    // Anonimiza o cliente — histórico de agendamentos preservado
+    // Anonimiza e marca como inativo — histórico de agendamentos preservado
     await pool.query(
       `UPDATE clientes 
        SET nome = 'Usuário Removido',
            email = NULL,
            telefone = NULL,
-           usuario_id = NULL
+           usuario_id = NULL,
+           ativo = false
        WHERE id = $1`,
       [id]
     );

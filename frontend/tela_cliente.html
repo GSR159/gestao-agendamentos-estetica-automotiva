@@ -18,18 +18,11 @@
     .app-container { display:flex; min-height:100vh; }
 
     /* ── SIDEBAR ── */
-    .sidebar {
-      width: var(--sidebar-w);
-      background:var(--bg-surface); border-right:1px solid var(--border);
-      display:flex; flex-direction:column;
-      padding:1.5rem;
-      position:fixed; height:100vh; z-index:40;
-      transition: width .2s;
-    }
+    .sidebar { width:var(--sidebar-w); background:var(--bg-surface); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:1.5rem; position:fixed; height:100vh; z-index:40; transition:width .2s; }
     .logo { display:flex; align-items:center; gap:.75rem; font-size:1.25rem; font-weight:800; color:#fff; margin-bottom:2.5rem; }
     .nav-links { flex:1; display:flex; flex-direction:column; gap:.5rem; }
     .nav-item { display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem; border-radius:.75rem; color:var(--text-muted); font-weight:500; transition:all .2s; cursor:pointer; border:none; background:transparent; text-align:left; width:100%; font-family:inherit; }
-    .nav-item:hover, .nav-item.active { background:var(--primary); color:white; box-shadow:0 4px 12px rgba(59,130,246,.25); }
+    .nav-item:hover,.nav-item.active { background:var(--primary); color:white; box-shadow:0 4px 12px rgba(59,130,246,.25); }
     .user-footer { margin-top:auto; padding-top:1.5rem; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
     .avatar { width:32px; height:32px; min-width:32px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:.8rem; flex-shrink:0; }
 
@@ -89,13 +82,23 @@
     .info-label { font-size:.8rem; color:var(--text-muted); min-width:110px; flex-shrink:0; padding-top:.1rem; }
     .info-value { font-size:.875rem; font-weight:500; color:var(--text-main); flex:1; word-break:break-word; }
 
-    /* ── EDIÇÃO ── */
+    /* ── EDIÇÃO PERFIL ── */
     .edit-section { font-size:.7rem; font-weight:700; color:#3b82f6; text-transform:uppercase; letter-spacing:.08em; margin:1rem 0 .5rem; }
     .cep-wrapper { position:relative; }
     .cep-wrapper .input-field { padding-right:5.5rem; }
     .btn-cep { position:absolute; right:.4rem; top:50%; transform:translateY(-50%); background:#1d4ed8; color:white; border:none; border-radius:.5rem; padding:.3rem .75rem; font-size:.75rem; font-weight:700; cursor:pointer; font-family:inherit; }
     .btn-cep:disabled { opacity:.5; cursor:wait; }
     .cep-status { font-size:.72rem; margin-top:.25rem; min-height:1rem; }
+
+    /* ── SLOT PICKER ── */
+    .slot-section-label { font-size:.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:.5rem; margin-top:.25rem; }
+    .slots-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(72px, 1fr)); gap:.5rem; }
+    .slot-btn { padding:.45rem .5rem; border-radius:.5rem; font-size:.8rem; font-weight:700; cursor:pointer; border:1px solid var(--border); background:var(--bg-card); color:var(--text-muted); transition:all .15s; font-family:inherit; text-align:center; }
+    .slot-btn:hover:not(:disabled) { border-color:var(--primary); color:var(--primary); background:rgba(59,130,246,.08); }
+    .slot-btn.selecionado { background:var(--primary); color:white; border-color:var(--primary); }
+    .slot-btn:disabled { opacity:.35; cursor:not-allowed; text-decoration:line-through; }
+    .slots-loading { color:var(--text-muted); font-size:.82rem; text-align:center; padding:.75rem 0; }
+    .slots-aviso { display:flex; align-items:center; gap:.5rem; background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); border-radius:.65rem; padding:.65rem 1rem; font-size:.8rem; color:#fca5a5; }
 
     /* ── MODAL ── */
     .modal-overlay { position:fixed; inset:0; z-index:9000; background:rgba(2,6,23,.85); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:1rem; }
@@ -115,30 +118,22 @@
     .btn-modal-sair { flex:1; padding:.7rem 1rem; border-radius:.75rem; background:rgba(251,191,36,.12); color:#fbbf24; border:1px solid rgba(251,191,36,.25); font-weight:700; font-size:.875rem; cursor:pointer; font-family:inherit; }
     .btn-modal-sair:hover { background:rgba(251,191,36,.22); }
 
-    /* ── RESPONSIVO MOBILE ── */
-    @media (max-width: 768px) {
-      :root { --sidebar-w: 70px; }
+    /* ── RESPONSIVO ── */
+    @media (max-width:768px) {
+      :root { --sidebar-w:70px; }
       .sidebar { padding:1rem .5rem; }
-      .sidebar .logo span,
-      .sidebar .nav-item span,
-      .sidebar .user-footer .user-nome { display:none; }
+      .sidebar .logo span,.sidebar .nav-item span,.sidebar .user-footer .user-nome { display:none; }
       .sidebar .nav-item { justify-content:center; padding:.75rem; }
       .sidebar .logo { justify-content:center; margin-bottom:1.5rem; }
       .sidebar .user-footer { flex-direction:column; gap:.5rem; padding-top:1rem; }
       .main-content { padding:1rem .75rem; }
       .stat-value { font-size:1.5rem; }
-      /* Tabela rolável */
       .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-      /* Info rows no mobile */
       .info-label { min-width:90px; }
-      /* Botão editar perfil menor */
-      #btn-editar-perfil { padding:.4rem .75rem; font-size:.75rem; }
     }
-
-    @media (max-width: 480px) {
+    @media (max-width:480px) {
       .main-content { padding:.75rem .5rem; }
-      .card { padding:1rem; }
-      .stat-card { padding:1rem; }
+      .card,.stat-card { padding:1rem; }
     }
   </style>
 </head>
@@ -173,7 +168,7 @@
   <!-- CONTEÚDO -->
   <main class="main-content">
 
-    <!-- AGENDAMENTOS -->
+    <!-- ══ AGENDAMENTOS ══ -->
     <div id="agendamentos" class="screen active">
       <header class="flex justify-between items-center mb-6 gap-3 flex-wrap">
         <div>
@@ -186,33 +181,48 @@
         </button>
       </header>
 
+      <!-- Form Novo Agendamento -->
       <div id="formAgendamentoCliente" class="card mb-5" style="display:none;">
         <h2 class="text-sm font-bold mb-4 flex items-center gap-2">
           <i data-lucide="calendar-plus" class="text-blue-500 w-4 h-4"></i> Novo Agendamento
         </h2>
-        <div class="grid grid-cols-1 gap-3 mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <!-- Veículo -->
           <div>
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Veículo</label>
-            <select id="agend-veiculo" class="input-field"><option value="">Selecione o veículo</option></select>
+            <select id="agend-veiculo" class="input-field" onchange="onMudaServicouOuData()">
+              <option value="">Selecione o veículo</option>
+            </select>
           </div>
+          <!-- Serviço -->
           <div>
             <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Serviço</label>
-            <select id="agend-servico" class="input-field"><option value="">Selecione o serviço</option></select>
+            <select id="agend-servico" class="input-field" onchange="onMudaServicouOuData()">
+              <option value="">Selecione o serviço</option>
+            </select>
           </div>
+          <!-- Data -->
           <div>
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Data e Hora</label>
-            <input type="datetime-local" id="agend-data" class="input-field">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Data</label>
+            <input type="date" id="agend-data" class="input-field" onchange="onMudaServicouOuData()">
           </div>
         </div>
-        <div class="flex justify-end gap-3 border-t border-slate-800 pt-3">
+
+        <!-- Seletor de Horário (carregado dinamicamente) -->
+        <div id="slots-container" style="display:none;">
+          <p class="slot-section-label">Horário disponível</p>
+          <div id="slots-content"></div>
+        </div>
+
+        <div class="flex justify-end gap-3 border-t border-slate-800 pt-3 mt-4">
           <button onclick="fecharFormAgendamento()" class="btn-secondary">Cancelar</button>
-          <button onclick="enviarAgendamento()" class="btn-primary">
+          <button onclick="enviarAgendamento()" class="btn-primary" id="btn-confirmar-agend" disabled>
             <i data-lucide="check" class="w-4 h-4"></i> Confirmar
           </button>
         </div>
       </div>
 
-      <!-- Stats — 1 coluna no mobile, 3 no desktop -->
+      <!-- Stats -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div class="stat-card">
           <div class="stat-icon bg-blue-500/10 text-blue-500"><i data-lucide="layers"></i></div>
@@ -244,14 +254,15 @@
       </div>
     </div>
 
-    <!-- VEÍCULOS -->
+    <!-- ══ VEÍCULOS ══ -->
     <div id="veiculos" class="screen">
       <header class="mb-6">
         <h1 class="text-2xl font-bold tracking-tight text-white">Meus Veículos</h1>
         <p class="text-slate-400 text-sm mt-1">Gerencie os veículos associados à sua conta.</p>
       </header>
+
       <div class="card mb-5">
-        <h2 class="text-sm font-bold mb-4 flex items-center gap-2">
+        <h2 class="text-sm font-bold mb-4 flex items-center gap-2" id="form-veiculo-titulo">
           <i data-lucide="plus-circle" class="text-blue-500 w-4 h-4"></i> Adicionar Novo Veículo
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -263,15 +274,19 @@
                    oninput="this.value=this.value.toUpperCase();const l=this.value.replace(/[^A-Z0-9]/g,'');const c=document.getElementById('placa-contador');c.textContent=l.length+'/7';c.classList.toggle('limite',l.length>=7);">
             <span class="placa-contador" id="placa-contador">0/7</span>
           </div>
-          <input id="cor" placeholder="Cor (ex: Cinza)"  class="input-field">
-          <input id="ano" placeholder="Ano (ex: 2023)"   class="input-field" type="number" min="1900" max="2099">
+          <input id="cor"  placeholder="Cor (ex: Cinza)"   class="input-field">
+          <input id="ano"  placeholder="Ano (ex: 2023)"    class="input-field" type="number" min="1900" max="2099">
         </div>
-        <div class="mt-3 flex justify-end">
-          <button onclick="criarVeiculo()" class="btn-primary">
+        <div class="mt-3 flex justify-end gap-3">
+          <button id="btn-cancelar-edicao-veiculo" onclick="cancelarEdicaoVeiculo()" class="btn-secondary" style="display:none;">
+            Cancelar
+          </button>
+          <button id="btn-salvar-veiculo" onclick="criarVeiculo()" class="btn-primary">
             <i data-lucide="plus" class="w-4 h-4"></i> Adicionar
           </button>
         </div>
       </div>
+
       <div class="card">
         <h2 class="text-sm font-bold mb-4 flex items-center gap-2">
           <i data-lucide="car-front" class="text-blue-500 w-4 h-4"></i> Veículos Cadastrados
@@ -280,7 +295,7 @@
       </div>
     </div>
 
-    <!-- CONTA -->
+    <!-- ══ CONTA ══ -->
     <div id="conta" class="screen">
       <header class="mb-6">
         <h1 class="text-2xl font-bold tracking-tight text-white">Minha Conta</h1>
@@ -311,7 +326,6 @@
               <i data-lucide="pencil" class="w-3 h-3"></i> Editar Perfil
             </button>
           </div>
-
           <div class="divide-y divide-slate-800">
             <div class="info-row"><span class="info-label">Nome</span><span class="info-value" id="conta-nome-row">—</span></div>
             <div class="info-row"><span class="info-label">E-mail</span><span class="info-value break-all" id="conta-email-row">—</span></div>
@@ -321,7 +335,6 @@
             <div class="info-row"><span class="info-label">Endereço</span><span class="info-value" id="conta-endereco">—</span></div>
             <div class="info-row"><span class="info-label">Membro desde</span><span class="info-value" id="conta-membro-desde">—</span></div>
           </div>
-
           <div class="mt-5 pt-4 border-t border-slate-800">
             <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Zona de Perigo</p>
             <button onclick="abrirModalExcluirConta()" class="btn-danger w-full sm:w-auto">
@@ -364,31 +377,12 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-            <div>
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Logradouro</label>
-              <input id="edit-logradouro" class="input-field" placeholder="Rua das Flores">
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Número</label>
-              <input id="edit-numero" class="input-field" placeholder="123">
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Complemento</label>
-              <input id="edit-complemento" class="input-field" placeholder="Apto 4B">
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Bairro</label>
-              <input id="edit-bairro" class="input-field" placeholder="Centro">
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Cidade</label>
-              <input id="edit-cidade" class="input-field" placeholder="São Paulo">
-            </div>
-            <div>
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Estado</label>
-              <input id="edit-estado" class="input-field" placeholder="SP" maxlength="2"
-                     oninput="this.value=this.value.toUpperCase()">
-            </div>
+            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Logradouro</label><input id="edit-logradouro" class="input-field" placeholder="Rua das Flores"></div>
+            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Número</label><input id="edit-numero" class="input-field" placeholder="123"></div>
+            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Complemento</label><input id="edit-complemento" class="input-field" placeholder="Apto 4B"></div>
+            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Bairro</label><input id="edit-bairro" class="input-field" placeholder="Centro"></div>
+            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Cidade</label><input id="edit-cidade" class="input-field" placeholder="São Paulo"></div>
+            <div><label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Estado</label><input id="edit-estado" class="input-field" placeholder="SP" maxlength="2" oninput="this.value=this.value.toUpperCase()"></div>
           </div>
 
           <div class="flex justify-end gap-3 border-t border-slate-800 pt-4 mt-2">
@@ -403,6 +397,19 @@
     </div>
 
   </main>
+</div>
+
+<!-- MODAL — Excluir Veículo -->
+<div id="modal-excluir-veiculo" class="modal-overlay hidden" onclick="if(event.target===this){this.classList.add('hidden');this.classList.remove('flex')}">
+  <div class="modal-box">
+    <div class="modal-icone modal-icone-perigo"><i data-lucide="trash-2" class="w-6 h-6"></i></div>
+    <p class="modal-titulo">Remover veículo?</p>
+    <p class="modal-desc">Esta ação é <strong>irreversível</strong>. O veículo será removido da sua conta.</p>
+    <div class="modal-acoes">
+      <button class="btn-modal-cancelar" onclick="document.getElementById('modal-excluir-veiculo').classList.add('hidden');document.getElementById('modal-excluir-veiculo').classList.remove('flex')">Cancelar</button>
+      <button class="btn-modal-perigo" onclick="excluirVeiculoConfirmado()">Sim, remover</button>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL — Excluir Conta -->
@@ -436,21 +443,15 @@
 <script src="auth.js"></script>
 <script src="completar-perfil.js"></script>
 <script src="tela_cliente.js"></script>
-
 <script>
   lucide.createIcons();
-
-  function abrirModalLogout() { const m=document.getElementById('modal-logout'); m.classList.remove('hidden'); m.classList.add('flex'); }
-  function fecharModalLogout() { const m=document.getElementById('modal-logout'); m.classList.add('hidden'); m.classList.remove('flex'); }
-  function executarLogout() { fecharModalLogout(); if(typeof logout==='function')logout(); else{localStorage.clear();window.location.href='login.html';} }
-
-  function abrirModalExcluirConta() { const m=document.getElementById('modal-excluir-conta'); m.classList.remove('hidden'); m.classList.add('flex'); }
-  function fecharModalExcluirConta() { const m=document.getElementById('modal-excluir-conta'); m.classList.add('hidden'); m.classList.remove('flex'); }
-  function executarExclusaoConta() { fecharModalExcluirConta(); if(typeof excluirConta==='function')excluirConta(); }
-
-  document.addEventListener('keydown', e => {
-    if(e.key==='Escape'){ fecharModalLogout(); fecharModalExcluirConta(); }
-  });
+  function abrirModalLogout(){const m=document.getElementById('modal-logout');m.classList.remove('hidden');m.classList.add('flex')}
+  function fecharModalLogout(){const m=document.getElementById('modal-logout');m.classList.add('hidden');m.classList.remove('flex')}
+  function executarLogout(){fecharModalLogout();if(typeof logout==='function')logout();else{localStorage.clear();window.location.href='login.html';}}
+  function abrirModalExcluirConta(){const m=document.getElementById('modal-excluir-conta');m.classList.remove('hidden');m.classList.add('flex')}
+  function fecharModalExcluirConta(){const m=document.getElementById('modal-excluir-conta');m.classList.add('hidden');m.classList.remove('flex')}
+  function executarExclusaoConta(){fecharModalExcluirConta();if(typeof excluirConta==='function')excluirConta();}
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){fecharModalLogout();fecharModalExcluirConta();}});
 </script>
 </body>
 </html>
