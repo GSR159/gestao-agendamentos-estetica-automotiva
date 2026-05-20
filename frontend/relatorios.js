@@ -1,11 +1,71 @@
-//  relatorios.js
+// relatorios.js
+
+let chartReceita  = null;
+let chartServicos = null;
+
+// Inicializa os dois gráficos — chamada pelo carregarRelatorios
+function inicializarGraficos(labelsReceita, dadosReceita, labelsServicos, dadosServicos) {
+  labelsReceita  = labelsReceita  || [];
+  dadosReceita   = dadosReceita   || [];
+  labelsServicos = labelsServicos || [];
+  dadosServicos  = dadosServicos  || [];
+
+  const ctxR = document.getElementById('receitaChart')?.getContext('2d');
+  const ctxS = document.getElementById('servicosChart')?.getContext('2d');
+  if (!ctxR || !ctxS) return;
+
+  if (chartReceita)  chartReceita.destroy();
+  if (chartServicos) chartServicos.destroy();
+
+  chartReceita = new Chart(ctxR, {
+    type: 'line',
+    data: {
+      labels: labelsReceita,
+      datasets: [{
+        label: 'Faturamento',
+        data: dadosReceita,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,0.1)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+      }
+    }
+  });
+
+  chartServicos = new Chart(ctxS, {
+    type: 'doughnut',
+    data: {
+      labels: labelsServicos,
+      datasets: [{
+        data: dadosServicos,
+        backgroundColor: ['#3b82f6','#10b981','#f59e0b','#6366f1','#8b5cf6'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 20 } }
+      }
+    }
+  });
+}
 
 async function carregarRelatorios() {
   try {
     const res  = await fetch(`${API}/relatorios`, { headers: getHeaders() });
     const data = await res.json();
 
-    // ── Cards ──
+    // Cards
     document.getElementById('val-ticket').innerText =
       'R$ ' + Number(data.ticketMedio || 0).toFixed(2).replace('.', ',');
     document.getElementById('val-receita').innerText =
@@ -13,17 +73,17 @@ async function carregarRelatorios() {
     document.getElementById('val-fidelizacao').innerText =
       (data.fidelizacao || 0) + '%';
 
-    // ── Evolução temporal ──
+    // Evolução temporal
     const labelsReceita = (data.evolucao || []).map(e => e.dia);
     const dadosReceita  = (data.evolucao || []).map(e => e.total);
 
-    // ── Mix de serviços ──
+    // Mix de serviços
     const labelsServicos = (data.servicos || []).map(s => s.nome);
     const dadosServicos  = (data.servicos || []).map(s => s.total);
 
     inicializarGraficos(labelsReceita, dadosReceita, labelsServicos, dadosServicos);
 
-    // ── Tabela de clientes ──
+    // Tabela de clientes
     const tbody = document.getElementById('rankingClientesBody');
     tbody.innerHTML = '';
 
@@ -35,22 +95,18 @@ async function carregarRelatorios() {
     data.clientes.forEach(cliente => {
       const tr = document.createElement('tr');
 
-      // Badges de serviços
       const servicosBadges = (cliente.servicos_realizados || '—')
         .split(', ')
-        .map(s =>
-          s === '—'
-            ? '<span style="color:#64748b">—</span>'
-            : `<span style="background:rgba(59,130,246,.12);color:#60a5fa;padding:2px 8px;border-radius:9999px;font-size:.72rem;font-weight:600;white-space:nowrap;">${s}</span>`
+        .map(s => s === '—'
+          ? '<span style="color:#64748b">—</span>'
+          : `<span style="background:rgba(59,130,246,.12);color:#60a5fa;padding:2px 8px;border-radius:9999px;font-size:.72rem;font-weight:600;white-space:nowrap;">${s}</span>`
         ).join('');
 
-      // Badge de funcionários
       const funcionarioNome  = cliente.funcionario || '—';
       const funcionarioBadge = funcionarioNome !== '—'
         ? `<span style="background:rgba(16,185,129,.12);color:#34d399;padding:2px 10px;border-radius:9999px;font-size:.72rem;font-weight:600;white-space:nowrap;">👤 ${funcionarioNome}</span>`
         : `<span style="color:#64748b">—</span>`;
 
-      // Badge(s) de veículos
       const veiculosNome  = cliente.veiculos || '—';
       const veiculosBadge = veiculosNome !== '—'
         ? veiculosNome.split(', ').map(v =>
@@ -60,19 +116,11 @@ async function carregarRelatorios() {
 
       tr.innerHTML = `
         <td class="font-medium text-white">${cliente.nome}</td>
-        <td>
-          <div style="display:flex;flex-wrap:wrap;gap:4px;">${veiculosBadge}</div>
-        </td>
+        <td><div style="display:flex;flex-wrap:wrap;gap:4px;">${veiculosBadge}</div></td>
         <td>${cliente.qtd}</td>
-        <td>
-          <div style="display:flex;flex-wrap:wrap;gap:4px;">${servicosBadges}</div>
-        </td>
-        <td>
-          <div style="display:flex;flex-wrap:wrap;gap:4px;">${funcionarioBadge}</div>
-        </td>
-        <td class="text-right font-bold text-white">
-          R$ ${Number(cliente.total).toFixed(2).replace('.', ',')}
-        </td>
+        <td><div style="display:flex;flex-wrap:wrap;gap:4px;">${servicosBadges}</div></td>
+        <td><div style="display:flex;flex-wrap:wrap;gap:4px;">${funcionarioBadge}</div></td>
+        <td class="text-right font-bold text-white">R$ ${Number(cliente.total).toFixed(2).replace('.', ',')}</td>
       `;
       tbody.appendChild(tr);
     });
@@ -84,4 +132,32 @@ async function carregarRelatorios() {
       tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-red-400">Erro ao carregar dados. Verifique a conexão.</td></tr>`;
     }
   }
+}
+
+// Exportar CSV
+function exportarExcel() {
+  const rows = document.getElementById('tabela-ranking')?.querySelectorAll('tr') || [];
+  const csv  = [];
+  for (const row of rows) {
+    const cols    = row.querySelectorAll('td, th');
+    const rowData = [];
+    for (const col of cols) {
+      const txt = col.innerText.replace(/,/g, '.').replace(/"/g, "'");
+      rowData.push('"' + txt + '"');
+    }
+    csv.push(rowData.join(';'));
+  }
+  const blob = new Blob(['\uFEFF' + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `Relatorio_SmartSystem_${new Date().toLocaleDateString()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// Exportar PDF via print
+function exportarPDF() {
+  window.print();
 }
