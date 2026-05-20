@@ -215,7 +215,7 @@ function renderizarDiasFechados(dias) {
     return;
   }
   lista.innerHTML = dias.map(d => {
-    const dataFmt = new Date(d.data + 'T12:00:00').toLocaleDateString('pt-BR', { 
+    const dataFmt = new Date(d.data.slice(0, 10) + 'T12:00:00').toLocaleDateString('pt-BR', { 
     weekday: 'short', 
     day: '2-digit', 
     month: 'short', 
