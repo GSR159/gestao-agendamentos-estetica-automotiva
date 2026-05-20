@@ -1,15 +1,18 @@
-// =====================================================
-//  clientes.js
-// =====================================================
+// clientes.js
+// Gerencia o CRUD de clientes: listagem, cadastro, edição e exclusão.
+// A exclusão tem uma proteção pra não deixar deletar a própria conta
+// nem qualquer conta com papel de superadmin.
+
+// ─── Listar clientes ──────────────────────────────────────────────────────────
 
 window.carregarClientes = async function () {
   try {
-    const res = await fetch(`${API}/clientes`, { headers: getHeaders() });
-    if (!res.ok) throw new Error('Erro na API');
+    const res  = await fetch(`${API}/clientes`, { headers: getHeaders() });
+    if (!res.ok) throw new Error('Falha na requisição');
 
     const dados = await res.json();
 
-    // Filtra clientes anonimizados pela LGPD — não exibe no admin
+    // Remove da listagem os registros anonimizados pela LGPD
     const ativos = dados.filter(c => c.nome !== 'Usuário Removido' && c.email !== null);
 
     const tabela = document.getElementById('tabela');
@@ -36,11 +39,13 @@ window.carregarClientes = async function () {
         <td class="text-right">
           <div class="flex items-center justify-end gap-2">
             <button onclick="editarCliente(${c.id})"
-              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors border border-blue-500/20">
+              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400
+                     hover:bg-blue-500/20 transition-colors border border-blue-500/20">
               Editar
             </button>
             <button onclick="confirmarExclusaoCliente(${c.id}, '${(c.nome ?? '').replace(/'/g, "\\'")}')"
-              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors border border-red-500/20">
+              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400
+                     hover:bg-red-500/20 transition-colors border border-red-500/20">
               Excluir
             </button>
           </div>
@@ -49,12 +54,15 @@ window.carregarClientes = async function () {
     `).join('');
 
     lucide.createIcons();
+
   } catch (erro) {
-    console.error(erro);
+    console.error('Erro ao carregar clientes:', erro);
     document.getElementById('tabela').innerHTML =
       `<tr><td colspan="4" class="py-8 text-center text-red-400">Erro ao carregar clientes.</td></tr>`;
   }
 };
+
+// ─── Formulário ───────────────────────────────────────────────────────────────
 
 window.abrirFormCliente = function () {
   document.getElementById('formCliente').style.display = 'block';
@@ -69,6 +77,8 @@ window.fecharFormCliente = function () {
   document.getElementById('formCliente').style.display = 'none';
 };
 
+// ─── Editar cliente ───────────────────────────────────────────────────────────
+
 window.editarCliente = async function (id) {
   try {
     const res     = await fetch(`${API}/clientes/${id}`, { headers: getHeaders() });
@@ -82,10 +92,12 @@ window.editarCliente = async function (id) {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (erro) {
-    console.error('Erro ao carregar cliente', erro);
+    console.error('Erro ao carregar cliente:', erro);
     toast.erro('Não foi possível carregar os dados do cliente.');
   }
 };
+
+// ─── Salvar (criar ou atualizar) ──────────────────────────────────────────────
 
 window.salvarCliente = async function () {
   const id       = document.getElementById('clienteId').value;
@@ -122,7 +134,8 @@ window.salvarCliente = async function () {
   }
 };
 
-/* ── Modal de confirmação de exclusão ── */
+// ─── Modal de confirmação de exclusão ────────────────────────────────────────
+
 window.confirmarExclusaoCliente = function (id, nome) {
   const modal = document.getElementById('modal-excluir-cliente');
   document.getElementById('modal-excluir-nome').textContent = nome;
@@ -137,10 +150,42 @@ window.fecharModalExcluirCliente = function () {
   modal.classList.remove('flex');
 };
 
+// ─── Executar exclusão ────────────────────────────────────────────────────────
+
 window.executarExclusaoCliente = async function () {
   const modal = document.getElementById('modal-excluir-cliente');
   const id    = modal.dataset.clienteId;
   fecharModalExcluirCliente();
+
+  // Bloqueia exclusão da própria conta e de qualquer superadmin.
+  // Essa verificação acontece no front, mas o ideal é ter a mesma
+  // proteção no backend também (retornando 403 nesse caso).
+  try {
+    const meRes  = await fetch(`${API}/auth/me`, { headers: getHeaders() });
+    const meData = await meRes.json();
+
+    // Não pode deletar a si mesmo
+    if (String(meData.id) === String(id)) {
+      toast.erro('Você não pode excluir sua própria conta.');
+      return;
+    }
+
+    // Busca os dados do alvo pra checar o papel dele
+    const alvoRes  = await fetch(`${API}/clientes/${id}`, { headers: getHeaders() });
+    const alvoData = await alvoRes.json();
+
+    // Superadmin e Admin não pode ser removido por ninguém via painel
+    if (alvoData.papel === 'superadmin' || alvoData.papel === 'Admin') {
+      toast.erro('Contas SUPERADMIN e Admin não podem ser excluídas.');
+      return;
+    }
+
+  } catch (e) {
+    // Se falhar a verificação, bloqueia por segurança ao invés de prosseguir
+    console.warn('Não foi possível verificar proteção de conta:', e);
+    toast.erro('Não foi possível verificar permissões. Tente novamente.');
+    return;
+  }
 
   try {
     const res = await fetch(`${API}/clientes/${id}`, {
@@ -158,5 +203,7 @@ window.executarExclusaoCliente = async function () {
     toast.erro('Erro de conexão ao remover cliente.');
   }
 };
+
+//INIT
 
 carregarClientes();
