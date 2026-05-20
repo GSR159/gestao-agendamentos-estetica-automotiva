@@ -214,7 +214,13 @@ function renderizarDiasFechados(dias) {
     return;
   }
   lista.innerHTML = dias.map(d => {
-    const dataFmt = new Date(d.data + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+    const dataFmt = new Date(d.data + 'T12:00:00').toLocaleDateString('pt-BR', { 
+    weekday: 'short', 
+    day: '2-digit', 
+    month: 'short', 
+    year: 'numeric',
+    timeZone: 'America/Sao_Paulo'
+    });
     return `
       <div class="dia-fechado-item">
         <div>
