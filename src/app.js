@@ -14,7 +14,7 @@ const relatorioRoutes   = require('./routes/relatorioRoutes');
 const clienteAreaRoutes = require('./routes/clienteAreaRoutes');
 const funcionarioRoutes = require('./routes/funcionarioRoutes');
 const agendaRoutes = require('./routes/agendaRoutes')
-
+const adminRoutes = require('./routes/adminRoutes');
 
 app.use(helmet());
 
@@ -68,6 +68,7 @@ app.use('/relatorios',   relatorioRoutes);
 app.use('/cliente',      clienteAreaRoutes);
 app.use('/funcionarios', funcionarioRoutes);
 app.use('/agenda', agendaRoutes);
+app.use('/admins', adminRoutes);
 
 // ─── Handler de erro global ───────────────────────────────────
 app.use((err, req, res, next) => {

@@ -1,8 +1,7 @@
 const pool = require('../config/db');
 
-// ─────────────────────────────────────────
-//  UTILITÁRIO
-// ─────────────────────────────────────────
+// ─── UTILITÁRIO ───────────────────────────────────────────────────────────────
+
 async function buscarClientePorEmail(email) {
   const resultado = await pool.query(
     'SELECT * FROM clientes WHERE email = $1',
@@ -22,9 +21,8 @@ function ehAniversario(dataNascimento) {
   );
 }
 
-// ─────────────────────────────────────────
-//  AGENDAMENTOS
-// ─────────────────────────────────────────
+// ─── AGENDAMENTOS ─────────────────────────────────────────────────────────────
+
 const meusAgendamentos = async (req, res) => {
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
@@ -73,9 +71,8 @@ const meusAgendamentos = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-//  VEÍCULOS
-// ─────────────────────────────────────────
+// ─── VEÍCULOS ─────────────────────────────────────────────────────────────────
+
 const meusVeiculos = async (req, res) => {
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
@@ -116,6 +113,30 @@ const criarVeiculoCliente = async (req, res) => {
   }
 };
 
+const atualizarVeiculoCliente = async (req, res) => {
+  const { id } = req.params;
+  const { modelo, placa, ano, marca, cor } = req.body;
+
+  try {
+    const cliente = await buscarClientePorEmail(req.usuario.email);
+    if (!cliente) return res.status(400).json({ erro: 'Cliente não encontrado.' });
+
+    const resultado = await pool.query(
+      `UPDATE veiculos SET modelo = $1, placa = $2, ano = $3, marca = $4, cor = $5
+       WHERE id = $6 AND cliente_id = $7 RETURNING *`,
+      [modelo, placa, ano || null, marca || null, cor || null, id, cliente.id]
+    );
+
+    if (resultado.rows.length === 0)
+      return res.status(404).json({ erro: 'Veículo não encontrado ou não pertence a você.' });
+
+    res.status(200).json(resultado.rows[0]);
+  } catch (error) {
+    console.error('Erro ao atualizar veículo:', error);
+    res.status(500).json({ erro: 'Erro ao atualizar veículo' });
+  }
+};
+
 const excluirVeiculoCliente = async (req, res) => {
   const { id } = req.params;
   try {
@@ -137,9 +158,8 @@ const excluirVeiculoCliente = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-//  AGENDAMENTO PELO CLIENTE
-// ─────────────────────────────────────────
+// ─── AGENDAMENTO PELO CLIENTE ─────────────────────────────────────────────────
+
 const criarAgendamentoCliente = async (req, res) => {
   const { veiculo_id, servico_id, data } = req.body;
 
@@ -165,34 +185,53 @@ const criarAgendamentoCliente = async (req, res) => {
       return res.status(400).json({ erro: 'Veículo não pertence a você.' });
 
     const inicioNovo = new Date(data);
-    const fimNovo    = new Date(inicioNovo);
-    fimNovo.setMinutes(fimNovo.getMinutes() + duracaoMinutos);
+    const fimNovo    = new Date(inicioNovo.getTime() + duracaoMinutos * 60000);
 
+    // Janela de busca — um dia antes e depois pra cobrir serviços longos
+    const janelaInicio = new Date(inicioNovo.getTime() - 24 * 60 * 60 * 1000).toISOString();
+    const janelaFim    = new Date(fimNovo.getTime()    + 24 * 60 * 60 * 1000).toISOString();
+
+    // Busca total de funcionários ativos
+    const totalFuncRes = await pool.query(
+      "SELECT COUNT(*) AS total FROM funcionarios WHERE ativo = TRUE"
+    );
+    const totalFuncionarios = parseInt(totalFuncRes.rows[0].total, 10);
+
+    if (totalFuncionarios === 0)
+      return res.status(400).json({ erro: 'Não há funcionários disponíveis no momento.' });
+
+    // Busca todos os agendamentos ativos que podem colidir com o horário pedido
     const agendamentosExistentes = await pool.query(`
       SELECT a.data, s.duracao_minutos
       FROM agendamentos a
       JOIN servicos s ON a.servico_id = s.id
-      WHERE a.status != 'recusado'
-      AND a.data BETWEEN $1 AND $2
-    `, [
-      new Date(inicioNovo.getTime() - 24 * 60 * 60 * 1000),
-      new Date(fimNovo.getTime()   + 24 * 60 * 60 * 1000)
-    ]);
+      WHERE a.status NOT IN ('recusado', 'cancelado', 'concluido')
+        AND a.data BETWEEN $1 AND $2
+    `, [janelaInicio, janelaFim]);
 
+    // Conta quantos agendamentos de fato se sobrepõem ao intervalo pedido
+    let funcionariosOcupados = 0;
     for (const ag of agendamentosExistentes.rows) {
       const inicioEx = new Date(ag.data);
-      const fimEx    = new Date(inicioEx);
-      fimEx.setMinutes(fimEx.getMinutes() + ag.duracao_minutos);
-      if (inicioNovo < fimEx && fimNovo > inicioEx)
-        return res.status(400).json({ erro: 'Horário já ocupado. Escolha outro horário.' });
+      const fimEx    = new Date(inicioEx.getTime() + ag.duracao_minutos * 60000);
+      if (inicioNovo < fimEx && fimNovo > inicioEx) {
+        funcionariosOcupados++;
+      }
     }
 
-    // Aniversário — desconto de 15%
+    // Só bloqueia se todos os funcionários estiverem ocupados — igual à lógica da barbearia
+    if (funcionariosOcupados >= totalFuncionarios) {
+      return res.status(400).json({
+        erro: `Todos os funcionários já estão ocupados neste horário. Escolha outro horário.`
+      });
+    }
+
+    // Tudo certo — verifica desconto de aniversário e cria o agendamento
     const isAniversario = ehAniversario(cliente.data_nascimento);
 
     const resultado = await pool.query(
       `INSERT INTO agendamentos
-       (cliente_id, veiculo_id, servico_id, data, duracao_minutos, status, desconto_aniversario)
+         (cliente_id, veiculo_id, servico_id, data, duracao_minutos, status, desconto_aniversario)
        VALUES ($1, $2, $3, $4, $5, 'pendente', $6) RETURNING *`,
       [cliente.id, veiculo_id, servico_id, data, duracaoMinutos, isAniversario]
     );
@@ -213,9 +252,8 @@ const criarAgendamentoCliente = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-//  MINHA CONTA — GET
-// ─────────────────────────────────────────
+// ─── MINHA CONTA — GET ────────────────────────────────────────────────────────
+
 const buscarConta = async (req, res) => {
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
@@ -244,11 +282,13 @@ const buscarConta = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-//  MINHA CONTA — PUT
-// ─────────────────────────────────────────
+// ─── MINHA CONTA — PUT ────────────────────────────────────────────────────────
+
 const atualizarConta = async (req, res) => {
-  const { telefone, data_nascimento, cep, logradouro, numero, complemento, bairro, cidade, estado } = req.body;
+  const {
+    telefone, data_nascimento, cep, logradouro,
+    numero, complemento, bairro, cidade, estado
+  } = req.body;
 
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
@@ -275,7 +315,7 @@ const atualizarConta = async (req, res) => {
     if (campos.length === 0)
       return res.status(400).json({ erro: 'Nenhum campo enviado para atualização.' });
 
-    // Calcula se o perfil ficou completo
+    // Recalcula se o perfil ficou completo com os novos dados
     const c = cliente;
     const perfilCompleto = !!(
       (telefone        ?? c.telefone)        &&
@@ -294,7 +334,10 @@ const atualizarConta = async (req, res) => {
     );
 
     if (telefone) {
-      await pool.query('UPDATE usuarios SET telefone = $1 WHERE id = $2', [telefone.trim(), req.usuario.id]);
+      await pool.query(
+        'UPDATE usuarios SET telefone = $1 WHERE id = $2',
+        [telefone.trim(), req.usuario.id]
+      );
     }
 
     res.status(200).json({
@@ -308,18 +351,19 @@ const atualizarConta = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-//  EXCLUIR CONTA — LGPD
-// ─────────────────────────────────────────
+// ─── EXCLUIR CONTA — LGPD ────────────────────────────────────────────────────
+
 const excluirConta = async (req, res) => {
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
 
     if (cliente) {
+      // Anonimiza dados sensíveis do veículo mas mantém o histórico
       await pool.query(
         `UPDATE veiculos SET placa = NULL, cor = NULL WHERE cliente_id = $1`,
         [cliente.id]
       );
+      // Anonimiza o cliente conforme a LGPD
       await pool.query(
         `UPDATE clientes
          SET nome = 'Usuário Removido', email = NULL, telefone = NULL,
@@ -331,7 +375,9 @@ const excluirConta = async (req, res) => {
       );
     }
 
+    // Remove o login
     await pool.query('DELETE FROM usuarios WHERE id = $1', [req.usuario.id]);
+
     res.status(200).json({ mensagem: 'Conta removida em conformidade com a LGPD.' });
   } catch (error) {
     console.error('Erro ao excluir conta:', error);
@@ -343,6 +389,7 @@ module.exports = {
   meusAgendamentos,
   meusVeiculos,
   criarVeiculoCliente,
+  atualizarVeiculoCliente,
   excluirVeiculoCliente,
   criarAgendamentoCliente,
   buscarConta,
