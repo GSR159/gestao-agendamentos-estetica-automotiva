@@ -210,4 +210,3 @@ router.get('/status-hoje', verificarToken, verificarAdmin, async (req, res) => {
 });
 
 module.exports = router;
-
