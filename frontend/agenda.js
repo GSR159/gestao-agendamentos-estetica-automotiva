@@ -208,7 +208,6 @@ async function carregarDiasFechados() {
 }
 
 function renderizarDiasFechados(dias) {
-    console.log('dias fechados',dias);
   const lista = document.getElementById('lista-dias-fechados');
   if (!dias.length) {
     lista.innerHTML = `<p class="vazio">Nenhum dia fechado cadastrado.</p>`;
