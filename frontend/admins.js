@@ -1,9 +1,7 @@
-// admins.js
 // Lógica da tela de gestão de administradores.
 // Só carrega corretamente se o usuário logado for superadmin —
-// o backend rejeita qualquer outra coisa nas rotas /admins.
 
-// ─── FORMULÁRIO ───────────────────────────────────────────────────────────────
+//FORMULÁRIO
 
 window.abrirFormAdmin = function () {
   document.getElementById('admin-nome').value  = '';
@@ -17,8 +15,7 @@ window.fecharFormAdmin = function () {
   document.getElementById('formAdmin').style.display = 'none';
 };
 
-// ─── CRIAR ADMIN ──────────────────────────────────────────────────────────────
-
+//CRIAR ADMIN
 window.salvarAdmin = async function () {
   const nome  = document.getElementById('admin-nome').value.trim();
   const email = document.getElementById('admin-email').value.trim();
@@ -64,7 +61,7 @@ window.salvarAdmin = async function () {
   }
 };
 
-// ─── LISTAR ADMINS ────────────────────────────────────────────────────────────
+//LISTAR ADMINS
 
 window.carregarAdmins = async function () {
   const tabela = document.getElementById('tabela-admins');
@@ -142,7 +139,7 @@ window.carregarAdmins = async function () {
   }
 };
 
-// ─── MODAL TOGGLE (ATIVAR/DESATIVAR) ─────────────────────────────────────────
+//MODAL TOGGLE (ATIVAR/DESATIVAR)
 
 window.confirmarToggleAdmin = function (id, nome, estaAtivo) {
   const modal = document.getElementById('modal-toggle-admin');
@@ -189,7 +186,7 @@ window.executarToggleAdmin = async function () {
   }
 };
 
-// ─── MODAL EXCLUSÃO ───────────────────────────────────────────────────────────
+//MODAL EXCLUSÃO
 
 window.confirmarExclusaoAdmin = function (id, nome) {
   const modal = document.getElementById('modal-excluir-admin');
@@ -246,6 +243,6 @@ window.verificarSuperAdmin = function () {
   }
 };
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
+// INIT 
 
 carregarAdmins();
