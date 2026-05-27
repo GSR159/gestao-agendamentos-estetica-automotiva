@@ -1,8 +1,6 @@
 const pool = require('../config/db');
 
-// ─────────────────────────────────────────
 //  LISTAR
-// ─────────────────────────────────────────
 const listarFuncionarios = async (req, res) => {
   try {
     const resultado = await pool.query(`
@@ -27,9 +25,7 @@ const listarFuncionarios = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
 //  LISTAR APENAS ATIVOS (para selects)
-// ─────────────────────────────────────────
 const listarFuncionariosAtivos = async (req, res) => {
   try {
     const resultado = await pool.query(
@@ -42,9 +38,7 @@ const listarFuncionariosAtivos = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
 //  CRIAR
-// ─────────────────────────────────────────
 const criarFuncionario = async (req, res) => {
   const { nome } = req.body;
 
@@ -64,9 +58,7 @@ const criarFuncionario = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
 //  ATUALIZAR (nome e/ou ativo)
-// ─────────────────────────────────────────
 const atualizarFuncionario = async (req, res) => {
   const { id } = req.params;
   const { nome, ativo } = req.body;
@@ -98,9 +90,7 @@ const atualizarFuncionario = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
 //  DELETAR
-// ─────────────────────────────────────────
 const deletarFuncionario = async (req, res) => {
   const { id } = req.params;
   try {
@@ -131,10 +121,8 @@ const deletarFuncionario = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
 //  DISPONIBILIDADE — retorna funcionários
 //  livres para um determinado horário
-// ─────────────────────────────────────────
 const funcionariosDisponiveis = async (req, res) => {
   const { data, servico_id } = req.query;
 

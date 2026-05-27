@@ -13,9 +13,7 @@ const EMAIL_FROM     = process.env.EMAIL_USER    || 'noreply@smartsystemauto.com
 
 const resend = new Resend(RESEND_API_KEY);
 
-// ─────────────────────────────────────────
 //  TEMPLATE BASE — moderno e minimalista
-// ─────────────────────────────────────────
 function emailBase({ titulo, subtitulo, corpo, btnTexto, btnHref, rodape }) {
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -112,9 +110,7 @@ function emailBase({ titulo, subtitulo, corpo, btnTexto, btnHref, rodape }) {
 </html>`;
 }
 
-// ─────────────────────────────────────────
 //  TEMPLATES ESPECÍFICOS
-// ─────────────────────────────────────────
 function emailConfirmacao(nome, link) {
   return emailBase({
     titulo:    `Confirme seu e-mail`,
@@ -169,9 +165,7 @@ function emailRecuperacaoSenha(nome, link) {
   });
 }
 
-// ─────────────────────────────────────────
 //  ENVIAR EMAIL
-// ─────────────────────────────────────────
 async function enviarEmail(para, assunto, html) {
   if (!RESEND_API_KEY) {
     console.warn('[EMAIL] Sem RESEND_API_KEY — email não enviado');
@@ -191,9 +185,7 @@ async function enviarEmail(para, assunto, html) {
   }
 }
 
-// ─────────────────────────────────────────
 //  REGISTER
-// ─────────────────────────────────────────
 const register = async (req, res) => {
   try {
     let { nome, email, senha, telefone, tipo } = req.body;
@@ -244,9 +236,7 @@ const register = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
 //  LOGIN
-// ─────────────────────────────────────────
 const login = async (req, res) => {
   try {
     let { email, senha } = req.body;
@@ -284,9 +274,7 @@ const login = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
 //  CONFIRMAR EMAIL
-// ─────────────────────────────────────────
 const confirmarEmail = async (req, res) => {
   try {
     const { token } = req.query;
@@ -315,9 +303,7 @@ const confirmarEmail = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
 //  REENVIAR EMAIL
-// ─────────────────────────────────────────
 const reenviarEmail = async (req, res) => {
   try {
     let { email } = req.body;
@@ -349,9 +335,7 @@ const reenviarEmail = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
 //  ESQUECI MINHA SENHA
-// ─────────────────────────────────────────
 const esquecerSenha = async (req, res) => {
   try {
     let { email } = req.body;
@@ -382,9 +366,7 @@ const esquecerSenha = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
 //  REDEFINIR SENHA
-// ─────────────────────────────────────────
 const redefinirSenha = async (req, res) => {
   try {
     const { token, novaSenha } = req.body;
@@ -418,9 +400,7 @@ const redefinirSenha = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
 //  VALIDAR TOKEN DE RECUPERAÇÃO
-// ─────────────────────────────────────────
 const validarTokenRecuperacao = async (req, res) => {
   try {
     const { token } = req.query;

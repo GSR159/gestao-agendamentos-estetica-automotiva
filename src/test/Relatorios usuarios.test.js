@@ -23,7 +23,6 @@ function mockQuery(rows = [], rowCount = 1) {
 
 beforeEach(() => jest.clearAllMocks());
 
-// ─── RELATÓRIOS ──────────────────────────────────────────
 describe('GET /relatorios', () => {
   test('deve retornar 401 sem token', async () => {
     const res = await request(app).get('/relatorios');
@@ -66,7 +65,6 @@ describe('GET /relatorios', () => {
   });
 });
 
-// ─── USUÁRIOS ────────────────────────────────────────────
 describe('POST /usuarios', () => {
   test('deve retornar 400 sem email ou senha', async () => {
     const res = await request(app).post('/usuarios').set('Authorization', `Bearer ${tokenSuper}`).send({ email: 'x@x.com' });
@@ -102,7 +100,6 @@ describe('POST /usuarios', () => {
   });
 });
 
-// ─── SUPERADMIN MIDDLEWARE ───────────────────────────────
 describe('superadminMiddleware', () => {
   test('deve retornar 403 para admin tentando rota superadmin', async () => {
     const res = await request(app).get('/admins').set('Authorization', `Bearer ${tokenAdmin}`);

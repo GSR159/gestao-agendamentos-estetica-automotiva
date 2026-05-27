@@ -1,7 +1,6 @@
 // src/utils/validacoes.js — schemas Joi centralizados
 const Joi = require('joi');
 
-// Auth 
 const schemaRegister = Joi.object({
   nome:     Joi.string().min(2).max(100).required().messages({
     'string.min':  'Nome deve ter ao menos 2 caracteres.',
@@ -37,7 +36,6 @@ const schemaRedefinirSenha = Joi.object({
   }),
 });
 
-// Agendamento 
 const schemaAgendamento = Joi.object({
   cliente_id:    Joi.number().integer().positive().required().messages({ 'any.required': 'cliente_id é obrigatório.' }),
   veiculo_id:    Joi.number().integer().positive().required().messages({ 'any.required': 'veiculo_id é obrigatório.' }),
@@ -63,7 +61,6 @@ const schemaStatusAgendamento = Joi.object({
   funcionario_id: Joi.number().integer().positive().allow(null).optional(),
 });
 
-// Serviço 
 const schemaServico = Joi.object({
   nome:            Joi.string().min(2).max(100).required(),
   preco:           Joi.number().positive().required(),
@@ -71,7 +68,6 @@ const schemaServico = Joi.object({
   descricao:       Joi.string().max(500).allow('', null).optional(),
 });
 
-//Funcionário
 const schemaFuncionario = Joi.object({
   nome:  Joi.string().min(2).max(100).required().messages({ 'any.required': 'Nome é obrigatório.' }),
 });
@@ -81,14 +77,12 @@ const schemaFuncionarioUpdate = Joi.object({
   ativo: Joi.boolean().optional(),
 }).min(1).messages({ 'object.min': 'Informe ao menos um campo para atualizar.' });
 
-// Cliente
 const schemaCliente = Joi.object({
   nome:     Joi.string().min(2).max(100).required(),
   email:    Joi.string().email().required(),
   telefone: Joi.string().max(20).allow('', null).optional(),
 });
 
-// Veículo 
 const schemaVeiculo = Joi.object({
   cliente_id: Joi.number().integer().positive().required(),
   modelo:     Joi.string().min(1).max(100).required(),
@@ -98,13 +92,11 @@ const schemaVeiculo = Joi.object({
   ano:        Joi.number().integer().min(1900).max(new Date().getFullYear() + 1).allow(null).optional(),
 });
 
-// Admin
 const schemaAdmin = Joi.object({
   nome:  Joi.string().min(2).max(100).required(),
   email: Joi.string().email().required(),
 });
 
-//Middleware factory 
 function validar(schema) {
   return (req, res, next) => {
     const { error } = schema.validate(req.body, { abortEarly: false, stripUnknown: true });

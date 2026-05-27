@@ -1,7 +1,5 @@
 const pool = require('../config/db');
 
-// ─── UTILITÁRIO ───────────────────────────────────────────────────────────────
-
 async function buscarClientePorEmail(email) {
   const resultado = await pool.query(
     'SELECT * FROM clientes WHERE email = $1',
@@ -20,8 +18,6 @@ function ehAniversario(dataNascimento) {
     hoje.getMonth() === nasc.getUTCMonth()
   );
 }
-
-// ─── AGENDAMENTOS ─────────────────────────────────────────────────────────────
 
 const meusAgendamentos = async (req, res) => {
   try {
@@ -70,8 +66,6 @@ const meusAgendamentos = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao listar agendamentos' });
   }
 };
-
-// ─── VEÍCULOS ─────────────────────────────────────────────────────────────────
 
 const meusVeiculos = async (req, res) => {
   try {
@@ -157,8 +151,6 @@ const excluirVeiculoCliente = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao excluir veículo' });
   }
 };
-
-// ─── AGENDAMENTO PELO CLIENTE ─────────────────────────────────────────────────
 
 const criarAgendamentoCliente = async (req, res) => {
   const { veiculo_id, servico_id, data } = req.body;
@@ -252,8 +244,6 @@ const criarAgendamentoCliente = async (req, res) => {
   }
 };
 
-// ─── MINHA CONTA — GET ────────────────────────────────────────────────────────
-
 const buscarConta = async (req, res) => {
   try {
     const cliente = await buscarClientePorEmail(req.usuario.email);
@@ -281,8 +271,6 @@ const buscarConta = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao buscar dados da conta.' });
   }
 };
-
-// ─── MINHA CONTA — PUT ────────────────────────────────────────────────────────
 
 const atualizarConta = async (req, res) => {
   const {
@@ -350,8 +338,6 @@ const atualizarConta = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao atualizar conta.' });
   }
 };
-
-// ─── EXCLUIR CONTA — LGPD ────────────────────────────────────────────────────
 
 const excluirConta = async (req, res) => {
   try {

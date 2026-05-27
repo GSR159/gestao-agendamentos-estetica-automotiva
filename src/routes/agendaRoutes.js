@@ -9,8 +9,6 @@ const verificarToken  = require('../middlewares/authMiddleware');
 const verificarAdmin  = require('../middlewares/adminMiddleware');
 const pool            = require('../config/db');
 
-// ── PÚBLICO / CLIENTE ─────────────────────────────
-
 /**
  * GET /agenda/slots?data=2025-06-10&servico_id=3
  * Retorna array de horários disponíveis para uma data e serviço.
@@ -110,8 +108,6 @@ router.get('/slots', verificarToken, async (req, res) => {
     res.status(500).json({ erro: 'Erro ao buscar horários disponíveis' });
   }
 });
-
-// ── ADMIN ONLY ────────────────────────────────────
 
 // GET /agenda/funcionamento — lista horários por dia da semana
 router.get('/funcionamento', verificarToken, verificarAdmin, async (req, res) => {

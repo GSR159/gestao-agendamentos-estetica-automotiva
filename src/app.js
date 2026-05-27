@@ -53,14 +53,12 @@ const limiterAuth = rateLimit({
 
 app.use(express.json({ limit: '10kb' }));
 
-//Documentação Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'Smart System — API Docs',
   customCss: '.swagger-ui .topbar { background-color: #0f172a; }',
 }));
 app.get('/api-docs.json', (req, res) => res.json(swaggerSpec));
 
-//Rotas
 app.use('/clientes',     clienteRoutes);
 app.use('/veiculos',     veiculoRoutes);
 app.use('/servicos',     servicoRoutes);
@@ -73,7 +71,6 @@ app.use('/funcionarios', funcionarioRoutes);
 app.use('/agenda',       agendaRoutes);
 app.use('/admins',       adminRoutes);
 
-//Handler de erro global
 app.use((err, req, res, next) => {
   if (process.env.NODE_ENV !== 'test') {
     logger.error(`[ERRO] ${err.message}`);

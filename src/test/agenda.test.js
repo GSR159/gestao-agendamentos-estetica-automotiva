@@ -22,7 +22,6 @@ function mockQuery(rows = [], rowCount = 1) {
 
 beforeEach(() => jest.clearAllMocks());
 
-// ─── STATUS HOJE ────────────────────────────────────────
 describe('GET /agenda/status-hoje', () => {
   test('deve retornar 401 sem token', async () => {
     const res = await request(app).get('/agenda/status-hoje');
@@ -64,7 +63,6 @@ describe('GET /agenda/status-hoje', () => {
   });
 });
 
-// ─── HORÁRIOS DE FUNCIONAMENTO ───────────────────────────
 describe('GET /agenda/funcionamento', () => {
   test('deve retornar lista de horários', async () => {
     mockQuery([
@@ -88,7 +86,6 @@ describe('PUT /agenda/funcionamento/:dia', () => {
   });
 });
 
-// ─── DIAS FECHADOS ───────────────────────────────────────
 describe('GET /agenda/dias-fechados', () => {
   test('deve listar dias fechados', async () => {
     mockQuery([{ id: 1, data: '2025-12-25', motivo: 'Natal' }]);
@@ -131,7 +128,6 @@ describe('DELETE /agenda/dias-fechados/:id', () => {
   });
 });
 
-// ─── SLOTS ───────────────────────────────────────────────
 describe('GET /agenda/slots', () => {
   test('deve retornar 400 sem parâmetros', async () => {
     const res = await request(app).get('/agenda/slots').set('Authorization', `Bearer ${tokenAdmin}`);
