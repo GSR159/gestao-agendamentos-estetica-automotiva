@@ -131,6 +131,7 @@
       </button>
     </div>
   </aside>
+
   <main class="main-content">
     <header class="flex justify-between items-center mb-8 flex-wrap gap-3">
       <div>
@@ -139,32 +140,61 @@
       </div>
     </header>
     <div class="grid grid-cols-1 gap-6">
+
+      <!-- Status de Hoje -->
       <div class="card" id="card-status-hoje">
         <div class="flex items-start justify-between flex-wrap gap-3">
           <div>
-            <h2 class="text-base font-bold mb-2 flex items-center gap-2"><i data-lucide="store" class="text-blue-500 w-4 h-4"></i> Status de Hoje</h2>
+            <h2 class="text-base font-bold mb-2 flex items-center gap-2">
+              <i data-lucide="store" class="text-blue-500 w-4 h-4"></i> Status de Hoje
+            </h2>
             <div id="status-badge" class="status-badge aberto">● Carregando...</div>
             <div id="status-detalhe"></div>
           </div>
           <button id="btn-toggle-hoje" class="btn-toggle">🔒 Fechar hoje</button>
         </div>
       </div>
+
+      <!-- Horários de Funcionamento -->
       <div class="card">
-        <h2 class="text-base font-bold mb-5 flex items-center gap-2"><i data-lucide="clock" class="text-blue-500 w-4 h-4"></i> Horários de Funcionamento <span class="text-xs font-normal text-slate-500 ml-1">— configure por dia da semana</span></h2>
-        <div id="tabela-funcionamento"><div class="text-slate-500 text-sm text-center py-6">Carregando...</div></div>
+        <h2 class="text-base font-bold mb-5 flex items-center gap-2">
+          <i data-lucide="clock" class="text-blue-500 w-4 h-4"></i>
+          Horários de Funcionamento
+          <span class="text-xs font-normal text-slate-500 ml-1">— configure por dia da semana</span>
+        </h2>
+        <div id="tabela-funcionamento">
+          <div class="text-slate-500 text-sm text-center py-6">Carregando...</div>
+        </div>
       </div>
+
+      <!-- Dias Fechados -->
       <div class="card">
-        <h2 class="text-base font-bold mb-5 flex items-center gap-2"><i data-lucide="calendar-x" class="text-red-400 w-4 h-4"></i> Dias Fechados <span class="text-xs font-normal text-slate-500 ml-1">— feriados e exceções</span></h2>
+        <h2 class="text-base font-bold mb-5 flex items-center gap-2">
+          <i data-lucide="calendar-x" class="text-red-400 w-4 h-4"></i>
+          Dias Fechados
+          <span class="text-xs font-normal text-slate-500 ml-1">— feriados e exceções</span>
+        </h2>
         <div class="add-dia-form">
-          <div class="input-group"><label>Data</label><input type="date" id="input-data-fechar"></div>
-          <div class="input-group" style="flex:2"><label>Motivo (opcional)</label><input type="text" id="input-motivo-especifico" placeholder="Ex: Feriado nacional, Evento..."></div>
+          <div class="input-group">
+            <label>Data</label>
+            <input type="date" id="input-data-fechar">
+          </div>
+          <div class="input-group" style="flex:2">
+            <label>Motivo (opcional)</label>
+            <input type="text" id="input-motivo-especifico" placeholder="Ex: Feriado nacional, Evento...">
+          </div>
           <button onclick="adicionarDiaFechado()" class="btn-add-dia">+ Adicionar</button>
         </div>
-        <div id="lista-dias-fechados" class="lista-dias"><div class="text-slate-500 text-sm text-center py-4">Carregando...</div></div>
+        <div id="lista-dias-fechados" class="lista-dias">
+          <div class="text-slate-500 text-sm text-center py-4">Carregando...</div>
+        </div>
       </div>
+
     </div>
   </main>
 </div>
+
+<!-- Modal: Fechar Hoje -->
 <div id="modal-fechar-hoje" class="modal-overlay hidden" onclick="if(event.target===this)fecharModalFecharHoje()">
   <div class="modal-box">
     <div class="modal-icone modal-icone-perigo"><i data-lucide="store" class="w-6 h-6"></i></div>
@@ -177,6 +207,8 @@
     </div>
   </div>
 </div>
+
+<!-- Modal: Logout -->
 <div id="modal-logout" class="modal-overlay hidden" onclick="if(event.target===this)fecharModalLogout()">
   <div class="modal-box">
     <div class="modal-icone modal-icone-aviso"><i data-lucide="log-out" class="w-6 h-6"></i></div>
@@ -188,22 +220,62 @@
     </div>
   </div>
 </div>
+
 <script src="config.js"></script>
 <script src="toast.js"></script>
 <script src="auth.js"></script>
 <script src="agenda.js"></script>
 <script>
   lucide.createIcons();
-    function abrirModalLogout(){const m=document.getElementById('modal-logout');m.classList.remove('hidden');m.classList.add('flex')}
-  function fecharModalLogout(){const m=document.getElementById('modal-logout');m.classList.add('hidden');m.classList.remove('flex')}
-  function executarLogout(){fecharModalLogout();if(typeof logout==='function')logout();else{localStorage.clear();window.location.href='login.html'}}
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){fecharModalLogout();if(typeof fecharModalFecharHoje==='function')fecharModalFecharHoje();}});
-    window.onload=()=>{
-    try{
-            try{const _t=localStorage.getItem('token');if(_t){const _p=JSON.parse(atob(_t.split('.')[1]));if(_p.tipo==='superadmin')document.getElementById('nav-admins')?.classList.remove('hidden')}}catch(_e){}
-      if(typeof verificarLogin==='function')verificarLogin();
-      if(typeof mostrarUsuario==='function'){mostrarUsuario();setTimeout(()=>{const s=document.getElementById('usuario-logado');if(s&&s.innerText!=='Usuário')document.getElementById('user-initial').innerText=s.innerText.charAt(0).toUpperCase()},300)}
-    }catch(e){console.error(e)}
+
+  function abrirModalLogout() {
+    const m = document.getElementById('modal-logout');
+    m.classList.remove('hidden'); m.classList.add('flex');
+  }
+  function fecharModalLogout() {
+    const m = document.getElementById('modal-logout');
+    m.classList.add('hidden'); m.classList.remove('flex');
+  }
+  function executarLogout() {
+    fecharModalLogout();
+    if (typeof logout === 'function') logout();
+    else { localStorage.clear(); window.location.href = 'login.html'; }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      fecharModalLogout();
+      if (typeof fecharModalFecharHoje === 'function') fecharModalFecharHoje();
+    }
+  });
+
+  // ── ÚNICO window.onload ──────────────────────────────
+  window.onload = () => {
+    try {
+      // Exibe menu de Administradores se for superadmin
+      try {
+        const _t = localStorage.getItem('token');
+        if (_t) {
+          const _p = JSON.parse(atob(_t.split('.')[1]));
+          if (_p.tipo === 'superadmin') document.getElementById('nav-admins')?.classList.remove('hidden');
+        }
+      } catch(_e) {}
+
+      if (typeof verificarLogin  === 'function') verificarLogin();
+      if (typeof mostrarUsuario  === 'function') {
+        mostrarUsuario();
+        setTimeout(() => {
+          const s = document.getElementById('usuario-logado');
+          if (s && s.innerText !== 'Usuário')
+            document.getElementById('user-initial').innerText = s.innerText.charAt(0).toUpperCase();
+        }, 300);
+      }
+    } catch(e) { console.error(e); }
+
+    // Carrega os dados da página
+    carregarStatusHoje();
+    carregarFuncionamento();
+    carregarDiasFechados();
   };
 </script>
 </body>

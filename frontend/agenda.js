@@ -4,25 +4,6 @@
 const DIAS_SEMANA = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
 const DIAS_CURTO  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
-// ── INIT ─────────────────────────────────────────────
-window.onload = async () => {
-  try {
-    if (typeof verificarLogin  === 'function') verificarLogin();
-    if (typeof mostrarUsuario  === 'function') {
-      mostrarUsuario();
-      setTimeout(() => {
-        const s = document.getElementById('usuario-logado');
-        if (s && s.innerText !== 'Usuário')
-          document.getElementById('user-initial').innerText = s.innerText.charAt(0).toUpperCase();
-      }, 300);
-    }
-  } catch(e) { console.error(e); }
-
-  await carregarStatusHoje();
-  await carregarFuncionamento();
-  await carregarDiasFechados();
-};
-
 // ── STATUS HOJE ──────────────────────────────────────
 async function carregarStatusHoje() {
   try {
@@ -49,7 +30,6 @@ async function carregarStatusHoje() {
       card.classList.add('fechado');
     }
 
-    // Botão de fechar/abrir hoje
     const btnToggle = document.getElementById('btn-toggle-hoje');
     if (data.aberto) {
       btnToggle.textContent = '🔒 Fechar hoje';
@@ -66,7 +46,6 @@ async function carregarStatusHoje() {
 async function reabrirHoje() {
   const hoje = new Date().toISOString().slice(0, 10);
   try {
-    // Busca o ID do dia fechado para hoje
     const res  = await fetch(`${API}/agenda/dias-fechados`, { headers: getHeaders() });
     const dias  = await res.json();
     const diaHoje = dias.find(d => d.data?.slice(0,10) === hoje);
@@ -196,7 +175,7 @@ async function salvarDiaComValores(dia, abertura, fechamento, intervalo, ativo) 
   } catch(e) { toast.erro('Erro de conexão.'); }
 }
 
-// ── DIAS FECHADOS ────────────────────────────────────
+// DIAS FECHADOS
 async function carregarDiasFechados() {
   try {
     const res  = await fetch(`${API}/agenda/dias-fechados`, { headers: getHeaders() });
@@ -214,12 +193,12 @@ function renderizarDiasFechados(dias) {
     return;
   }
   lista.innerHTML = dias.map(d => {
-    const dataFmt = new Date(d.data.slice(0, 10) + 'T12:00:00').toLocaleDateString('pt-BR', { 
-    weekday: 'short', 
-    day: '2-digit', 
-    month: 'short', 
-    year: 'numeric',
-    timeZone: 'America/Sao_Paulo'
+    const dataFmt = new Date(d.data.slice(0, 10) + 'T12:00:00').toLocaleDateString('pt-BR', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'America/Sao_Paulo'
     });
     return `
       <div class="dia-fechado-item">
@@ -249,8 +228,8 @@ async function adicionarDiaFechado() {
       const e = await res.json();
       toast.erro(e.erro || 'Erro ao adicionar.'); return;
     }
-    document.getElementById('input-data-fechar').value          = '';
-    document.getElementById('input-motivo-especifico').value    = '';
+    document.getElementById('input-data-fechar').value       = '';
+    document.getElementById('input-motivo-especifico').value = '';
     toast.sucesso('Dia fechado adicionado!');
     await carregarDiasFechados();
     await carregarStatusHoje();
