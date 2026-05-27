@@ -107,11 +107,20 @@
         <button onclick="criarAgendamento()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold transition-all">Guardar Agendamento</button>
       </div>
     </div>
+    <!-- Filtros de Status -->
+    <div class="flex flex-wrap gap-2 mb-3">
+      <button class="btn-filtro-status text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-500 bg-blue-600 text-white transition-all" data-status="" onclick="filtrarStatus('')">Todos</button>
+      <button class="btn-filtro-status text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-700 bg-transparent text-slate-400 hover:text-white transition-all" data-status="pendente" onclick="filtrarStatus('pendente')">Pendentes</button>
+      <button class="btn-filtro-status text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-700 bg-transparent text-slate-400 hover:text-white transition-all" data-status="aprovado" onclick="filtrarStatus('aprovado')">Aprovados</button>
+      <button class="btn-filtro-status text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-700 bg-transparent text-slate-400 hover:text-white transition-all" data-status="concluido" onclick="filtrarStatus('concluido')">Concluídos</button>
+      <button class="btn-filtro-status text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-700 bg-transparent text-slate-400 hover:text-white transition-all" data-status="recusado" onclick="filtrarStatus('recusado')">Recusados</button>
+    </div>
     <div class="data-card shadow-2xl">
       <table>
         <thead><tr><th>Cliente</th><th>Veículo</th><th>Serviço</th><th>Data / Hora</th><th>Status</th><th>Funcionário</th><th class="text-right">Ações</th></tr></thead>
         <tbody id="tabela"><tr><td colspan="7" class="py-20 text-center text-slate-500"><div class="flex flex-col items-center gap-3"><i data-lucide="cloud-download" class="w-10 h-10 opacity-20"></i><p>Sincronizando com a nuvem...</p></div></td></tr></tbody>
       </table>
+      <div id="paginacao-agend"></div>
     </div>
   </main>
 </div>

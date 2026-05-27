@@ -12,7 +12,7 @@ const request      = require('supertest');
 const jwt          = require('jsonwebtoken');
 const app          = require('../app');
 const pool         = require('../config/db');
-const SECRET       = process.env.JWT_SECRET || 'segredo_super_forte';
+const SECRET       = process.env.JWT_SECRET;
 const tokenAdmin   = jwt.sign({ id: 1, tipo: 'admin',   email: 'admin@test.com' }, SECRET, { expiresIn: '1d' });
 const tokenCliente = jwt.sign({ id: 2, tipo: 'cliente', email: 'cli@test.com', cliente_id: 5 }, SECRET, { expiresIn: '1d' });
 
@@ -23,17 +23,18 @@ function mockQuery(rows = [], rowCount = 1) {
 beforeEach(() => jest.clearAllMocks());
 
 describe('GET /clientes', () => {
-
-  test('deve listar clientes', async () => {
-    mockQuery([{ id: 1, nome: 'João', email: 'joao@test.com', telefone: '11999' }]);
+  test('deve listar clientes com paginação', async () => {
+    mockQuery([{ id: 1, nome: 'João', email: 'joao@test.com', telefone: '11999' }]); // SELECT
+    mockQuery([{ count: '1' }]); // COUNT
     const res = await request(app).get('/clientes').set('Authorization', `Bearer ${tokenAdmin}`);
     expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body).toHaveProperty('dados');
+    expect(Array.isArray(res.body.dados)).toBe(true);
+    expect(res.body).toHaveProperty('total', 1);
   });
 });
 
 describe('GET /clientes/:id', () => {
-
   test('deve retornar 404 se não existir', async () => {
     mockQuery([]);
     const res = await request(app).get('/clientes/999').set('Authorization', `Bearer ${tokenAdmin}`);
@@ -49,7 +50,6 @@ describe('GET /clientes/:id', () => {
 });
 
 describe('POST /clientes', () => {
-
   test('deve criar cliente com sucesso', async () => {
     mockQuery([{ id: 5, nome: 'Novo', email: 'novo@test.com', telefone: '11777' }]);
     const res = await request(app).post('/clientes').set('Authorization', `Bearer ${tokenAdmin}`)
@@ -60,7 +60,6 @@ describe('POST /clientes', () => {
 });
 
 describe('PUT /clientes/:id', () => {
-
   test('deve retornar 404 se não existir', async () => {
     mockQuery([]);
     const res = await request(app).put('/clientes/999').set('Authorization', `Bearer ${tokenAdmin}`)
@@ -78,7 +77,6 @@ describe('PUT /clientes/:id', () => {
 });
 
 describe('DELETE /clientes/:id (LGPD)', () => {
-
   test('deve retornar 404 se não existir', async () => {
     mockQuery([]);
     const res = await request(app).delete('/clientes/999').set('Authorization', `Bearer ${tokenAdmin}`);
@@ -96,7 +94,6 @@ describe('DELETE /clientes/:id (LGPD)', () => {
 });
 
 describe('GET /veiculos', () => {
-
   test('deve retornar 401 sem token', async () => {
     const res = await request(app).get('/veiculos');
     expect(res.status).toBe(401);
@@ -110,8 +107,7 @@ describe('GET /veiculos', () => {
 });
 
 describe('POST /veiculos', () => {
-
-  test('deve retornar 400 se campos faltarem', async () => {
+  test('deve retornar 400 se campos faltarem (Joi)', async () => {
     const res = await request(app).post('/veiculos').set('Authorization', `Bearer ${tokenAdmin}`).send({ marca: 'Toyota' });
     expect(res.status).toBe(400);
   });
@@ -126,7 +122,6 @@ describe('POST /veiculos', () => {
 });
 
 describe('DELETE /veiculos/:id', () => {
-
   test('deve retornar 403 para cliente', async () => {
     const res = await request(app).delete('/veiculos/1').set('Authorization', `Bearer ${tokenCliente}`);
     expect(res.status).toBe(403);

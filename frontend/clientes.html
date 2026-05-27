@@ -106,11 +106,22 @@
         <button onclick="salvarCliente()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold transition-all">Guardar Dados</button>
       </div>
     </div>
+    <!-- Busca -->
+    <div class="mb-3">
+      <div class="relative">
+        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"></i>
+        <input type="text" placeholder="Buscar por nome ou e-mail..."
+          oninput="onBuscaCliente(this.value)"
+          style="background:#0f172a;border:1px solid #334155;color:#f8fafc;padding:.65rem 1rem .65rem 2.25rem;border-radius:.75rem;outline:none;width:100%;font-size:.875rem;box-sizing:border-box;transition:border-color .2s;"
+          onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#334155'">
+      </div>
+    </div>
     <div class="data-card shadow-2xl">
       <table>
         <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th class="text-right">Ações</th></tr></thead>
         <tbody id="tabela"><tr><td colspan="4" class="py-20 text-center text-slate-500"><div class="flex flex-col items-center gap-3"><i data-lucide="database" class="w-10 h-10 opacity-10"></i><p>A carregar base de dados...</p></div></td></tr></tbody>
       </table>
+      <div id="paginacao-clientes"></div>
     </div>
   </main>
 </div>
