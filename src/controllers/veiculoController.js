@@ -1,4 +1,5 @@
 // controllers/veiculoController.js
+
 const VeiculoService = require('../services/veiculoService');
 const logger         = require('../utils/logger');
 

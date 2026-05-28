@@ -310,9 +310,7 @@
     <i data-lucide="arrow-up" class="w-5 h-5"></i>
   </button>
 
-  <!-- ═══════════════════════════════════════════════════
-       MODAL — Termos de Uso
-  ════════════════════════════════════════════════════ -->
+  <!--  MODAL — Termos de Uso -->
   <div id="modal-termos" class="modal-doc-overlay" onclick="if(event.target===this) fecharModalTermos()">
     <div class="modal-doc-box">
       <div class="modal-doc-header">
@@ -398,9 +396,7 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════
-       MODAL — Política de Privacidade (LGPD)
-  ════════════════════════════════════════════════════ -->
+  <!-- MODAL — Política de Privacidade (LGPD) -->
   <div id="modal-lgpd" class="modal-doc-overlay" onclick="if(event.target===this) fecharModalLGPD()">
     <div class="modal-doc-box">
       <div class="modal-doc-header">
@@ -518,7 +514,7 @@
       document.getElementById('btn-topo').classList.toggle('visivel', window.scrollY > 300);
     });
 
-    // ── Toggle senha ──────────────────────────────────────────
+    // Toggle senha 
     function togglePassword(inputId, eyeId, eyeOffId) {
       const input  = document.getElementById(inputId);
       const eye    = document.getElementById(eyeId);
@@ -532,7 +528,7 @@
       }
     }
 
-    // ── Validação da senha em tempo real ──────────────────────
+    // Validação da senha em tempo real 
     function avaliarSenha(senha) {
       const regras = [
         { id: 'rule-length',  valid: senha.length >= 6 },
@@ -553,7 +549,7 @@
              /[a-z]/.test(senha) && /[!@#$%^&*(),.?":{}|<>]/.test(senha);
     }
 
-    // ── Modais de Termos e LGPD ───────────────────────────────
+    // Modais de Termos e LGPD 
     function abrirModalTermos() {
       const m = document.getElementById('modal-termos');
       m.classList.add('aberto');
@@ -577,7 +573,7 @@
       document.body.style.overflow = '';
     }
 
-    // ── Executar cadastro ─────────────────────────────────────
+    // Executar cadastro 
     async function executarCadastro() {
       const erroDiv    = document.getElementById('alerta-erro');
       const sucessoDiv = document.getElementById('alerta-sucesso');

@@ -1,6 +1,3 @@
-// =====================================================
-// NOVAS ROTAS DE AGENDA — adicionar no seu Express
-// =====================================================
 // Arquivo: routes/agendaRoutes.js
 
 const express         = require('express');

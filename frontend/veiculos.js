@@ -206,5 +206,3 @@ async function executarDeleteVeiculo(id) {
     carregarVeiculos(_offsetVeic);
   } catch { toast.erro('Erro de conexão.'); }
 }
-
-// INIT (chamado pelo window.onload do HTML)

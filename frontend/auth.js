@@ -4,7 +4,7 @@ function verificarLogin() {
   if (!token) window.location.href = 'login.html';
 }
 
-// ================= LOGIN =================
+//LOGIN
 async function login() {
   const email  = document.getElementById('email').value.trim().toLowerCase();
   const senha  = document.getElementById('senha').value;
@@ -75,7 +75,7 @@ async function login() {
   }
 }
 
-// ================= REENVIAR EMAIL =================
+// REENVIAR EMAIL 
 async function reenviarEmail() {
   const email  = document.getElementById('email').value.trim().toLowerCase();
   const erroEl = document.getElementById('erro');
@@ -111,14 +111,14 @@ async function reenviarEmail() {
   }
 }
 
-// ================= BOTÃO REENVIO =================
+//BOTÃO REENVIO 
 function mostrarBotaoReenvio(mostrar) {
   const btn = document.getElementById('btn-reenviar');
   if (!btn) return;
   btn.style.display = mostrar ? 'block' : 'none';
 }
 
-// ================= JWT =================
+//JWT
 function parseJwt(token) {
   try {
     const base64 = token.split('.')[1];

@@ -192,7 +192,7 @@
     const params = new URLSearchParams(window.location.search);
     const TOKEN  = params.get('token');
 
-    // ── Valida token ao carregar ────────────────────────────────
+    //Valida token ao carregar
     async function validarToken() {
       if (!TOKEN) { mostrarTokenInvalido(); return; }
 
@@ -218,7 +218,7 @@
       lucide.createIcons();
     }
 
-    // ── Toggle senha ─────────────────────────────────────────────
+    //Toggle senha
     function toggleSenha(inputId, eyeId, eyeOffId) {
       const input  = document.getElementById(inputId);
       const eye    = document.getElementById(eyeId);
@@ -232,10 +232,10 @@
       }
     }
 
-    // ── Avalia força da senha ────────────────────────────────────
+    // Avalia força da senha 
     function avaliarSenha(senha) {
       const regras = [
-        { id: 'rule-length',  valid: senha.length >= 6 },
+        { id: 'rule-length',  valid: senha.length >= 8 },
         { id: 'rule-upper',   valid: /[A-Z]/.test(senha) },
         { id: 'rule-lower',   valid: /[a-z]/.test(senha) },
         { id: 'rule-special', valid: /[!@#$%^&*(),.?":{}|<>]/.test(senha) },
@@ -253,7 +253,7 @@
       return senha.length >= 6 && /[A-Z]/.test(senha) && /[a-z]/.test(senha) && /[!@#$%^&*(),.?":{}|<>]/.test(senha);
     }
 
-    // ── Redefine senha ───────────────────────────────────────────
+    // Redefine senha
     async function redefinirSenha() {
       const novaSenha     = document.getElementById('nova-senha').value;
       const confirmar     = document.getElementById('confirmar-senha').value;
@@ -306,7 +306,7 @@
       }
     }
 
-    // ── Init ─────────────────────────────────────────────────────
+    // INIT
     validarToken();
   </script>
 </body>

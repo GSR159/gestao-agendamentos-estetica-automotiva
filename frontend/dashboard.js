@@ -17,7 +17,7 @@ async function carregarDashboard() {
       ? resposta
       : resposta.dados || resposta.data || resposta.agendamentos || [];
 
-    // ── CARDS ────────────────────────────────────────────────
+    // CARDS
     document.getElementById('total').innerText = dados.length;
 
     document.getElementById('pendentes').innerText =
@@ -29,7 +29,7 @@ async function carregarDashboard() {
     document.getElementById('recusados').innerText =
       dados.filter(a => a.status === 'recusado').length;
 
-    // ── GRÁFICO ──────────────────────────────────────────────
+    // GRÁFICO
     const dias = {};
 
     dados.forEach(a => {
@@ -127,7 +127,7 @@ async function carregarDashboard() {
       });
     }
 
-    // ── AGENDA DE HOJE ───────────────────────────────────────
+    // AGENDA DE HOJE
     const hoje = new Date().toLocaleDateString('pt-BR');
 
     const agendaHoje = dados

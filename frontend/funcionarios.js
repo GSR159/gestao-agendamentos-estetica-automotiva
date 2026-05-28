@@ -1,8 +1,5 @@
-// =====================================================
-//  funcionarios.js
-// =====================================================
 
-// ── Formulário ────────────────────────────────────────
+// Formulário
 function abrirForm() {
   document.getElementById('funcId').value    = '';
   document.getElementById('funcNome').value  = '';
@@ -56,7 +53,7 @@ async function salvarFuncionario() {
   }
 }
 
-// ── Listar ────────────────────────────────────────────
+// Listar
 async function carregarFuncionarios() {
   try {
     const res   = await fetch(`${API}/funcionarios`, { headers: getHeaders() });
@@ -112,7 +109,7 @@ async function carregarFuncionarios() {
   }
 }
 
-// ── Modal de exclusão ─────────────────────────────────
+// Modal de exclusão 
 let _funcParaExcluir = null;
 
 function confirmarExclusao(id, nome) {
@@ -148,5 +145,5 @@ async function executarExclusao() {
   }
 }
 
-// ── Init ──────────────────────────────────────────────
+// INIT
 carregarFuncionarios();

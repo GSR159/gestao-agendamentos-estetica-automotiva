@@ -13,7 +13,7 @@ function getUsuario() {
   } catch { return null; }
 }
 
-// ── NAVEGAÇÃO ────────────────────────────────────────
+//  NAVEGAÇÃO 
 function trocarTela(tela) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -22,7 +22,7 @@ function trocarTela(tela) {
   lucide.createIcons();
 }
 
-// ── BADGES ──────────────────────────────────────────
+//  BADGES 
 function getBadge(status) {
   const map = {
     pendente:  { cls: 'badge-pending',  icon: 'clock',        label: 'Pendente'  },
@@ -34,7 +34,7 @@ function getBadge(status) {
   return `<span class="badge ${s.cls}"><i data-lucide="${s.icon}" style="width:11px;height:11px"></i> ${s.label}</span>`;
 }
 
-// ── GOOGLE CALENDAR ──────────────────────────────────
+//  GOOGLE CALENDAR 
 function abrirGoogleCalendar(agendamento) {
   const inicio = new Date(agendamento.data);
   const fim    = new Date(inicio.getTime() + 60 * 60 * 1000);
@@ -55,8 +55,7 @@ function abrirGoogleCalendar(agendamento) {
   window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank');
 }
 
-// ── APPLE CALENDAR (ICS) ─────────────────────────────
-// RFC 5545 §3.3.11 — vírgulas no campo LOCATION devem ser escapadas como \,
+//  APPLE CALENDAR (ICS) 
 function baixarICS(agendamento) {
   const inicio  = new Date(agendamento.data);
   const fim     = new Date(inicio.getTime() + 60 * 60 * 1000);
@@ -109,7 +108,7 @@ function getBotoesCalendario(agendamento) {
     </div>`;
 }
 
-// ── AGENDAMENTOS ─────────────────────────────────────
+//  AGENDAMENTOS 
 async function carregarAgendamentos() {
   try {
     const res  = await fetch(`${API}/cliente/meus-agendamentos`, { headers: getHeaders() });
@@ -141,7 +140,7 @@ async function carregarAgendamentos() {
   }
 }
 
-// ── SLOT PICKER ──────────────────────────────────────
+//  SLOT PICKER 
 let _horarioSelecionado = null;
 let _slotDebounce       = null;
 
@@ -220,7 +219,7 @@ function selecionarSlot(horario, btn) {
   document.getElementById('btn-confirmar-agend').disabled = false;
 }
 
-// ── FORM AGENDAMENTO ─────────────────────────────────
+//  FORM AGENDAMENTO 
 let listaServicosCliente = [];
 
 async function carregarServicosParaAgendamento() {
@@ -310,7 +309,7 @@ async function enviarAgendamento() {
   }
 }
 
-// ── VEÍCULOS ─────────────────────────────────────────
+//  VEÍCULOS 
 let _veiculoEditandoId = null;
 
 async function carregarVeiculos() {
@@ -437,7 +436,7 @@ async function criarVeiculo() {
     return;
   }
 
-  // ── EDIÇÃO ──
+  //  EDIÇÃO 
   if (_veiculoEditandoId) {
     try {
       const res = await fetch(`${API}/cliente/meus-veiculos/${_veiculoEditandoId}`, {
@@ -452,7 +451,7 @@ async function criarVeiculo() {
     return;
   }
 
-  // ── CRIAÇÃO ──
+  //  CRIAÇÃO 
   try {
     const res = await fetch(`${API}/cliente/meus-veiculos`, {
       method: 'POST', headers: getHeaders(),
@@ -467,7 +466,7 @@ async function criarVeiculo() {
   } catch { toast.erro('Erro de conexão.'); }
 }
 
-// ── CONTA ────────────────────────────────────────────
+//  CONTA 
 let _dadosConta = null;
 
 async function carregarDadosConta() {
@@ -525,7 +524,7 @@ async function carregarDadosConta() {
 
 function preencherInfoConta() { carregarDadosConta(); }
 
-// ── EDITAR PERFIL ────────────────────────────────────
+//  EDITAR PERFIL 
 function abrirEdicaoPerfil() {
   if (!_dadosConta) return;
   const c   = _dadosConta;
@@ -602,7 +601,7 @@ async function salvarPerfil() {
   finally { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
 }
 
-// ── EXCLUIR CONTA ────────────────────────────────────
+// EXCLUIR CONTA 
 async function excluirConta() {
   try {
     const res  = await fetch(`${API}/cliente/minha-conta`, { method: 'DELETE', headers: getHeaders() });
@@ -616,7 +615,7 @@ async function excluirConta() {
   } catch { toast.erro('Erro de conexão.'); }
 }
 
-// ── INIT ─────────────────────────────────────────────
+// INIT 
 window.onload = () => {
   verificarLogin();
   carregarDadosConta();

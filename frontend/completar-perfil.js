@@ -5,7 +5,7 @@
 
 (function () {
 
-  // ── Injeta estilos ───────────────────────────────────────────
+  // Injeta estilos 
   function injetarEstilos() {
     if (document.getElementById('cp-styles')) return;
     const style = document.createElement('style');
@@ -114,7 +114,7 @@
     document.head.appendChild(style);
   }
 
-  // ── Cria banner persistente ──────────────────────────────────
+  //Cria banner persistente 
   function criarBannerPersistente() {
     if (document.getElementById('cp-banner-incompleto')) return;
     const div = document.createElement('div');
@@ -133,7 +133,7 @@
     setTimeout(() => { div.style.display = 'flex'; }, 100);
   }
 
-  // ── Cria o modal ─────────────────────────────────────────────
+  // Cria o modal 
   function criarModal() {
     const div = document.createElement('div');
     div.id = 'cp-overlay';
@@ -214,21 +214,21 @@
     document.body.appendChild(div);
   }
 
-  // ── Abre o modal (usado pelo banner) ─────────────────────────
+  // Abre o modal (usado pelo banner) 
   window._cpAbrirModal = function () {
     const banner = document.getElementById('cp-banner-incompleto');
     if (banner) banner.style.display = 'none';
     if (!document.getElementById('cp-overlay')) criarModal();
   };
 
-  // ── Formata CEP ──────────────────────────────────────────────
+  // Formata CEP
   window._cpFormatarCEP = function (input) {
     let v = input.value.replace(/\D/g, '');
     if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5, 8);
     input.value = v;
   };
 
-  // ── Busca ViaCEP ─────────────────────────────────────────────
+  // Busca ViaCEP
   window._cpBuscarCEP = async function () {
     const cep    = document.getElementById('cp-cep').value.replace(/\D/g, '');
     const status = document.getElementById('cp-cep-status');
@@ -275,14 +275,14 @@
     if (e.key === 'Enter' && document.activeElement?.id === 'cp-cep') window._cpBuscarCEP();
   });
 
-  // ── Pular → mostra banner ────────────────────────────────────
+  // Pular → mostra banner 
   window._cpPular = function () {
     const overlay = document.getElementById('cp-overlay');
     if (overlay) overlay.remove();
     criarBannerPersistente();
   };
 
-  // ── Salvar perfil ────────────────────────────────────────────
+  // Salvar perfil 
   window._cpSalvar = async function () {
     const btn            = document.getElementById('cp-btn-salvar');
     const telefone       = document.getElementById('cp-telefone').value.trim();
@@ -333,13 +333,13 @@
     }
   };
 
-  // ── Banner de aniversário ────────────────────────────────────
+  // Banner de aniversário 
   function mostrarBannerAniversario() {
     const banner = document.getElementById('cp-banner-aniversario');
     if (banner) banner.style.display = 'block';
   }
 
-  // ── Verifica perfil ao carregar ──────────────────────────────
+  // Verifica perfil ao carregar
   async function verificarPerfil() {
     try {
       const token = localStorage.getItem('token');
