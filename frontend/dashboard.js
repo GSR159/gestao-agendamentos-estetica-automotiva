@@ -3,7 +3,7 @@ async function carregarDashboard() {
     const res = await fetch(`${API}/agendamentos`, { headers: getHeaders() });
     if (!res.ok) throw new Error('Erro ao buscar dados');
 
-    const dados = await res.json();
+    const {dados} = await res.json();
 
     // ── CARDS ────────────────────────────────────────────────
     document.getElementById('total').innerText     = dados.length;
