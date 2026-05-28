@@ -8,7 +8,14 @@ async function carregarDashboard() {
       throw new Error('Erro ao buscar dados');
     }
 
-    const dados = await res.json();
+    const resposta = await res.json();
+
+    console.log('Resposta API:', resposta);
+
+    // GARANTE ARRAY
+    const dados = Array.isArray(resposta)
+      ? resposta
+      : resposta.dados || resposta.data || resposta.agendamentos || [];
 
     // ── CARDS ────────────────────────────────────────────────
     document.getElementById('total').innerText = dados.length;
@@ -43,7 +50,11 @@ async function carregarDashboard() {
       }
     });
 
-    const labels = Object.keys(dias);
+    const labels = Object.keys(dias).sort((a, b) => {
+      const [da, ma, ya] = a.split('/');
+      const [db, mb, yb] = b.split('/');
+      return new Date(`${ya}-${ma}-${da}`) - new Date(`${yb}-${mb}-${db}`);
+    });
 
     const aprovadosData = labels.map(d => dias[d].aprovado);
     const pendentesData = labels.map(d => dias[d].pendente);
@@ -51,70 +62,70 @@ async function carregarDashboard() {
 
     const canvas = document.getElementById('grafico');
 
-    if (!canvas) return;
+    if (canvas) {
+      if (window.graficoInstance) {
+        window.graficoInstance.destroy();
+      }
 
-    if (window.graficoInstance) {
-      window.graficoInstance.destroy();
-    }
-
-    window.graficoInstance = new Chart(canvas.getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: 'Aprovados',
-            data: aprovadosData,
-            backgroundColor: '#22c55e',
-            borderRadius: 6
-          },
-          {
-            label: 'Pendentes',
-            data: pendentesData,
-            backgroundColor: '#f59e0b',
-            borderRadius: 6
-          },
-          {
-            label: 'Recusados',
-            data: recusadosData,
-            backgroundColor: '#ef4444',
-            borderRadius: 6
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'top',
-            labels: {
-              color: '#94a3b8',
-              padding: 16
+      window.graficoInstance = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Aprovados',
+              data: aprovadosData,
+              backgroundColor: '#22c55e',
+              borderRadius: 6
+            },
+            {
+              label: 'Pendentes',
+              data: pendentesData,
+              backgroundColor: '#f59e0b',
+              borderRadius: 6
+            },
+            {
+              label: 'Recusados',
+              data: recusadosData,
+              backgroundColor: '#ef4444',
+              borderRadius: 6
             }
-          }
+          ]
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              precision: 0,
-              color: '#94a3b8'
-            },
-            grid: {
-              color: '#1e293b'
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                color: '#94a3b8',
+                padding: 16
+              }
             }
           },
-          x: {
-            ticks: {
-              color: '#94a3b8'
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0,
+                color: '#94a3b8'
+              },
+              grid: {
+                color: '#1e293b'
+              }
             },
-            grid: {
-              display: false
+            x: {
+              ticks: {
+                color: '#94a3b8'
+              },
+              grid: {
+                display: false
+              }
             }
           }
         }
-      }
-    });
+      });
+    }
 
     // ── AGENDA DE HOJE ───────────────────────────────────────
     const hoje = new Date().toLocaleDateString('pt-BR');
@@ -122,10 +133,7 @@ async function carregarDashboard() {
     const agendaHoje = dados
       .filter(a => {
         if (!a.data) return false;
-
-        return (
-          new Date(a.data).toLocaleDateString('pt-BR') === hoje
-        );
+        return new Date(a.data).toLocaleDateString('pt-BR') === hoje;
       })
       .sort((a, b) => new Date(a.data) - new Date(b.data));
 
@@ -165,13 +173,11 @@ async function carregarDashboard() {
         color: '#22c55e',
         label: 'Aprovado'
       },
-
       pendente: {
         bg: 'rgba(251,191,36,.12)',
         color: '#fbbf24',
         label: 'Pendente'
       },
-
       recusado: {
         bg: 'rgba(239,68,68,.12)',
         color: '#ef4444',
