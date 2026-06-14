@@ -27,7 +27,7 @@ router.post('/agendar', criarAgendamentoCliente);
 
 // Conta do cliente
 router.get   ('/minha-conta', buscarConta);
-router.put   ('/minha-conta', atualizarConta);   // atualiza telefone, endereço, nascimento
+router.put   ('/minha-conta', atualizarConta);
 router.delete('/minha-conta', excluirConta);
 
 module.exports = router;

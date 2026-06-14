@@ -167,7 +167,7 @@ window.carregarAgendamentos = async function (offset = 0) {
       hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Sao_Paulo'
     });
     const selectFunc = `<select onchange="atribuirFuncionario(${a.id}, this.value)"
-      style="background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:.3rem .6rem;
+      style="background:#221b17;border:1px solid #3a2f29;color:#fdf6f0;padding:.3rem .6rem;
              border-radius:.5rem;font-size:.75rem;outline:none;min-width:130px;">
       ${opsFuncionarios.replace(`value="${a.funcionario_id}"`, `value="${a.funcionario_id}" selected`)}
     </select>`;
@@ -239,8 +239,8 @@ window.filtrarStatus = function (status) {
   document.querySelectorAll('.btn-filtro-status').forEach(btn => {
     const ativo = btn.dataset.status === status;
     btn.style.background  = ativo ? 'var(--primary)' : 'transparent';
-    btn.style.color       = ativo ? '#fff' : '#94a3b8';
-    btn.style.borderColor = ativo ? 'var(--primary)' : '#334155';
+    btn.style.color       = ativo ? '#fff' : '#a8978c';
+    btn.style.borderColor = ativo ? 'var(--primary)' : '#3a2f29';
   });
 
   carregarAgendamentos(0);

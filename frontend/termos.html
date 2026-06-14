@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Termos de Uso - Smart System</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
+  <style>h1,h2,h3,.logo,.btn-primary,.stat-value,.modal-titulo{font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em}
     :root {
-      --bg-deep: #020617; --bg-surface: #0f172a; --bg-card: #1e293b;
-      --border: #334155; --primary: #3b82f6;
-      --text-main: #f8fafc; --text-muted: #94a3b8;
+      --bg-deep: #0c0a08; --bg-surface: #17120f; --bg-card: #221b17;
+      --border: #3a2f29; --primary: #ff6b35;
+      --text-main: #fdf6f0; --text-muted: #a8978c;
     }
     * { box-sizing: border-box; }
     body {
@@ -21,7 +22,7 @@
     }
     .bg-glow {
       position: fixed; width: 420px; height: 420px;
-      background: radial-gradient(circle, rgba(59,130,246,.15) 0%, rgba(2,6,23,0) 70%);
+      background: radial-gradient(circle, rgba(255,107,53,.15) 0%, rgba(2,6,23,0) 70%);
       border-radius: 50%; z-index: 0; filter: blur(60px); pointer-events: none;
     }
     .page-wrap {
@@ -35,7 +36,7 @@
     }
     .brand { display: flex; align-items: center; gap: 12px; }
     .brand-icon {
-      width: 48px; height: 48px; border-radius: 14px; background: #2563eb;
+      width: 48px; height: 48px; border-radius: 14px; background: #e85a2a;
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 12px 30px rgba(37,99,235,.25); flex-shrink: 0;
     }
@@ -61,7 +62,7 @@
     ul { padding-left: 20px; margin: 8px 0 12px; }
     li { margin-bottom: 4px; }
     .highlight {
-      background: rgba(59,130,246,.08); border: 1px solid rgba(59,130,246,.18);
+      background: rgba(255,107,53,.08); border: 1px solid rgba(255,107,53,.18);
       color: #dbeafe; border-radius: 14px; padding: 14px 16px; margin-bottom: 24px;
       font-size: .93rem; line-height: 1.65;
     }
@@ -79,7 +80,7 @@
       border: none; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; z-index: 9999;
-      box-shadow: 0 4px 12px rgba(59,130,246,.4);
+      box-shadow: 0 4px 12px rgba(255,107,53,.4);
       opacity: 0; pointer-events: none;
       transition: opacity .3s, transform .3s;
     }

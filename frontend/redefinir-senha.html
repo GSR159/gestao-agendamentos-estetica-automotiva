@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Redefinir Senha — Smart System</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
+  <style>h1,h2,h3,.logo,.btn-primary,.stat-value,.modal-titulo{font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em}
     :root {
-      --bg-deep: #020617; --bg-surface: #0f172a; --bg-card: #1e293b;
-      --border: #334155; --primary: #3b82f6;
-      --text-main: #f8fafc; --text-muted: #94a3b8;
+      --bg-deep: #0c0a08; --bg-surface: #17120f; --bg-card: #221b17;
+      --border: #3a2f29; --primary: #ff6b35;
+      --text-main: #fdf6f0; --text-muted: #a8978c;
     }
     body {
       margin: 0;
@@ -21,7 +22,7 @@
     }
     .bg-glow {
       position: absolute; width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(59,130,246,.15) 0%, rgba(2,6,23,0) 70%);
+      background: radial-gradient(circle, rgba(255,107,53,.15) 0%, rgba(2,6,23,0) 70%);
       border-radius: 50%; z-index: -1; filter: blur(60px);
     }
     .container { width: 100%; max-width: 420px; z-index: 10; animation: fadeIn .4s ease-out; }
@@ -50,7 +51,7 @@
       border-radius: .75rem; outline: none;
       width: 100%; box-sizing: border-box; transition: all .2s;
     }
-    input:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 2px rgba(59,130,246,.1); }
+    input:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 2px rgba(255,107,53,.1); }
     .toggle-password {
       position: absolute; right: 1rem; top: 50%;
       transform: translateY(-50%); color: var(--text-muted);
@@ -61,13 +62,13 @@
     .rule-item { display: flex; align-items: center; gap: .375rem; transition: all .3s; }
     .rule-valid { color: #22c55e !important; }
     .btn-primary {
-      background: var(--primary); color: white;
+      background: var(--primary); color: var(--primary-ink);
       width: 100%; padding: .875rem; border-radius: .75rem;
       font-weight: 700; font-size: 1rem; border: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: .5rem;
       margin-top: 1.5rem; transition: all .2s;
     }
-    .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+    .btn-primary:hover { background: #e85a2a; transform: translateY(-1px); }
     .btn-primary:disabled { opacity: .6; cursor: not-allowed; transform: none; }
     .alerta {
       padding: .75rem; border-radius: .5rem; font-size: .875rem;
@@ -93,7 +94,7 @@
 
   <div class="container">
     <div class="text-center mb-6">
-      <div class="inline-flex items-center justify-center p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-900/20 mb-4">
+      <div class="inline-flex items-center justify-center p-3 bg-orange-600 rounded-2xl shadow-lg shadow-orange-900/20 mb-4">
         <i data-lucide="lock-keyhole" class="w-8 h-8 text-white"></i>
       </div>
       <h1 class="text-3xl font-extrabold tracking-tight text-white mb-1">Nova Senha</h1>
@@ -176,7 +177,7 @@
         <p class="font-bold text-white mb-1">Link inválido ou expirado</p>
         <p class="text-slate-400 text-sm mb-4">Solicite um novo link de recuperação de senha.</p>
         <a href="recuperar-senha.html"
-           style="display:inline-flex;align-items:center;gap:8px;background:#3b82f6;color:white;padding:10px 20px;border-radius:10px;text-decoration:none;font-weight:700;">
+           style="display:inline-flex;align-items:center;gap:8px;background:#ff6b35;color:white;padding:10px 20px;border-radius:10px;text-decoration:none;font-weight:700;">
           <i data-lucide="mail" style="width:16px;height:16px"></i>
           Solicitar novo link
         </a>
@@ -192,7 +193,7 @@
     const params = new URLSearchParams(window.location.search);
     const TOKEN  = params.get('token');
 
-    // ── Valida token ao carregar ────────────────────────────────
+    //Valida token ao carregar
     async function validarToken() {
       if (!TOKEN) { mostrarTokenInvalido(); return; }
 
@@ -218,7 +219,7 @@
       lucide.createIcons();
     }
 
-    // ── Toggle senha ─────────────────────────────────────────────
+    //Toggle senha
     function toggleSenha(inputId, eyeId, eyeOffId) {
       const input  = document.getElementById(inputId);
       const eye    = document.getElementById(eyeId);
@@ -232,10 +233,10 @@
       }
     }
 
-    // ── Avalia força da senha ────────────────────────────────────
+    // Avalia força da senha 
     function avaliarSenha(senha) {
       const regras = [
-        { id: 'rule-length',  valid: senha.length >= 6 },
+        { id: 'rule-length',  valid: senha.length >= 8 },
         { id: 'rule-upper',   valid: /[A-Z]/.test(senha) },
         { id: 'rule-lower',   valid: /[a-z]/.test(senha) },
         { id: 'rule-special', valid: /[!@#$%^&*(),.?":{}|<>]/.test(senha) },
@@ -253,7 +254,7 @@
       return senha.length >= 6 && /[A-Z]/.test(senha) && /[a-z]/.test(senha) && /[!@#$%^&*(),.?":{}|<>]/.test(senha);
     }
 
-    // ── Redefine senha ───────────────────────────────────────────
+    // Redefine senha
     async function redefinirSenha() {
       const novaSenha     = document.getElementById('nova-senha').value;
       const confirmar     = document.getElementById('confirmar-senha').value;
@@ -306,7 +307,7 @@
       }
     }
 
-    // ── Init ─────────────────────────────────────────────────────
+    // INIT
     validarToken();
   </script>
 </body>

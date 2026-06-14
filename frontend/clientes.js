@@ -44,7 +44,7 @@ window.carregarClientes = async function (offset = 0) {
         <td class="text-right">
           <div class="flex items-center justify-end gap-2">
             <button onclick="editarCliente(${c.id})"
-              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors border border-blue-500/20">
+              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors border border-orange-500/20">
               Editar
             </button>
             <button onclick="confirmarExclusaoCliente(${c.id}, '${(c.nome ?? '').replace(/'/g, "\\'")}')"
@@ -128,6 +128,7 @@ window.editarCliente = async function (id) {
     document.getElementById('nome').value      = cliente.nome;
     document.getElementById('email').value     = cliente.email;
     document.getElementById('telefone').value  = cliente.telefone;
+    maskTelefone(document.getElementById('telefone'));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (erro) {
     toast.erro('Não foi possível carregar os dados do cliente.');

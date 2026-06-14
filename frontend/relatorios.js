@@ -24,8 +24,8 @@ function inicializarGraficos(labelsReceita, dadosReceita, labelsServicos, dadosS
       datasets: [{
         label: 'Faturamento',
         data: dadosReceita,
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59,130,246,0.1)',
+        borderColor: '#ff6b35',
+        backgroundColor: 'rgba(255,107,53,0.1)',
         fill: true,
         tension: 0.4,
         borderWidth: 3
@@ -35,8 +35,8 @@ function inicializarGraficos(labelsReceita, dadosReceita, labelsServicos, dadosS
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
-        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+        y: { grid: { color: '#3a2f29' }, ticks: { color: '#a8978c' } },
+        x: { grid: { display: false }, ticks: { color: '#a8978c' } }
       }
     }
   });
@@ -47,14 +47,14 @@ function inicializarGraficos(labelsReceita, dadosReceita, labelsServicos, dadosS
       labels: labelsServicos,
       datasets: [{
         data: dadosServicos,
-        backgroundColor: ['#3b82f6','#10b981','#f59e0b','#6366f1','#8b5cf6'],
+        backgroundColor: ['#ff6b35','#10b981','#f59e0b','#6366f1','#8b5cf6'],
         borderWidth: 0
       }]
     },
     options: {
       responsive: true,
       plugins: {
-        legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 20 } }
+        legend: { position: 'bottom', labels: { color: '#a8978c', padding: 20 } }
       }
     }
   });
@@ -72,6 +72,13 @@ async function carregarRelatorios() {
       'R$ ' + Number(data.receitaTotal || 0).toFixed(2).replace('.', ',');
     document.getElementById('val-fidelizacao').innerText =
       (data.fidelizacao || 0) + '%';
+    document.getElementById('val-ltv').innerText =
+      'R$ ' + Number(data.ltvMedio || 0).toFixed(2).replace('.', ',');
+    const segs = data.segmentos || {};
+    ['novo','ativo','fiel','em_risco','inativo'].forEach(k => {
+      const el = document.getElementById('seg-' + k);
+      if (el) el.textContent = segs[k] || 0;
+    });
 
     // Evolução temporal
     const labelsReceita = (data.evolucao || []).map(e => e.dia);
@@ -99,7 +106,7 @@ async function carregarRelatorios() {
         .split(', ')
         .map(s => s === '—'
           ? '<span style="color:#64748b">—</span>'
-          : `<span style="background:rgba(59,130,246,.12);color:#60a5fa;padding:2px 8px;border-radius:9999px;font-size:.72rem;font-weight:600;white-space:nowrap;">${s}</span>`
+          : `<span style="background:rgba(45,212,191,.12);color:#2dd4bf;padding:2px 8px;border-radius:9999px;font-size:.72rem;font-weight:600;white-space:nowrap;">${s}</span>`
         ).join('');
 
       const funcionarioNome  = cliente.funcionario || '—';

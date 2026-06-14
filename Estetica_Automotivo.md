@@ -1,102 +1,90 @@
-[README.md](https://github.com/user-attachments/files/26128972/README.md)
-# 🚗 Sistema de Agendamento para Estética Automotiva
+# 🚗 Smart System — Estética Automotiva
 
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
-![Node](https://img.shields.io/badge/Node.js-18+-green)
+![CI](https://github.com/GSR159/gestao-agendamentos-estetica-automotiva/actions/workflows/ci.yml/badge.svg)
+![Node](https://img.shields.io/badge/Node.js-20+-green)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
-![License](https://img.shields.io/badge/license-Acad%C3%AAmico-lightgrey)
+![License](https://img.shields.io/badge/license-Acadêmico-lightgrey)
+
+Sistema completo de gestão de agendamentos para estética automotiva, desenvolvido como Trabalho de Conclusão de Curso em Engenharia de Software.
 
 ---
 
 ## 📌 Sobre o Projeto
 
-Este projeto consiste no desenvolvimento de um sistema backend para gerenciamento de agendamentos em uma estética automotiva.
+O Smart System permite o gerenciamento completo de uma estética automotiva: clientes, veículos, serviços, funcionários, agendamentos e relatórios financeiros. O sistema conta com área administrativa e área do cliente, autenticação JWT, notificações por e-mail e conformidade com a LGPD.
 
-O sistema permite o controle de clientes, veículos, serviços e agendamentos, garantindo organização operacional e evitando conflitos de horários.
-
-Este projeto está sendo desenvolvido como Trabalho de Conclusão de Curso (TCC) em Engenharia de Software.
-
----
-
-## 🎯 Objetivos do Sistema
-
-- Gerenciar clientes e veículos
-- Controlar serviços oferecidos
-- Realizar agendamentos
-- Evitar conflitos de horários automaticamente
-- Estruturar base para dashboard e automações futuras
+**Deploy em produção:** [smartsystemauto.com.br](https://smartsystemauto.com.br)  
+**Documentação da API:** `/api-docs` (Swagger UI)
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Tecnologias
 
-- **Node.js**
-- **Express**
-- **PostgreSQL**
-- **pgAdmin**
-- **Git & GitHub**
-- *(Futuro)* MQTT + Node-RED
-- *(Futuro)* Frontend Web
+| Camada | Tecnologia |
+|---|---|
+| Runtime | Node.js 20+ |
+| Framework | Express 4 |
+| Banco de dados | PostgreSQL |
+| Autenticação | JWT + bcrypt |
+| Validação | Joi |
+| E-mail | Resend |
+| Testes | Jest + Supertest |
+| Documentação | Swagger / OpenAPI 3 |
+| Logging | Winston |
+| Agendamento | node-cron |
+| Deploy | Vercel |
+| CI/CD | GitHub Actions |
 
 ---
 
 ## 📂 Estrutura do Projeto
 
 ```
-backend/
+├── frontend/               # Interface web (HTML + Tailwind CSS + JS vanilla)
+│   ├── agendamentos.html
+│   ├── clientes.html
+│   ├── veiculos.html
+│   ├── servicos.html
+│   ├── funcionarios.html
+│   ├── agenda.html
+│   ├── relatorios.html
+│   ├── tela_cliente.html
+│   └── ...
 │
-├── controllers/
-├── routes/
-├── models/
-├── database/
-│
-├── app.js
-└── server.js
+└── src/                    # Backend (Node.js / Express)
+    ├── config/
+    │   ├── db.js           # Conexão PostgreSQL
+    │   ├── swagger.js      # Configuração OpenAPI
+    │   └── constants.js    # Constantes e magic numbers
+    ├── controllers/        # Recebem req/res e delegam ao service
+    ├── services/           # Lógica de negócio
+    ├── models/             # Queries SQL
+    ├── routes/             # Endpoints + documentação Swagger
+    ├── middlewares/        # Auth, Admin, Superadmin
+    ├── jobs/               # Cron jobs (expiração de agendamentos)
+    ├── utils/
+    │   ├── logger.js       # Winston
+    │   └── validacoes.js   # Schemas Joi
+    ├── test/               # Testes Jest + Supertest
+    ├── app.js
+    └── server.js
 ```
 
 ---
 
-## 🗄️ Banco de Dados
+## ⚙️ Como Executar
 
-O sistema utiliza PostgreSQL com as seguintes tabelas principais:
+### Pré-requisitos
 
-- `clientes`
-- `veiculos`
-- `servicos`
-- `agendamentos`
-
-### Exemplo: tabela de agendamentos
-
-```sql
-CREATE TABLE agendamentos (
-    id SERIAL PRIMARY KEY,
-    cliente_id INTEGER REFERENCES clientes(id),
-    veiculo_id INTEGER REFERENCES veiculos(id),
-    servico_id INTEGER REFERENCES servicos(id),
-    data TIMESTAMP,
-    status VARCHAR(50)
-);
-```
-
----
-
-## 🔌 Funcionalidades Implementadas
-
-- ✔️ Cadastro de veículos  
-- ✔️ Cadastro de serviços  
-- ✔️ Cadastro de agendamentos  
-- ✔️ Validação de conflitos de horário  
-- ✔️ API REST estruturada  
-- ✔️ Integração com PostgreSQL  
-
----
-
-## ⚙️ Como Executar o Projeto
+- Node.js 20+
+- PostgreSQL 14+
+- npm
 
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/seu-repositorio.git
+git clone https://github.com/GSR159/gestao-agendamentos-estetica-automotiva.git
+cd gestao-agendamentos-estetica-automotiva
 ```
 
 ### 2. Instale as dependências
@@ -105,82 +93,144 @@ git clone https://github.com/seu-usuario/seu-repositorio.git
 npm install
 ```
 
-### 3. Configure o banco de dados
+### 3. Configure as variáveis de ambiente
 
-- Instale o PostgreSQL
-- Crie o banco de dados
-- Execute os scripts SQL
+Copie o arquivo de exemplo e preencha com seus dados:
 
-### 4. Configure o arquivo `.env`
+```bash
+cp .env.example .env
+```
 
 ```env
-DB_HOST=localhost
-DB_USER=postgres
-DB_PASSWORD=sua_senha
-DB_NAME=estetica_automotiva
-DB_PORT=5432
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/estetica_db
+JWT_SECRET=sua_string_secreta_longa
+FRONT_URL=http://127.0.0.1:5500
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx
+EMAIL_USER=noreply@seudominio.com.br
+NODE_ENV=development
 PORT=3000
 ```
+
+### 4. Configure o banco de dados
+
+Crie o banco e execute o script SQL:
+
+```bash
+psql -U postgres -c "CREATE DATABASE estetica_db;"
+psql -U postgres -d estetica_db -f database/database.sql
+```
+
+Ou via pgAdmin: abra o Query Tool e execute o arquivo `database/database.sql`.
 
 ### 5. Inicie o servidor
 
 ```bash
+# Desenvolvimento (com hot reload)
 npm run dev
+
+# Produção
+npm start
 ```
 
-ou
+O servidor sobe em `http://localhost:3000`  
+A documentação da API fica em `http://localhost:3000/api-docs`
+
+---
+
+## 🔌 Endpoints Principais
+
+A documentação completa e interativa está disponível em `/api-docs` (Swagger UI).
+
+| Módulo | Endpoints |
+|---|---|
+| **Auth** | `POST /auth/register`, `POST /auth/login`, `GET /auth/confirmar-email`, `POST /auth/esqueci-senha`, `POST /auth/redefinir-senha` |
+| **Clientes** | `GET /clientes`, `GET /clientes/:id`, `POST /clientes`, `PUT /clientes/:id`, `DELETE /clientes/:id`, `GET /clientes/:id/exportar` |
+| **Veículos** | `GET /veiculos`, `POST /veiculos`, `PUT /veiculos/:id`, `DELETE /veiculos/:id` |
+| **Serviços** | `GET /servicos`, `POST /servicos`, `PUT /servicos/:id`, `DELETE /servicos/:id` |
+| **Agendamentos** | `GET /agendamentos`, `POST /agendamentos`, `PUT /agendamentos/:id`, `DELETE /agendamentos/:id` |
+| **Funcionários** | `GET /funcionarios`, `POST /funcionarios`, `PUT /funcionarios/:id`, `DELETE /funcionarios/:id`, `GET /funcionarios/disponiveis` |
+| **Agenda** | `GET /agenda/slots`, `GET /agenda/status-hoje`, `GET /agenda/funcionamento`, `PUT /agenda/funcionamento/:dia`, `GET /agenda/dias-fechados`, `POST /agenda/dias-fechados` |
+| **Relatórios** | `GET /relatorios` |
+| **Área do Cliente** | `GET /cliente/minha-conta`, `PUT /cliente/minha-conta`, `DELETE /cliente/minha-conta`, `GET /cliente/meus-agendamentos`, `POST /cliente/agendar` |
+| **Admins** | `GET /admins`, `POST /admins`, `PATCH /admins/:id/toggle`, `DELETE /admins/:id` |
+
+---
+
+## 🧪 Testes
 
 ```bash
-node server.js
+# Rodar todos os testes
+npm test
+
+# Rodar com relatório de cobertura
+npm run test:coverage
+```
+
+Cobertura atual: **~64% statements**, **115 testes passando**.
+
+Os testes cobrem: autenticação, agendamentos, clientes, veículos, serviços, funcionários, agenda, relatórios, middlewares e área do cliente.
+
+---
+
+## 🔍 Qualidade de Código
+
+```bash
+# Verificar problemas de lint
+npm run lint
+
+# Corrigir automaticamente
+npm run lint:fix
+
+# Formatar com Prettier
+npm run format
+
+# Verificar formatação sem alterar
+npm run format:check
 ```
 
 ---
 
-## 🌐 Endpoints da API
+## 🔒 Segurança
 
-### Veículos
-
-- `GET /veiculos`
-- `GET /veiculos/:id`
-- `POST /veiculos`
-
-### Serviços
-
-- `GET /servicos`
-- `POST /servicos`
-
-### Agendamentos
-
-- `GET /agendamentos`
-- `POST /agendamentos`
+- Autenticação via JWT com expiração de 24h
+- Senhas com bcrypt (salt rounds: 10)
+- Rate limiting: 200 req/15min global, 10 req/15min em `/auth`
+- Helmet para headers HTTP seguros
+- Validação de entrada com Joi em todas as rotas de mutação
+- CORS configurável via variável de ambiente
 
 ---
 
-## ⚠️ Observações Técnicas
+## 🛡️ LGPD
 
-- O backend trabalha com datas em **UTC**
-- A conversão de horário será tratada no frontend
-- A validação de conflitos de agendamento já está implementada
+O sistema implementa os seguintes direitos do titular (Lei 13.709/2018):
+
+- **Art. 18, I** — Confirmação da existência de tratamento
+- **Art. 18, II** — Acesso aos dados via `GET /cliente/minha-conta`
+- **Art. 18, VI** — Portabilidade via `GET /clientes/:id/exportar`
+- **Art. 18, VI** — Eliminação via `DELETE /cliente/minha-conta` (anonimização, histórico preservado)
 
 ---
 
-## 🚀 Roadmap
+## 🔁 CI/CD
 
-- 🔹 Desenvolvimento do frontend
-- 🔹 Dashboard administrativo
-- 🔹 Integração com MQTT
-- 🔹 Notificações em tempo real
-- 🔹 Autenticação de usuários
+O projeto usa GitHub Actions. A cada push na `main` ou `develop`:
+
+1. Instala dependências (`npm ci`)
+2. Verifica lint (`npm run lint`)
+3. Roda testes com cobertura (`npm run test:coverage`)
+4. Salva relatório de cobertura como artefato
 
 ---
 
 ## 👨‍💻 Autor
 
 **Guilherme Rocha**  
-Estudante de Engenharia de Software
+Estudante de Engenharia de Software  
+[github.com/GSR159](https://github.com/GSR159)
 
 ---
 
 ## 📄 Licença
 
-Este projeto é de caráter acadêmico e educacional.
+Este projeto é de caráter acadêmico e educacional — Trabalho de Conclusão de Curso.

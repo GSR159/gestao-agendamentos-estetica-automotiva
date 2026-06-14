@@ -17,7 +17,7 @@ async function carregarDashboard() {
       ? resposta
       : resposta.dados || resposta.data || resposta.agendamentos || [];
 
-    // ── CARDS ────────────────────────────────────────────────
+    // CARDS
     document.getElementById('total').innerText = dados.length;
 
     document.getElementById('pendentes').innerText =
@@ -29,7 +29,7 @@ async function carregarDashboard() {
     document.getElementById('recusados').innerText =
       dados.filter(a => a.status === 'recusado').length;
 
-    // ── GRÁFICO ──────────────────────────────────────────────
+    // GRÁFICO
     const dias = {};
 
     dados.forEach(a => {
@@ -98,7 +98,7 @@ async function carregarDashboard() {
             legend: {
               position: 'top',
               labels: {
-                color: '#94a3b8',
+                color: '#a8978c',
                 padding: 16
               }
             }
@@ -108,15 +108,15 @@ async function carregarDashboard() {
               beginAtZero: true,
               ticks: {
                 precision: 0,
-                color: '#94a3b8'
+                color: '#a8978c'
               },
               grid: {
-                color: '#1e293b'
+                color: '#221b17'
               }
             },
             x: {
               ticks: {
-                color: '#94a3b8'
+                color: '#a8978c'
               },
               grid: {
                 display: false
@@ -127,7 +127,7 @@ async function carregarDashboard() {
       });
     }
 
-    // ── AGENDA DE HOJE ───────────────────────────────────────
+    // AGENDA DE HOJE
     const hoje = new Date().toLocaleDateString('pt-BR');
 
     const agendaHoje = dados
@@ -156,7 +156,7 @@ async function carregarDashboard() {
         <div style="
           text-align:center;
           padding:2rem 0;
-          color:#475569;
+          color:#5a4b43;
           font-size:.875rem;
           font-style:italic;
         ">
@@ -202,17 +202,17 @@ async function carregarDashboard() {
         padding:10px 12px;
         border-radius:10px;
         background:rgba(30,41,59,.4);
-        border:1px solid #1e293b;
+        border:1px solid #221b17;
         margin-bottom:8px;
         transition:border-color .2s;
       `;
 
       div.onmouseenter = () => {
-        div.style.borderColor = '#3b82f6';
+        div.style.borderColor = '#ff6b35';
       };
 
       div.onmouseleave = () => {
-        div.style.borderColor = '#1e293b';
+        div.style.borderColor = '#221b17';
       };
 
       div.innerHTML = `
@@ -220,7 +220,7 @@ async function carregarDashboard() {
           <span style="
             font-size:.8rem;
             font-weight:800;
-            color:#3b82f6;
+            color:#ff6b35;
           ">
             ${hora}
           </span>
@@ -229,7 +229,7 @@ async function carregarDashboard() {
         <div style="
           width:1px;
           height:32px;
-          background:#334155;
+          background:#3a2f29;
           flex-shrink:0;
         "></div>
 
@@ -238,7 +238,7 @@ async function carregarDashboard() {
             margin:0;
             font-size:.875rem;
             font-weight:600;
-            color:#f8fafc;
+            color:#fdf6f0;
             white-space:nowrap;
             overflow:hidden;
             text-overflow:ellipsis;

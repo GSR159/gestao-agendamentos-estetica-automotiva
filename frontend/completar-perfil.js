@@ -5,7 +5,7 @@
 
 (function () {
 
-  // ── Injeta estilos ───────────────────────────────────────────
+  // Injeta estilos 
   function injetarEstilos() {
     if (document.getElementById('cp-styles')) return;
     const style = document.createElement('style');
@@ -23,8 +23,8 @@
       @keyframes cpFadeIn { from{opacity:0} to{opacity:1} }
 
       #cp-box {
-        background: #0f172a;
-        border: 1px solid #334155;
+        background: #17120f;
+        border: 1px solid #3a2f29;
         border-radius: 1.5rem;
         padding: 2rem 2rem 1.5rem;
         width: 100%; max-width: 560px;
@@ -38,32 +38,32 @@
         to{opacity:1;transform:scale(1) translateY(0)}
       }
 
-      .cp-titulo { font-size:1.25rem; font-weight:800; color:#f8fafc; margin-bottom:0.25rem; }
+      .cp-titulo { font-size:1.25rem; font-weight:800; color:#fdf6f0; margin-bottom:0.25rem; }
       .cp-subtitulo { font-size:0.875rem; color:#64748b; margin-bottom:1.5rem; line-height:1.5; }
-      .cp-secao { font-size:0.7rem; font-weight:700; color:#3b82f6; text-transform:uppercase; letter-spacing:0.08em; margin:1.25rem 0 0.75rem; }
+      .cp-secao { font-size:0.7rem; font-weight:700; color:#ff6b35; text-transform:uppercase; letter-spacing:0.08em; margin:1.25rem 0 0.75rem; }
       .cp-grid { display:grid; gap:0.75rem; }
       .cp-grid-2 { grid-template-columns:1fr 1fr; }
       .cp-grid-3 { grid-template-columns:1fr 1fr 1fr; }
       .cp-label { display:block; font-size:0.7rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.35rem; }
-      .cp-input { background:#1e293b; border:1px solid #334155; color:#f8fafc; border-radius:0.65rem; padding:0.6rem 0.875rem; font-size:0.875rem; outline:none; width:100%; box-sizing:border-box; transition:border-color 0.2s; font-family:inherit; }
-      .cp-input:focus { border-color:#3b82f6; }
-      .cp-input::placeholder { color:#475569; }
+      .cp-input { background:#221b17; border:1px solid #3a2f29; color:#fdf6f0; border-radius:0.65rem; padding:0.6rem 0.875rem; font-size:0.875rem; outline:none; width:100%; box-sizing:border-box; transition:border-color 0.2s; font-family:inherit; }
+      .cp-input:focus { border-color:#ff6b35; }
+      .cp-input::placeholder { color:#5a4b43; }
       .cp-input:disabled { opacity:0.5; cursor:not-allowed; }
       .cp-cep-wrapper { position:relative; }
       .cp-cep-wrapper .cp-input { padding-right:6rem; }
-      .cp-btn-cep { position:absolute; right:0.4rem; top:50%; transform:translateY(-50%); background:#1d4ed8; color:white; border:none; border-radius:0.5rem; padding:0.3rem 0.75rem; font-size:0.75rem; font-weight:700; cursor:pointer; transition:background 0.2s; }
-      .cp-btn-cep:hover { background:#2563eb; }
+      .cp-btn-cep { position:absolute; right:0.4rem; top:50%; transform:translateY(-50%); background:#cc4a1f; color:white; border:none; border-radius:0.5rem; padding:0.3rem 0.75rem; font-size:0.75rem; font-weight:700; cursor:pointer; transition:background 0.2s; }
+      .cp-btn-cep:hover { background:#e85a2a; }
       .cp-btn-cep:disabled { opacity:0.5; cursor:wait; }
       .cp-cep-status { font-size:0.72rem; margin-top:0.3rem; min-height:1rem; }
       .cp-cep-ok { color:#22c55e; }
       .cp-cep-err { color:#ef4444; }
-      .cp-rodape { display:flex; gap:0.75rem; margin-top:1.75rem; padding-top:1.25rem; border-top:1px solid #1e293b; }
-      .cp-btn-pular { flex:1; padding:0.7rem; border-radius:0.75rem; border:1px solid #334155; background:transparent; color:#64748b; font-weight:700; font-size:0.875rem; cursor:pointer; transition:all 0.2s; font-family:inherit; }
-      .cp-btn-pular:hover { color:#f8fafc; border-color:#475569; }
-      .cp-btn-salvar { flex:2; padding:0.7rem; border-radius:0.75rem; border:none; background:#3b82f6; color:white; font-weight:700; font-size:0.875rem; cursor:pointer; transition:all 0.2s; font-family:inherit; }
-      .cp-btn-salvar:hover { background:#2563eb; }
+      .cp-rodape { display:flex; gap:0.75rem; margin-top:1.75rem; padding-top:1.25rem; border-top:1px solid #221b17; }
+      .cp-btn-pular { flex:1; padding:0.7rem; border-radius:0.75rem; border:1px solid #3a2f29; background:transparent; color:#64748b; font-weight:700; font-size:0.875rem; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+      .cp-btn-pular:hover { color:#fdf6f0; border-color:#5a4b43; }
+      .cp-btn-salvar { flex:2; padding:0.7rem; border-radius:0.75rem; border:none; background:#ff6b35; color:white; font-weight:700; font-size:0.875rem; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+      .cp-btn-salvar:hover { background:#e85a2a; }
       .cp-btn-salvar:disabled { opacity:0.6; cursor:wait; }
-      .cp-lgpd { font-size:0.7rem; color:#475569; text-align:center; margin-top:0.75rem; line-height:1.5; }
+      .cp-lgpd { font-size:0.7rem; color:#5a4b43; text-align:center; margin-top:0.75rem; line-height:1.5; }
 
       /* Banner aniversário */
       #cp-banner-aniversario { display:none; background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(245,158,11,.06)); border:1px solid rgba(251,191,36,.3); border-radius:1rem; padding:1rem 1.25rem; margin-bottom:1.5rem; text-align:center; }
@@ -77,7 +77,7 @@
         position: fixed;
         bottom: 1.5rem; left: 50%; transform: translateX(-50%);
         z-index: 7000;
-        background: linear-gradient(135deg, #1e293b, #0f172a);
+        background: linear-gradient(135deg, #221b17, #17120f);
         border: 1px solid rgba(251,191,36,0.4);
         border-radius: 1rem;
         padding: 0.875rem 1.25rem;
@@ -90,21 +90,21 @@
       #cp-banner-incompleto .cp-banner-icon { font-size:1.5rem; flex-shrink:0; }
       #cp-banner-incompleto .cp-banner-texto { flex:1; }
       #cp-banner-incompleto .cp-banner-titulo { font-size:0.8rem; font-weight:800; color:#fbbf24; margin-bottom:0.15rem; }
-      #cp-banner-incompleto .cp-banner-desc { font-size:0.72rem; color:#94a3b8; }
+      #cp-banner-incompleto .cp-banner-desc { font-size:0.72rem; color:#a8978c; }
       #cp-banner-incompleto .cp-banner-btn {
-        background:#3b82f6; color:white; border:none;
+        background:#ff6b35; color:white; border:none;
         border-radius:0.65rem; padding:0.5rem 1rem;
         font-size:0.8rem; font-weight:700; cursor:pointer;
         white-space:nowrap; flex-shrink:0; font-family:inherit;
         transition:background 0.2s;
       }
-      #cp-banner-incompleto .cp-banner-btn:hover { background:#2563eb; }
+      #cp-banner-incompleto .cp-banner-btn:hover { background:#e85a2a; }
       #cp-banner-incompleto .cp-banner-fechar {
-        background:transparent; border:none; color:#475569;
+        background:transparent; border:none; color:#5a4b43;
         cursor:pointer; padding:0.25rem; flex-shrink:0;
         font-size:1rem; line-height:1; transition:color 0.2s;
       }
-      #cp-banner-incompleto .cp-banner-fechar:hover { color:#f8fafc; }
+      #cp-banner-incompleto .cp-banner-fechar:hover { color:#fdf6f0; }
 
       @media(max-width:520px) {
         .cp-grid-2, .cp-grid-3 { grid-template-columns:1fr; }
@@ -114,7 +114,7 @@
     document.head.appendChild(style);
   }
 
-  // ── Cria banner persistente ──────────────────────────────────
+  //Cria banner persistente 
   function criarBannerPersistente() {
     if (document.getElementById('cp-banner-incompleto')) return;
     const div = document.createElement('div');
@@ -133,7 +133,7 @@
     setTimeout(() => { div.style.display = 'flex'; }, 100);
   }
 
-  // ── Cria o modal ─────────────────────────────────────────────
+  // Cria o modal 
   function criarModal() {
     const div = document.createElement('div');
     div.id = 'cp-overlay';
@@ -146,13 +146,13 @@
         </div>
 
         <div class="cp-titulo">Complete o seu cadastro</div>
-        <p class="cp-subtitulo">Precisamos de mais alguns dados para personalizar o seu atendimento. Todos os dados são protegidos pela <strong style="color:#94a3b8">LGPD</strong>.</p>
+        <p class="cp-subtitulo">Precisamos de mais alguns dados para personalizar o seu atendimento. Todos os dados são protegidos pela <strong style="color:#a8978c">LGPD</strong>.</p>
 
         <div class="cp-secao">📋 Dados Pessoais</div>
         <div class="cp-grid cp-grid-2">
           <div>
             <label class="cp-label">Telefone *</label>
-            <input id="cp-telefone" class="cp-input" type="tel" placeholder="(11) 99999-9999">
+            <input id="cp-telefone" class="cp-input" type="tel" placeholder="(11) 99999-9999" maxlength="15" oninput="maskTelefone(this)">
           </div>
           <div>
             <label class="cp-label">Data de Nascimento *</label>
@@ -214,21 +214,21 @@
     document.body.appendChild(div);
   }
 
-  // ── Abre o modal (usado pelo banner) ─────────────────────────
+  // Abre o modal (usado pelo banner) 
   window._cpAbrirModal = function () {
     const banner = document.getElementById('cp-banner-incompleto');
     if (banner) banner.style.display = 'none';
     if (!document.getElementById('cp-overlay')) criarModal();
   };
 
-  // ── Formata CEP ──────────────────────────────────────────────
+  // Formata CEP
   window._cpFormatarCEP = function (input) {
     let v = input.value.replace(/\D/g, '');
     if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5, 8);
     input.value = v;
   };
 
-  // ── Busca ViaCEP ─────────────────────────────────────────────
+  // Busca ViaCEP
   window._cpBuscarCEP = async function () {
     const cep    = document.getElementById('cp-cep').value.replace(/\D/g, '');
     const status = document.getElementById('cp-cep-status');
@@ -275,14 +275,14 @@
     if (e.key === 'Enter' && document.activeElement?.id === 'cp-cep') window._cpBuscarCEP();
   });
 
-  // ── Pular → mostra banner ────────────────────────────────────
+  // Pular → mostra banner 
   window._cpPular = function () {
     const overlay = document.getElementById('cp-overlay');
     if (overlay) overlay.remove();
     criarBannerPersistente();
   };
 
-  // ── Salvar perfil ────────────────────────────────────────────
+  // Salvar perfil 
   window._cpSalvar = async function () {
     const btn            = document.getElementById('cp-btn-salvar');
     const telefone       = document.getElementById('cp-telefone').value.trim();
@@ -333,13 +333,13 @@
     }
   };
 
-  // ── Banner de aniversário ────────────────────────────────────
+  // Banner de aniversário 
   function mostrarBannerAniversario() {
     const banner = document.getElementById('cp-banner-aniversario');
     if (banner) banner.style.display = 'block';
   }
 
-  // ── Verifica perfil ao carregar ──────────────────────────────
+  // Verifica perfil ao carregar
   async function verificarPerfil() {
     try {
       const token = localStorage.getItem('token');

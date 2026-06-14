@@ -13,7 +13,7 @@ function getUsuario() {
   } catch { return null; }
 }
 
-// ── NAVEGAÇÃO ────────────────────────────────────────
+//  NAVEGAÇÃO 
 function trocarTela(tela) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -22,7 +22,7 @@ function trocarTela(tela) {
   lucide.createIcons();
 }
 
-// ── BADGES ──────────────────────────────────────────
+//  BADGES 
 function getBadge(status) {
   const map = {
     pendente:  { cls: 'badge-pending',  icon: 'clock',        label: 'Pendente'  },
@@ -34,7 +34,7 @@ function getBadge(status) {
   return `<span class="badge ${s.cls}"><i data-lucide="${s.icon}" style="width:11px;height:11px"></i> ${s.label}</span>`;
 }
 
-// ── GOOGLE CALENDAR ──────────────────────────────────
+//  GOOGLE CALENDAR 
 function abrirGoogleCalendar(agendamento) {
   const inicio = new Date(agendamento.data);
   const fim    = new Date(inicio.getTime() + 60 * 60 * 1000);
@@ -55,8 +55,7 @@ function abrirGoogleCalendar(agendamento) {
   window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank');
 }
 
-// ── APPLE CALENDAR (ICS) ─────────────────────────────
-// RFC 5545 §3.3.11 — vírgulas no campo LOCATION devem ser escapadas como \,
+//  APPLE CALENDAR (ICS) 
 function baixarICS(agendamento) {
   const inicio  = new Date(agendamento.data);
   const fim     = new Date(inicio.getTime() + 60 * 60 * 1000);
@@ -99,7 +98,7 @@ function getBotoesCalendario(agendamento) {
   return `
     <div class="flex items-center gap-2 mt-1">
       <button onclick='abrirGoogleCalendar(JSON.parse(decodeURIComponent("${dados}")))'
-        class="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors border border-blue-500/20 hover:border-blue-400/40 rounded-lg px-2 py-1">
+        class="flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 transition-colors border border-orange-500/20 hover:border-orange-400/40 rounded-lg px-2 py-1">
         <i data-lucide="calendar-plus" style="width:12px;height:12px"></i> Google
       </button>
       <button onclick='baixarICS(JSON.parse(decodeURIComponent("${dados}")))'
@@ -109,7 +108,7 @@ function getBotoesCalendario(agendamento) {
     </div>`;
 }
 
-// ── AGENDAMENTOS ─────────────────────────────────────
+//  AGENDAMENTOS 
 async function carregarAgendamentos() {
   try {
     const res  = await fetch(`${API}/cliente/meus-agendamentos`, { headers: getHeaders() });
@@ -141,154 +140,226 @@ async function carregarAgendamentos() {
   }
 }
 
-// ── SLOT PICKER ──────────────────────────────────────
+//  ASSISTENTE DE AGENDAMENTO (chat) 
 let _horarioSelecionado = null;
-let _slotDebounce       = null;
+let _chatEscolha = { veiculo: null, servico: null, data: null };
+let listaServicosCliente = [];
+let listaVeiculosCliente = [];
 
-function onMudaServicouOuData() {
-  const servico_id = document.getElementById('agend-servico').value;
-  const data       = document.getElementById('agend-data').value;
+function chatBody() { return document.getElementById('chat-body'); }
+function chatQR()   { return document.getElementById('chat-quickreplies'); }
 
-  // Reseta seleção anterior
-  _horarioSelecionado = null;
-  document.getElementById('btn-confirmar-agend').disabled = true;
-
-  if (!servico_id || !data) {
-    document.getElementById('slots-container').style.display = 'none';
-    return;
-  }
-
-  // Debounce para não disparar múltiplas chamadas ao digitar data
-  clearTimeout(_slotDebounce);
-  _slotDebounce = setTimeout(() => carregarSlots(data, servico_id), 300);
+function chatScroll() {
+  const b = chatBody();
+  b.scrollTop = b.scrollHeight;
 }
 
-async function carregarSlots(data, servico_id) {
-  const container = document.getElementById('slots-container');
-  const content   = document.getElementById('slots-content');
+function chatBot(html) {
+  const b = chatBody();
+  b.insertAdjacentHTML('beforeend', `<div class="msg msg-bot">${html}</div>`);
+  chatScroll();
+}
 
-  container.style.display = 'block';
-  content.innerHTML = `<p class="slots-loading">⏳ Verificando disponibilidade...</p>`;
+function chatUser(html) {
+  const b = chatBody();
+  b.insertAdjacentHTML('beforeend', `<div class="msg msg-user">${html}</div>`);
+  chatScroll();
+}
 
+function chatTyping(ms, depois) {
+  const b = chatBody();
+  b.insertAdjacentHTML('beforeend', `<div class="typing" id="chat-typing"><span></span><span></span><span></span></div>`);
+  chatScroll();
+  setTimeout(() => {
+    document.getElementById('chat-typing')?.remove();
+    depois();
+  }, ms);
+}
+
+function chatQuickReplies(html) {
+  chatQR().innerHTML = html;
+  lucide.createIcons();
+}
+
+//  PASSO 1 — VEÍCULO 
+async function carregarVeiculosParaAgendamento() {
   try {
-    const res  = await fetch(`${API}/agenda/slots?data=${data}&servico_id=${servico_id}`, { headers: getHeaders() });
+    const res   = await fetch(`${API}/cliente/meus-veiculos`, { headers: getHeaders() });
+    listaVeiculosCliente = await res.json();
+  } catch (err) { console.error(err); listaVeiculosCliente = []; }
+}
+
+function chatPassoVeiculo() {
+  if (!listaVeiculosCliente.length) {
+    chatBot('Você ainda não tem nenhum veículo cadastrado. Vá até <strong>"Meus Veículos"</strong> e adicione um para começar.');
+    chatQuickReplies('');
+    return;
+  }
+  chatBot('Olá! 👋 Vamos marcar seu serviço. Pra qual veículo é o agendamento?');
+  chatQuickReplies(
+    listaVeiculosCliente.map(v =>
+      `<button class="qr-btn" onclick="chatEscolheVeiculo('${v.id}','${v.modelo} · ${v.placa}')">${v.modelo} · ${v.placa}</button>`
+    ).join('')
+  );
+}
+
+function chatEscolheVeiculo(id, label) {
+  _chatEscolha.veiculo = id;
+  chatUser(label);
+  chatQuickReplies('');
+  chatTyping(450, chatPassoServico);
+}
+
+//  PASSO 2 — SERVIÇO 
+async function carregarServicosParaAgendamento() {
+  try {
+    const res = await fetch(`${API}/servicos`, { headers: getHeaders() });
+    listaServicosCliente = await res.json();
+  } catch (err) { console.error(err); listaServicosCliente = []; }
+}
+
+function chatPassoServico() {
+  chatBot('Boa escolha! Qual serviço você quer fazer?');
+  chatQuickReplies(
+    listaServicosCliente.map(s =>
+      `<button class="qr-btn" onclick="chatEscolheServico('${s.id}','${s.nome}')">${s.nome} · R$ ${Number(s.preco).toFixed(2).replace('.',',')}</button>`
+    ).join('')
+  );
+}
+
+function chatEscolheServico(id, label) {
+  _chatEscolha.servico = id;
+  chatUser(label);
+  chatQuickReplies('');
+  chatTyping(450, chatPassoData);
+}
+
+//  PASSO 3 — DATA 
+function chatPassoData() {
+  const hoje = new Date().toISOString().slice(0, 10);
+  chatBot('Perfeito. Pra qual dia você quer agendar?');
+  chatQuickReplies(`
+    <div class="qr-input-wrap">
+      <input type="date" id="chat-data-input" class="input-field" min="${hoje}" value="${hoje}">
+      <button class="qr-btn qr-primary" onclick="chatEscolheData()">Ver horários</button>
+    </div>`);
+}
+
+function chatEscolheData() {
+  const data = document.getElementById('chat-data-input').value;
+  if (!data) { toast.aviso('Escolha uma data.'); return; }
+  _chatEscolha.data = data;
+  const [y,m,d] = data.split('-');
+  chatUser(`${d}/${m}/${y}`);
+  chatQuickReplies('');
+  chatTyping(350, chatPassoHorario);
+}
+
+//  PASSO 4 — HORÁRIO 
+async function chatPassoHorario() {
+  chatBot('Verificando os horários disponíveis... ⏳');
+  try {
+    const res = await fetch(`${API}/agenda/slots?data=${_chatEscolha.data}&servico_id=${_chatEscolha.servico}`, { headers: getHeaders() });
     const data_resp = await res.json();
 
     if (!data_resp.aberto) {
-      content.innerHTML = `
-        <div class="slots-aviso">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          ${data_resp.motivo || 'Loja fechada neste dia. Escolha outra data.'}
-        </div>`;
+      chatBot(`🚫 ${data_resp.motivo || 'Loja fechada nesse dia. Escolha outra data.'}`);
+      chatTyping(300, chatPassoData);
       return;
     }
 
     const slots = data_resp.slots ?? [];
     const disponiveis = slots.filter(s => s.disponivel);
 
-    if (!slots.length) {
-      content.innerHTML = `<div class="slots-aviso">⚠️ Nenhum horário disponível para esta data.</div>`;
-      return;
-    }
-
     if (!disponiveis.length) {
-      content.innerHTML = `<div class="slots-aviso">⚠️ Todos os horários estão ocupados. Tente outra data.</div>`;
+      chatBot('⚠️ Todos os horários estão ocupados nesse dia. Vamos tentar outra data?');
+      chatTyping(300, chatPassoData);
       return;
     }
 
-    content.innerHTML = `<div class="slots-grid">
-      ${slots.map(s => `
-        <button
-          class="slot-btn${!s.disponivel ? '' : ''}"
-          ${!s.disponivel ? 'disabled' : ''}
-          onclick="selecionarSlot('${s.horario}', this)"
-          title="${s.disponivel ? `${s.livres} de ${s.total} funcionário(s) livre(s)` : 'Horário ocupado'}"
-        >${s.horario}</button>
-      `).join('')}
-    </div>`;
+    chatBot('Aqui estão os horários disponíveis hoje:');
+    chatQuickReplies(
+      disponiveis.map(s =>
+        `<button class="qr-btn" title="${s.livres} de ${s.total} livre(s)" onclick="chatEscolheHorario('${s.horario}')">${s.horario}</button>`
+      ).join('') + `<button class="qr-btn" onclick="chatTyping(0,chatPassoData)">📅 Trocar data</button>`
+    );
   } catch (e) {
     console.error(e);
-    content.innerHTML = `<div class="slots-aviso">❌ Erro ao buscar horários. Tente novamente.</div>`;
+    chatBot('❌ Não consegui buscar os horários agora. Tente novamente.');
   }
 }
 
-function selecionarSlot(horario, btn) {
-  // Remove seleção anterior
-  document.querySelectorAll('.slot-btn.selecionado').forEach(b => b.classList.remove('selecionado'));
-  btn.classList.add('selecionado');
+function chatEscolheHorario(horario) {
   _horarioSelecionado = horario;
-  document.getElementById('btn-confirmar-agend').disabled = false;
+  chatUser(horario);
+  chatQuickReplies('');
+  chatTyping(400, chatPassoResumo);
 }
 
-// ── FORM AGENDAMENTO ─────────────────────────────────
-let listaServicosCliente = [];
+//  PASSO 5 — RESUMO E CONFIRMAÇÃO 
+function chatPassoResumo() {
+  const veiculo = listaVeiculosCliente.find(v => String(v.id) === String(_chatEscolha.veiculo));
+  const servico = listaServicosCliente.find(s => String(s.id) === String(_chatEscolha.servico));
+  const [y,m,d] = _chatEscolha.data.split('-');
 
-async function carregarServicosParaAgendamento() {
-  try {
-    const res = await fetch(`${API}/servicos`, { headers: getHeaders() });
-    listaServicosCliente = await res.json();
-    const select = document.getElementById('agend-servico');
-    if (!select) return;
-    select.innerHTML = `<option value="">Selecione o serviço</option>` +
-      listaServicosCliente.map(s =>
-        `<option value="${s.id}">${s.nome} (${s.duracao_minutos} min) — R$ ${Number(s.preco).toFixed(2).replace('.',',')}</option>`
-      ).join('');
-  } catch (err) { console.error(err); }
+  chatBot('Tudo certo, só confirmar:');
+  chatBody().insertAdjacentHTML('beforeend', `
+    <div class="msg-summary">
+      <div><span>Veículo</span><span>${veiculo ? veiculo.modelo+' · '+veiculo.placa : '—'}</span></div>
+      <div><span>Serviço</span><span>${servico ? servico.nome : '—'}</span></div>
+      <div><span>Preço</span><span>R$ ${servico ? Number(servico.preco).toFixed(2).replace('.',',') : '—'}</span></div>
+      <div><span>Data</span><span>${d}/${m}/${y}</span></div>
+      <div><span>Horário</span><span>${_horarioSelecionado}</span></div>
+    </div>`);
+  chatScroll();
+  chatQuickReplies(`
+    <button class="qr-btn qr-primary" id="btn-confirmar-agend-real" onclick="enviarAgendamento()"><i data-lucide="check" style="width:14px;height:14px"></i> Confirmar agendamento</button>
+    <button class="qr-btn" onclick="reiniciarChatAgendamento()">Recomeçar</button>`);
 }
 
-async function carregarVeiculosParaAgendamento() {
-  try {
-    const res   = await fetch(`${API}/cliente/meus-veiculos`, { headers: getHeaders() });
-    const dados = await res.json();
-    const select = document.getElementById('agend-veiculo');
-    if (!select) return;
-    select.innerHTML = `<option value="">Selecione o veículo</option>` +
-      dados.map(v => `<option value="${v.id}">${v.modelo} — ${v.placa}</option>`).join('');
-  } catch (err) { console.error(err); }
-}
-
-function abrirFormAgendamento() {
-  // Data mínima = hoje
-  const hoje = new Date().toISOString().slice(0, 10);
-  document.getElementById('agend-data').min = hoje;
-
-  carregarVeiculosParaAgendamento();
-  carregarServicosParaAgendamento();
-
-  // Reset slots
+function reiniciarChatAgendamento() {
+  _chatEscolha = { veiculo: null, servico: null, data: null };
   _horarioSelecionado = null;
-  document.getElementById('slots-container').style.display = 'none';
-  document.getElementById('btn-confirmar-agend').disabled = true;
+  chatBody().innerHTML = '';
+  chatQuickReplies('');
+  chatTyping(200, chatPassoVeiculo);
+}
 
-  document.getElementById('formAgendamentoCliente').style.display = 'block';
+//  ABRIR / FECHAR 
+async function abrirFormAgendamento() {
+  document.getElementById('formAgendamentoCliente').style.display = 'flex';
+  chatBody().innerHTML = '';
+  chatQuickReplies('');
+  _chatEscolha = { veiculo: null, servico: null, data: null };
+  _horarioSelecionado = null;
+
+  await Promise.all([carregarVeiculosParaAgendamento(), carregarServicosParaAgendamento()]);
+  chatTyping(400, chatPassoVeiculo);
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
   lucide.createIcons();
 }
 
 function fecharFormAgendamento() {
   document.getElementById('formAgendamentoCliente').style.display = 'none';
-  document.getElementById('slots-container').style.display = 'none';
   _horarioSelecionado = null;
-  ['agend-veiculo','agend-servico','agend-data'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  document.getElementById('btn-confirmar-agend').disabled = true;
+  _chatEscolha = { veiculo: null, servico: null, data: null };
 }
 
 async function enviarAgendamento() {
-  const veiculo_id = document.getElementById('agend-veiculo').value;
-  const servico_id = document.getElementById('agend-servico').value;
-  const data       = document.getElementById('agend-data').value;
+  const veiculo_id = _chatEscolha.veiculo;
+  const servico_id = _chatEscolha.servico;
+  const data       = _chatEscolha.data;
 
-  if (!veiculo_id || !servico_id || !data) { toast.aviso('Preencha todos os campos.'); return; }
-  if (!_horarioSelecionado) { toast.aviso('Selecione um horário disponível.'); return; }
+  if (!veiculo_id || !servico_id || !data || !_horarioSelecionado) {
+    toast.aviso('Algo deu errado, vamos recomeçar.');
+    reiniciarChatAgendamento();
+    return;
+  }
 
-  // Monta datetime combinando data + horário selecionado
   const dataHora = `${data}T${_horarioSelecionado}:00`;
-
-  const btn = document.getElementById('btn-confirmar-agend');
-  btn.disabled = true;
+  const btn = document.getElementById('btn-confirmar-agend-real');
+  if (btn) { btn.disabled = true; btn.style.opacity = '.6'; }
 
   try {
     const res = await fetch(`${API}/cliente/agendar`, {
@@ -297,20 +368,22 @@ async function enviarAgendamento() {
     });
     const resposta = await res.json();
     if (!res.ok) {
-      toast.erro(resposta.erro ?? 'Erro ao criar agendamento.');
-      btn.disabled = false;
+      chatBot(`❌ ${resposta.erro ?? 'Erro ao criar agendamento.'}`);
+      chatQuickReplies(`<button class="qr-btn" onclick="reiniciarChatAgendamento()">Recomeçar</button>`);
       return;
     }
+    chatQuickReplies('');
+    chatBot('✅ Agendamento enviado! Você vai receber a confirmação assim que for aprovado.');
     toast.sucesso('Agendamento criado! Aguarde a aprovação.');
-    fecharFormAgendamento();
     carregarAgendamentos();
+    setTimeout(fecharFormAgendamento, 1800);
   } catch {
-    toast.erro('Erro de conexão com o servidor.');
-    btn.disabled = false;
+    chatBot('❌ Erro de conexão com o servidor. Tente novamente.');
+    chatQuickReplies(`<button class="qr-btn" onclick="enviarAgendamento()">Tentar de novo</button>`);
   }
 }
 
-// ── VEÍCULOS ─────────────────────────────────────────
+//  VEÍCULOS 
 let _veiculoEditandoId = null;
 
 async function carregarVeiculos() {
@@ -327,7 +400,7 @@ async function carregarVeiculos() {
     lista.innerHTML = data.map(v => `
       <div class="vehicle-card">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex-shrink-0" style="display:flex;align-items:center;justify-content:center;">
+          <div class="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-500 flex-shrink-0" style="display:flex;align-items:center;justify-content:center;">
             <i data-lucide="car-front" class="w-5 h-5"></i>
           </div>
           <div>
@@ -337,7 +410,7 @@ async function carregarVeiculos() {
         </div>
         <div class="flex items-center gap-2">
           <button onclick="abrirEdicaoVeiculo(${v.id},'${(v.marca||'').replace(/'/g,"\\'")}','${(v.modelo||'').replace(/'/g,"\\'")}','${(v.placa||'').replace(/'/g,"\\'")}','${(v.cor||'').replace(/'/g,"\\'")}','${v.ano||''}')"
-            class="text-slate-500 hover:text-blue-400 transition-colors flex-shrink-0" title="Editar">
+            class="text-slate-500 hover:text-orange-400 transition-colors flex-shrink-0" title="Editar">
             <i data-lucide="pencil" class="w-4 h-4"></i>
           </button>
           <button onclick="confirmarExcluirVeiculo('${v.id}')"
@@ -368,7 +441,7 @@ function abrirEdicaoVeiculo(id, marca, modelo, placa, cor, ano) {
   if (contador) { contador.textContent = `${placaLimpa.length}/7`; contador.classList.toggle('limite', placaLimpa.length >= 7); }
 
   const titulo = document.getElementById('form-veiculo-titulo');
-  if (titulo) titulo.innerHTML = '<i data-lucide="pencil" class="text-blue-500 w-4 h-4"></i> Editar Veículo';
+  if (titulo) titulo.innerHTML = '<i data-lucide="pencil" class="text-orange-500 w-4 h-4"></i> Editar Veículo';
 
   const btnSalvar = document.getElementById('btn-salvar-veiculo');
   if (btnSalvar) btnSalvar.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Salvar Alterações';
@@ -388,7 +461,7 @@ function cancelarEdicaoVeiculo() {
   if (contador) { contador.textContent = '0/7'; contador.classList.remove('limite'); }
 
   const titulo = document.getElementById('form-veiculo-titulo');
-  if (titulo) titulo.innerHTML = '<i data-lucide="plus-circle" class="text-blue-500 w-4 h-4"></i> Adicionar Novo Veículo';
+  if (titulo) titulo.innerHTML = '<i data-lucide="plus-circle" class="text-orange-500 w-4 h-4"></i> Adicionar Novo Veículo';
 
   const btnSalvar = document.getElementById('btn-salvar-veiculo');
   if (btnSalvar) btnSalvar.innerHTML = '<i data-lucide="plus" class="w-4 h-4"></i> Adicionar';
@@ -437,7 +510,7 @@ async function criarVeiculo() {
     return;
   }
 
-  // ── EDIÇÃO ──
+  //  EDIÇÃO 
   if (_veiculoEditandoId) {
     try {
       const res = await fetch(`${API}/cliente/meus-veiculos/${_veiculoEditandoId}`, {
@@ -452,7 +525,7 @@ async function criarVeiculo() {
     return;
   }
 
-  // ── CRIAÇÃO ──
+  //  CRIAÇÃO 
   try {
     const res = await fetch(`${API}/cliente/meus-veiculos`, {
       method: 'POST', headers: getHeaders(),
@@ -467,7 +540,7 @@ async function criarVeiculo() {
   } catch { toast.erro('Erro de conexão.'); }
 }
 
-// ── CONTA ────────────────────────────────────────────
+//  CONTA 
 let _dadosConta = null;
 
 async function carregarDadosConta() {
@@ -525,12 +598,13 @@ async function carregarDadosConta() {
 
 function preencherInfoConta() { carregarDadosConta(); }
 
-// ── EDITAR PERFIL ────────────────────────────────────
+//  EDITAR PERFIL 
 function abrirEdicaoPerfil() {
   if (!_dadosConta) return;
   const c   = _dadosConta;
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
   set('edit-telefone',    c.telefone);
+  maskTelefone(document.getElementById('edit-telefone'));
   set('edit-nascimento',  c.data_nascimento ? c.data_nascimento.split('T')[0] : '');
   set('edit-cep',         c.cep);
   set('edit-logradouro',  c.logradouro);
@@ -555,7 +629,7 @@ async function buscarCEPEdicao() {
   const btn    = document.getElementById('btn-buscar-cep');
   if (cep.length !== 8) { status.textContent = 'CEP inválido.'; status.style.color = '#ef4444'; return; }
   btn.disabled = true; btn.textContent = '...';
-  status.textContent = 'Buscando...'; status.style.color = '#94a3b8';
+  status.textContent = 'Buscando...'; status.style.color = '#a8978c';
   try {
     const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
     const data = await res.json();
@@ -602,7 +676,7 @@ async function salvarPerfil() {
   finally { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
 }
 
-// ── EXCLUIR CONTA ────────────────────────────────────
+// EXCLUIR CONTA 
 async function excluirConta() {
   try {
     const res  = await fetch(`${API}/cliente/minha-conta`, { method: 'DELETE', headers: getHeaders() });
@@ -616,7 +690,7 @@ async function excluirConta() {
   } catch { toast.erro('Erro de conexão.'); }
 }
 
-// ── INIT ─────────────────────────────────────────────
+// INIT 
 window.onload = () => {
   verificarLogin();
   carregarDadosConta();

@@ -157,7 +157,7 @@ const criarAdmin = async (req, res) => {
   }
 };
 
-// ─── ATIVAR / DESATIVAR ADMIN
+// ATIVAR / DESATIVAR ADMIN
 
 const toggleAdmin = async (req, res) => {
   const { id } = req.params;

@@ -1,4 +1,4 @@
-// models/agendamentoModel.js — apenas queries SQL, sem lógica de negócio
+// models/agendamentoModel.js — apenas queries SQL
 const pool = require('../config/db');
 
 const listar = async ({ limit, offset, status }) => {
@@ -29,8 +29,9 @@ const buscarPorId = async (id) => {
   return r.rows[0] || null;
 };
 
-const criar = async ({ cliente_id, veiculo_id, servico_id, data, duracao_minutos, funcionario_id, desconto_aniversario }) => {
-  const r = await pool.query(
+const criar = async ({ cliente_id, veiculo_id, servico_id, data, duracao_minutos, funcionario_id, desconto_aniversario }, client = null) => {
+  const queryClient = client || pool;
+  const r = await queryClient.query(
     `INSERT INTO agendamentos (cliente_id, veiculo_id, servico_id, data, duracao_minutos, status, funcionario_id, desconto_aniversario)
      VALUES ($1,$2,$3,$4,$5,'pendente',$6,$7) RETURNING *`,
     [cliente_id, veiculo_id, servico_id, data, duracao_minutos, funcionario_id || null, desconto_aniversario || false]
@@ -62,13 +63,18 @@ const expirarPendentes = async () => {
   return r.rowCount;
 };
 
-const buscarConflitos = async ({ funcionario_id, janelaInicio, janelaFim }) => {
+/**
+ * Busca conflitos de agendamento com suporte a transações
+ * Permite passar um cliente de transação para operações atômicas
+ */
+const buscarConflitos = async ({ funcionario_id, janelaInicio, janelaFim }, client = null) => {
+  const queryClient = client || pool;
   const where  = funcionario_id ? 'AND a.funcionario_id = $3' : '';
   const params = funcionario_id
     ? [janelaInicio, janelaFim, funcionario_id]
     : [janelaInicio, janelaFim];
-  const r = await pool.query(`
-    SELECT a.data, s.duracao_minutos FROM agendamentos a
+  const r = await queryClient.query(`
+    SELECT a.data, s.duracao_minutos, a.funcionario_id FROM agendamentos a
     JOIN servicos s ON a.servico_id = s.id
     WHERE a.status != 'recusado'
       AND a.data BETWEEN $1 AND $2

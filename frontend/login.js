@@ -19,10 +19,10 @@ async function login() {
       return;
     }
 
-    // 🔥 salva token
+    //Salva token
     localStorage.setItem("token", data.token);
 
-    // 🔥 redireciona
+    //Redireciona
     window.location.href = "dashboard.html";
 
   } catch (error) {

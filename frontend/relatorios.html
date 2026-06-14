@@ -4,17 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart System - Relatórios</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    :root{--bg-deep:#020617;--bg-surface:#0f172a;--bg-card:#1e293b;--border:#334155;--primary:#3b82f6;--text-main:#f8fafc;--text-muted:#94a3b8}
+  <style>h1,h2,h3,.logo,.btn-primary,.stat-value,.modal-titulo{font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em}
+    :root{--bg-deep:#0c0a08;--bg-surface:#17120f;--bg-card:#221b17;--border:#3a2f29;--primary:#ff6b35;--primary-ink:#1a0f08;--accent:#2dd4bf;--text-main:#fdf6f0;--text-muted:#a8978c}
     body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg-deep);color:var(--text-main);overflow-x:hidden}
     .app-container{display:flex;min-height:100vh}
     .sidebar{width:260px;background:var(--bg-surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem;position:fixed;height:100vh;z-index:40}
     .logo{display:flex;align-items:center;gap:.75rem;font-size:1.25rem;font-weight:800;color:#fff;margin-bottom:2.5rem}
     .nav-links{flex:1;display:flex;flex-direction:column;gap:.5rem}
     .nav-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:.75rem;color:var(--text-muted);text-decoration:none;font-weight:500;transition:all .2s}
-    .nav-item:hover,.nav-item.active{background:var(--primary);color:white;box-shadow:0 4px 12px rgba(59,130,246,.25)}
+    .nav-item:hover,.nav-item.active{background:var(--primary);color:white;box-shadow:0 4px 12px rgba(255,107,53,.25)}
     .nav-item-super{border:1px solid rgba(251,191,36,.2);background:rgba(251,191,36,.05);color:#fbbf24!important}
     .nav-item-super:hover,.nav-item-super.active{background:rgba(251,191,36,.15)!important;border-color:rgba(251,191,36,.4);box-shadow:0 4px 12px rgba(251,191,36,.15)!important;color:#fbbf24!important}
     .main-content{flex:1;margin-left:260px;padding:2.5rem}
@@ -29,21 +30,21 @@
     .user-footer{margin-top:auto;padding-top:1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
     .avatar{width:32px;height:32px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:.8rem}
     .modal-overlay{position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.85);backdrop-filter:blur(6px);align-items:center;justify-content:center}
-    .modal-box{background:#0f172a;border:1px solid #334155;border-radius:1.25rem;padding:2rem;width:100%;max-width:420px;box-shadow:0 25px 60px rgba(0,0,0,.6);animation:mE .25s cubic-bezier(.34,1.56,.64,1)}
+    .modal-box{background:#17120f;border:1px solid #3a2f29;border-radius:1.25rem;padding:2rem;width:100%;max-width:420px;box-shadow:0 25px 60px rgba(0,0,0,.6);animation:mE .25s cubic-bezier(.34,1.56,.64,1)}
     @keyframes mE{from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
     .modal-icone{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem}
     .modal-icone-perigo{background:rgba(239,68,68,.12);color:#ef4444}
     .modal-icone-aviso{background:rgba(251,191,36,.12);color:#fbbf24}
-    .modal-titulo{font-size:1.125rem;font-weight:800;color:#f8fafc;text-align:center;margin-bottom:.5rem}
-    .modal-desc{font-size:.875rem;color:#94a3b8;text-align:center;line-height:1.6;margin-bottom:1.75rem}
-    .modal-desc strong{color:#f8fafc}
+    .modal-titulo{font-size:1.125rem;font-weight:800;color:#fdf6f0;text-align:center;margin-bottom:.5rem}
+    .modal-desc{font-size:.875rem;color:#a8978c;text-align:center;line-height:1.6;margin-bottom:1.75rem}
+    .modal-desc strong{color:#fdf6f0}
     .modal-acoes{display:flex;gap:.75rem}
-    .btn-mc{flex:1;padding:.7rem 1rem;border-radius:.75rem;border:1px solid #334155;background:transparent;color:#94a3b8;font-weight:700;font-size:.875rem;cursor:pointer;transition:all .2s;font-family:inherit}
-    .btn-mc:hover{background:rgba(255,255,255,.05);color:#f8fafc}
+    .btn-mc{flex:1;padding:.7rem 1rem;border-radius:.75rem;border:1px solid #3a2f29;background:transparent;color:#a8978c;font-weight:700;font-size:.875rem;cursor:pointer;transition:all .2s;font-family:inherit}
+    .btn-mc:hover{background:rgba(255,255,255,.05);color:#fdf6f0}
     .btn-ms{flex:1;padding:.7rem 1rem;border-radius:.75rem;background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25);font-weight:700;font-size:.875rem;cursor:pointer;transition:all .2s;font-family:inherit}
     .btn-ms:hover{background:rgba(251,191,36,.22)}
-    .btn-modal-cancelar{flex:1;padding:.7rem 1rem;border-radius:.75rem;border:1px solid #334155;background:transparent;color:#94a3b8;font-weight:700;font-size:.875rem;cursor:pointer;transition:all .2s;font-family:inherit}
-    .btn-modal-cancelar:hover{background:rgba(255,255,255,.05);color:#f8fafc}
+    .btn-modal-cancelar{flex:1;padding:.7rem 1rem;border-radius:.75rem;border:1px solid #3a2f29;background:transparent;color:#a8978c;font-weight:700;font-size:.875rem;cursor:pointer;transition:all .2s;font-family:inherit}
+    .btn-modal-cancelar:hover{background:rgba(255,255,255,.05);color:#fdf6f0}
     .btn-modal-perigo{flex:1;padding:.7rem 1rem;border-radius:.75rem;border:none;background:#dc2626;color:white;font-weight:700;font-size:.875rem;cursor:pointer;transition:all .2s;font-family:inherit}
     .btn-modal-perigo:hover{background:#b91c1c}
     .btn-modal-sair,.btn-modal-aviso{flex:1;padding:.7rem 1rem;border-radius:.75rem;background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25);font-weight:700;font-size:.875rem;cursor:pointer;transition:all .2s;font-family:inherit}
@@ -55,6 +56,10 @@
     .badge-inativo{background:rgba(239,68,68,.12);color:#ef4444;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700}
     @media(max-width:1024px){.sidebar{width:80px;padding:1.5rem .75rem}.sidebar span,.logo span{display:none}.main-content{margin-left:80px}}
     .bi-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:1rem;padding:1.5rem}
+    .seg-pill{display:flex;align-items:center;gap:.6rem;background:var(--bg-card);border:1px solid var(--border);border-radius:.75rem;padding:.75rem .9rem}
+    .seg-pill strong{display:block;font-size:1.1rem;font-weight:800;color:var(--text-main)}
+    .seg-pill small{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
+    .seg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
     .data-table-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:1rem;overflow:hidden}
     @media print{.sidebar,.export-controls,header button,.user-footer{display:none!important}.main-content{margin-left:0!important;padding:0!important}.bi-card,.data-table-card{border:1px solid #ccc!important;color:black!important;background:white!important}body{background:white!important;color:black!important}}
   </style>
@@ -97,17 +102,28 @@
         <button onclick="exportarPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all font-bold"><i data-lucide="file-text" class="w-5 h-5"></i><span class="hidden sm:inline">Gerar PDF</span></button>
       </div>
     </header>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
       <div class="bi-card"><p class="text-xs font-bold text-slate-500 uppercase mb-2 tracking-widest">Ticket Médio</p><h3 class="text-2xl font-black text-white" id="val-ticket">--</h3></div>
       <div class="bi-card"><p class="text-xs font-bold text-slate-500 uppercase mb-2 tracking-widest">Receita Total</p><h3 class="text-2xl font-black text-white" id="val-receita">--</h3></div>
-      <div class="bi-card"><p class="text-xs font-bold text-slate-500 uppercase mb-2 tracking-widest">Fidelização</p><h3 class="text-2xl font-black text-white" id="val-fidelizacao">--</h3></div>
+      <div class="bi-card"><p class="text-xs font-bold text-slate-500 uppercase mb-2 tracking-widest">Fidelização</p><h3 class="text-2xl font-black text-white" id="val-fidelizacao">--</h3><p class="text-[10px] text-slate-500 mt-1">% de recorrentes que voltam com frequência</p></div>
+      <div class="bi-card"><p class="text-xs font-bold text-slate-500 uppercase mb-2 tracking-widest">LTV Médio</p><h3 class="text-2xl font-black text-white" id="val-ltv">--</h3><p class="text-[10px] text-slate-500 mt-1">Valor médio gerado por cliente</p></div>
+    </div>
+    <div class="bi-card mb-8">
+      <h2 class="text-lg font-bold mb-4 flex items-center gap-2"><i data-lucide="users" class="w-5 h-5 text-orange-500"></i> Segmentação de Clientes (RFM)</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3" id="segmentos-grid">
+        <div class="seg-pill" data-seg="novo"><span class="seg-dot" style="background:#ffb088"></span><div><strong id="seg-novo">0</strong><small>Novos</small></div></div>
+        <div class="seg-pill" data-seg="ativo"><span class="seg-dot" style="background:#34d399"></span><div><strong id="seg-ativo">0</strong><small>Ativos</small></div></div>
+        <div class="seg-pill" data-seg="fiel"><span class="seg-dot" style="background:#a78bfa"></span><div><strong id="seg-fiel">0</strong><small>Fiéis</small></div></div>
+        <div class="seg-pill" data-seg="em_risco"><span class="seg-dot" style="background:#fbbf24"></span><div><strong id="seg-em_risco">0</strong><small>Em risco</small></div></div>
+        <div class="seg-pill" data-seg="inativo"><span class="seg-dot" style="background:#f87171"></span><div><strong id="seg-inativo">0</strong><small>Inativos</small></div></div>
+      </div>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-      <div class="bi-card"><h2 class="text-lg font-bold mb-6 flex items-center gap-2"><i data-lucide="trending-up" class="w-5 h-5 text-blue-500"></i> Evolução Temporal</h2><canvas id="receitaChart" height="150"></canvas></div>
-      <div class="bi-card"><h2 class="text-lg font-bold mb-6 flex items-center gap-2"><i data-lucide="pie-chart" class="w-5 h-5 text-blue-500"></i> Mix de Serviços</h2><canvas id="servicosChart" height="150"></canvas></div>
+      <div class="bi-card"><h2 class="text-lg font-bold mb-6 flex items-center gap-2"><i data-lucide="trending-up" class="w-5 h-5 text-orange-500"></i> Evolução Temporal</h2><canvas id="receitaChart" height="150"></canvas></div>
+      <div class="bi-card"><h2 class="text-lg font-bold mb-6 flex items-center gap-2"><i data-lucide="pie-chart" class="w-5 h-5 text-orange-500"></i> Mix de Serviços</h2><canvas id="servicosChart" height="150"></canvas></div>
     </div>
     <div class="data-table-card">
-      <div class="p-4 border-b border-slate-700 bg-slate-800/30"><h3 class="font-bold flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-blue-400"></i> Resumo Analítico de Clientes</h3></div>
+      <div class="p-4 border-b border-slate-700 bg-slate-800/30"><h3 class="font-bold flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-orange-400"></i> Resumo Analítico de Clientes</h3></div>
       <table id="tabela-ranking">
         <thead><tr><th>Cliente</th><th>Veículos</th><th>Qtd.</th><th>Serviços Realizados</th><th>Funcionários</th><th class="text-right">Investimento Total</th></tr></thead>
         <tbody id="rankingClientesBody"><tr><td colspan="6" class="py-10 text-center text-slate-500">Aguardando sincronização de dados...</td></tr></tbody>

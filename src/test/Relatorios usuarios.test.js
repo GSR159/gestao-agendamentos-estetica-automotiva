@@ -37,7 +37,11 @@ describe('GET /relatorios', () => {
   test('deve retornar relatórios para admin', async () => {
     mockQuery([{ total: '1500.00' }]);                    // receita
     mockQuery([{ qtd: '5' }]);                            // total agendamentos
-    mockQuery([{ pct: '60' }]);                           // fidelização
+    mockQuery([                                           // segmentação RFM
+      { segmento: 'novo', qtd: '1', ltv_total: '100', ltv_medio: '100' },
+      { segmento: 'fiel', qtd: '3', ltv_total: '900', ltv_medio: '300' },
+      { segmento: 'inativo', qtd: '1', ltv_total: '500', ltv_medio: '500' },
+    ]);
     mockQuery([{ dia: '01/06', total: '300.00' }]);        // evolução
     mockQuery([{ nome: 'Lavagem', total: '3' }]);          // mix serviços
     mockQuery([{ nome: 'João', qtd: '2', total: '600', servicos_realizados: 'Lavagem', funcionario: 'Pedro', veiculos: 'Corolla' }]);
@@ -45,7 +49,9 @@ describe('GET /relatorios', () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('receitaTotal', 1500);
     expect(res.body).toHaveProperty('ticketMedio', 300);
-    expect(res.body).toHaveProperty('fidelizacao', 60);
+    expect(res.body).toHaveProperty('fidelizacao', 75); // 3 fiel / (5-1 novo) = 75%
+    expect(res.body).toHaveProperty('ltvMedio');
+    expect(res.body.segmentos).toMatchObject({ novo: 1, fiel: 3, inativo: 1 });
     expect(Array.isArray(res.body.evolucao)).toBe(true);
     expect(Array.isArray(res.body.servicos)).toBe(true);
     expect(Array.isArray(res.body.clientes)).toBe(true);
@@ -54,7 +60,7 @@ describe('GET /relatorios', () => {
   test('deve retornar ticketMedio 0 se não houver agendamentos', async () => {
     mockQuery([{ total: '0' }]);
     mockQuery([{ qtd: '0' }]);
-    mockQuery([{ pct: null }]);
+    mockQuery([]);
     mockQuery([]);
     mockQuery([]);
     mockQuery([]);

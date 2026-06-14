@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart System - Área do Cliente</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
+  <style>h1,h2,h3,.logo,.btn-primary,.stat-value,.modal-titulo{font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em}
     :root {
-      --bg-deep:#020617; --bg-surface:#0f172a; --bg-card:#1e293b;
-      --border:#334155; --primary:#3b82f6;
-      --text-main:#f8fafc; --text-muted:#94a3b8;
+      --bg-deep: #0c0a08; --bg-surface: #17120f; --bg-card: #221b17;
+      --border: #3a2f29; --primary: #ff6b35;
+      --text-main: #fdf6f0; --text-muted: #a8978c;
       --sidebar-w: 260px;
     }
     * { box-sizing: border-box; }
@@ -22,7 +23,7 @@
     .logo { display:flex; align-items:center; gap:.75rem; font-size:1.25rem; font-weight:800; color:#fff; margin-bottom:2.5rem; }
     .nav-links { flex:1; display:flex; flex-direction:column; gap:.5rem; }
     .nav-item { display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem; border-radius:.75rem; color:var(--text-muted); font-weight:500; transition:all .2s; cursor:pointer; border:none; background:transparent; text-align:left; width:100%; font-family:inherit; }
-    .nav-item:hover,.nav-item.active { background:var(--primary); color:white; box-shadow:0 4px 12px rgba(59,130,246,.25); }
+    .nav-item:hover,.nav-item.active { background:var(--primary); color:white; box-shadow:0 4px 12px rgba(255,107,53,.25); }
     .user-footer { margin-top:auto; padding-top:1.5rem; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
     .avatar { width:32px; height:32px; min-width:32px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:.8rem; flex-shrink:0; }
 
@@ -41,7 +42,7 @@
     thead th { background:rgba(30,41,59,.5); padding:.75rem 1rem; text-align:left; font-size:.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700; border-bottom:1px solid var(--border); white-space:nowrap; }
     tbody td { padding:.75rem 1rem; border-bottom:1px solid var(--border); font-size:.8rem; color:var(--text-muted); }
     tbody tr:last-child td { border-bottom:none; }
-    tbody tr:hover td { background:rgba(59,130,246,.04); color:var(--text-main); }
+    tbody tr:hover td { background:rgba(255,107,53,.04); color:var(--text-main); }
 
     /* ── SCREENS ── */
     .screen { display:none; }
@@ -64,11 +65,11 @@
     .placa-contador.limite { color:#f87171; }
 
     /* ── BOTÕES ── */
-    .btn-primary { display:inline-flex; align-items:center; gap:.5rem; background:var(--primary); color:white; font-weight:700; font-size:.875rem; padding:.65rem 1.25rem; border-radius:.65rem; border:none; cursor:pointer; transition:all .2s; font-family:inherit; }
-    .btn-primary:hover { background:#2563eb; box-shadow:0 4px 12px rgba(59,130,246,.3); }
+    .btn-primary { display:inline-flex; align-items:center; gap:.5rem; background:var(--primary); color: var(--primary-ink); font-weight:700; font-size:.875rem; padding:.65rem 1.25rem; border-radius:.65rem; border:none; cursor:pointer; transition:all .2s; font-family:inherit; }
+    .btn-primary:hover { background:#e85a2a; box-shadow:0 4px 12px rgba(255,107,53,.3); }
     .btn-primary:disabled { opacity:.6; cursor:not-allowed; }
     .btn-secondary { display:inline-flex; align-items:center; gap:.5rem; background:transparent; color:var(--text-muted); font-weight:700; font-size:.875rem; padding:.65rem 1.25rem; border-radius:.65rem; border:1px solid var(--border); cursor:pointer; transition:all .2s; font-family:inherit; }
-    .btn-secondary:hover { color:white; border-color:#475569; }
+    .btn-secondary:hover { color:white; border-color:#5a4b43; }
     .btn-danger { display:inline-flex; align-items:center; gap:.5rem; background:rgba(239,68,68,.1); color:#ef4444; font-weight:700; font-size:.875rem; padding:.65rem 1.25rem; border-radius:.65rem; border:1px solid rgba(239,68,68,.25); cursor:pointer; transition:all .2s; font-family:inherit; }
     .btn-danger:hover { background:rgba(239,68,68,.2); }
 
@@ -83,36 +84,57 @@
     .info-value { font-size:.875rem; font-weight:500; color:var(--text-main); flex:1; word-break:break-word; }
 
     /* ── EDIÇÃO PERFIL ── */
-    .edit-section { font-size:.7rem; font-weight:700; color:#3b82f6; text-transform:uppercase; letter-spacing:.08em; margin:1rem 0 .5rem; }
+    .edit-section { font-size:.7rem; font-weight:700; color:#ff6b35; text-transform:uppercase; letter-spacing:.08em; margin:1rem 0 .5rem; }
     .cep-wrapper { position:relative; }
     .cep-wrapper .input-field { padding-right:5.5rem; }
-    .btn-cep { position:absolute; right:.4rem; top:50%; transform:translateY(-50%); background:#1d4ed8; color:white; border:none; border-radius:.5rem; padding:.3rem .75rem; font-size:.75rem; font-weight:700; cursor:pointer; font-family:inherit; }
+    .btn-cep { position:absolute; right:.4rem; top:50%; transform:translateY(-50%); background:#cc4a1f; color:white; border:none; border-radius:.5rem; padding:.3rem .75rem; font-size:.75rem; font-weight:700; cursor:pointer; font-family:inherit; }
     .btn-cep:disabled { opacity:.5; cursor:wait; }
     .cep-status { font-size:.72rem; margin-top:.25rem; min-height:1rem; }
 
-    /* ── SLOT PICKER ── */
-    .slot-section-label { font-size:.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.08em; margin-bottom:.5rem; margin-top:.25rem; }
-    .slots-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(72px, 1fr)); gap:.5rem; }
-    .slot-btn { padding:.45rem .5rem; border-radius:.5rem; font-size:.8rem; font-weight:700; cursor:pointer; border:1px solid var(--border); background:var(--bg-card); color:var(--text-muted); transition:all .15s; font-family:inherit; text-align:center; }
-    .slot-btn:hover:not(:disabled) { border-color:var(--primary); color:var(--primary); background:rgba(59,130,246,.08); }
-    .slot-btn.selecionado { background:var(--primary); color:white; border-color:var(--primary); }
-    .slot-btn:disabled { opacity:.35; cursor:not-allowed; text-decoration:line-through; }
-    .slots-loading { color:var(--text-muted); font-size:.82rem; text-align:center; padding:.75rem 0; }
-    .slots-aviso { display:flex; align-items:center; gap:.5rem; background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.2); border-radius:.65rem; padding:.65rem 1rem; font-size:.8rem; color:#fca5a5; }
+    /* ── CHAT BOOKING ── */
+    .chat-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:1rem;overflow:hidden;display:flex;flex-direction:column;max-height:560px}
+    .chat-head{display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid var(--border);background:rgba(255,107,53,.06)}
+    .chat-head-avatar{width:38px;height:38px;border-radius:50%;background:var(--primary);color:var(--primary-ink);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .chat-head-title{font-weight:800;font-size:.9rem;font-family:'Space Grotesk',sans-serif}
+    .chat-head-sub{font-size:.72rem;color:var(--text-muted);display:flex;align-items:center;gap:.4rem}
+    .dot-online{width:7px;height:7px;border-radius:50%;background:#2dd4bf;display:inline-block}
+    .chat-close{margin-left:auto;background:transparent;border:none;color:var(--text-muted);cursor:pointer;padding:.25rem}
+    .chat-close:hover{color:var(--text-main)}
+    .chat-body{flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:.6rem;min-height:180px}
+    .msg{max-width:80%;padding:.6rem .9rem;border-radius:1rem;font-size:.85rem;line-height:1.45;animation:msgIn .25s ease-out}
+    @keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .msg-bot{align-self:flex-start;background:var(--bg-card);border:1px solid var(--border);border-bottom-left-radius:.25rem;color:var(--text-main)}
+    .msg-user{align-self:flex-end;background:var(--primary);color:var(--primary-ink);border-bottom-right-radius:.25rem;font-weight:600}
+    .msg-summary{align-self:stretch;background:var(--bg-card);border:1px solid var(--border);border-radius:.85rem;padding:.9rem 1rem;font-size:.82rem}
+    .msg-summary div{display:flex;justify-content:space-between;padding:.25rem 0;border-bottom:1px solid var(--border)}
+    .msg-summary div:last-child{border-bottom:none}
+    .msg-summary span:first-child{color:var(--text-muted)}
+    .typing{display:flex;gap:3px;align-self:flex-start;padding:.7rem .9rem;background:var(--bg-card);border:1px solid var(--border);border-radius:1rem;border-bottom-left-radius:.25rem}
+    .typing span{width:6px;height:6px;border-radius:50%;background:var(--text-muted);animation:typingBlink 1s infinite}
+    .typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+    @keyframes typingBlink{0%,100%{opacity:.25}50%{opacity:1}}
+    .chat-quickreplies{display:flex;flex-wrap:wrap;gap:.5rem;padding:.85rem 1.25rem;border-top:1px solid var(--border);background:var(--bg-card)}
+    .qr-btn{background:var(--bg-surface);border:1px solid var(--border);color:var(--text-main);border-radius:1.5rem;padding:.5rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+    .qr-btn:hover{border-color:var(--primary);color:var(--primary)}
+    .qr-btn.qr-primary{background:var(--primary);color:var(--primary-ink);border-color:var(--primary)}
+    .qr-btn.qr-primary:hover{opacity:.9}
+    .qr-input-wrap{display:flex;gap:.5rem;width:100%}
+    .qr-input-wrap input{flex:1}
+    .qr-empty{font-size:.78rem;color:var(--text-muted);padding:.4rem 0}
 
     /* ── MODAL ── */
     .modal-overlay { position:fixed; inset:0; z-index:9000; background:rgba(2,6,23,.85); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:1rem; }
-    .modal-box { background:#0f172a; border:1px solid #334155; border-radius:1.25rem; padding:2rem; width:100%; max-width:420px; box-shadow:0 25px 60px rgba(0,0,0,.6); animation:modalEntrar .25s cubic-bezier(.34,1.56,.64,1); }
+    .modal-box { background:#17120f; border:1px solid #3a2f29; border-radius:1.25rem; padding:2rem; width:100%; max-width:420px; box-shadow:0 25px 60px rgba(0,0,0,.6); animation:modalEntrar .25s cubic-bezier(.34,1.56,.64,1); }
     @keyframes modalEntrar { from{opacity:0;transform:scale(.92) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
     .modal-icone { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.25rem; }
     .modal-icone-perigo { background:rgba(239,68,68,.12); color:#ef4444; }
     .modal-icone-aviso  { background:rgba(251,191,36,.12); color:#fbbf24; }
-    .modal-titulo { font-size:1.125rem; font-weight:800; color:#f8fafc; text-align:center; margin-bottom:.5rem; }
-    .modal-desc { font-size:.875rem; color:#94a3b8; text-align:center; line-height:1.6; margin-bottom:1.75rem; }
-    .modal-desc strong { color:#f8fafc; }
+    .modal-titulo { font-size:1.125rem; font-weight:800; color:#fdf6f0; text-align:center; margin-bottom:.5rem; }
+    .modal-desc { font-size:.875rem; color:#a8978c; text-align:center; line-height:1.6; margin-bottom:1.75rem; }
+    .modal-desc strong { color:#fdf6f0; }
     .modal-acoes { display:flex; gap:.75rem; }
-    .btn-modal-cancelar { flex:1; padding:.7rem 1rem; border-radius:.75rem; border:1px solid #334155; background:transparent; color:#94a3b8; font-weight:700; font-size:.875rem; cursor:pointer; font-family:inherit; }
-    .btn-modal-cancelar:hover { background:rgba(255,255,255,.05); color:#f8fafc; }
+    .btn-modal-cancelar { flex:1; padding:.7rem 1rem; border-radius:.75rem; border:1px solid #3a2f29; background:transparent; color:#a8978c; font-weight:700; font-size:.875rem; cursor:pointer; font-family:inherit; }
+    .btn-modal-cancelar:hover { background:rgba(255,255,255,.05); color:#fdf6f0; }
     .btn-modal-perigo { flex:1; padding:.7rem 1rem; border-radius:.75rem; border:none; background:#dc2626; color:white; font-weight:700; font-size:.875rem; cursor:pointer; font-family:inherit; }
     .btn-modal-perigo:hover { background:#b91c1c; }
     .btn-modal-sair { flex:1; padding:.7rem 1rem; border-radius:.75rem; background:rgba(251,191,36,.12); color:#fbbf24; border:1px solid rgba(251,191,36,.25); font-weight:700; font-size:.875rem; cursor:pointer; font-family:inherit; }
@@ -181,51 +203,24 @@
         </button>
       </header>
 
-      <!-- Form Novo Agendamento -->
-      <div id="formAgendamentoCliente" class="card mb-5" style="display:none;">
-        <h2 class="text-sm font-bold mb-4 flex items-center gap-2">
-          <i data-lucide="calendar-plus" class="text-blue-500 w-4 h-4"></i> Novo Agendamento
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <!-- Veículo -->
+      <!-- Assistente de Agendamento (estilo chat) -->
+      <div id="formAgendamentoCliente" class="chat-card mb-5" style="display:none;">
+        <div class="chat-head">
+          <div class="chat-head-avatar"><i data-lucide="wrench"></i></div>
           <div>
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Veículo</label>
-            <select id="agend-veiculo" class="input-field" onchange="onMudaServicouOuData()">
-              <option value="">Selecione o veículo</option>
-            </select>
+            <p class="chat-head-title">Assistente de Agendamento</p>
+            <p class="chat-head-sub"><span class="dot-online"></span> Resposta automática</p>
           </div>
-          <!-- Serviço -->
-          <div>
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Serviço</label>
-            <select id="agend-servico" class="input-field" onchange="onMudaServicouOuData()">
-              <option value="">Selecione o serviço</option>
-            </select>
-          </div>
-          <!-- Data -->
-          <div>
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Data</label>
-            <input type="date" id="agend-data" class="input-field" onchange="onMudaServicouOuData()">
-          </div>
+          <button onclick="fecharFormAgendamento()" class="chat-close" aria-label="Fechar"><i data-lucide="x"></i></button>
         </div>
-
-        <!-- Seletor de Horário (carregado dinamicamente) -->
-        <div id="slots-container" style="display:none;">
-          <p class="slot-section-label">Horário disponível</p>
-          <div id="slots-content"></div>
-        </div>
-
-        <div class="flex justify-end gap-3 border-t border-slate-800 pt-3 mt-4">
-          <button onclick="fecharFormAgendamento()" class="btn-secondary">Cancelar</button>
-          <button onclick="enviarAgendamento()" class="btn-primary" id="btn-confirmar-agend" disabled>
-            <i data-lucide="check" class="w-4 h-4"></i> Confirmar
-          </button>
-        </div>
+        <div id="chat-body" class="chat-body"></div>
+        <div id="chat-quickreplies" class="chat-quickreplies"></div>
       </div>
 
       <!-- Stats -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div class="stat-card">
-          <div class="stat-icon bg-blue-500/10 text-blue-500"><i data-lucide="layers"></i></div>
+          <div class="stat-icon bg-orange-500/10 text-orange-500"><i data-lucide="layers"></i></div>
           <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total</span>
           <div class="stat-value" id="stat-total">0</div>
         </div>
@@ -243,7 +238,7 @@
 
       <div class="card">
         <h2 class="text-sm font-bold mb-4 flex items-center gap-2">
-          <i data-lucide="list" class="text-blue-500 w-4 h-4"></i> Histórico de Agendamentos
+          <i data-lucide="list" class="text-orange-500 w-4 h-4"></i> Histórico de Agendamentos
         </h2>
         <div class="table-wrap">
           <table>
@@ -263,7 +258,7 @@
 
       <div class="card mb-5">
         <h2 class="text-sm font-bold mb-4 flex items-center gap-2" id="form-veiculo-titulo">
-          <i data-lucide="plus-circle" class="text-blue-500 w-4 h-4"></i> Adicionar Novo Veículo
+          <i data-lucide="plus-circle" class="text-orange-500 w-4 h-4"></i> Adicionar Novo Veículo
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input id="marca"  placeholder="Marca (ex: Toyota)"   class="input-field">
@@ -289,7 +284,7 @@
 
       <div class="card">
         <h2 class="text-sm font-bold mb-4 flex items-center gap-2">
-          <i data-lucide="car-front" class="text-blue-500 w-4 h-4"></i> Veículos Cadastrados
+          <i data-lucide="car-front" class="text-orange-500 w-4 h-4"></i> Veículos Cadastrados
         </h2>
         <div id="listaVeiculos" class="flex flex-col gap-3"></div>
       </div>
@@ -306,7 +301,7 @@
 
         <!-- Avatar -->
         <div class="card flex flex-col items-center justify-center py-8 gap-4">
-          <div class="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-2xl font-black" id="conta-avatar">C</div>
+          <div class="w-16 h-16 rounded-full bg-orange-500 flex items-center justify-center text-2xl font-black" id="conta-avatar">C</div>
           <div class="text-center">
             <p class="font-bold text-base text-white" id="conta-nome">—</p>
             <p class="text-xs text-slate-500 break-all" id="conta-email">—</p>
@@ -320,7 +315,7 @@
         <div class="lg:col-span-2 card" id="info-perfil-static">
           <div class="flex items-center justify-between mb-4 gap-2 flex-wrap">
             <h2 class="text-sm font-bold flex items-center gap-2">
-              <i data-lucide="user" class="text-blue-500 w-4 h-4"></i> Informações Pessoais
+              <i data-lucide="user" class="text-orange-500 w-4 h-4"></i> Informações Pessoais
             </h2>
             <button id="btn-editar-perfil" onclick="abrirEdicaoPerfil()" class="btn-primary" style="padding:.45rem .9rem;font-size:.8rem;">
               <i data-lucide="pencil" class="w-3 h-3"></i> Editar Perfil
@@ -348,7 +343,7 @@
         <div class="lg:col-span-2 card" id="form-editar-perfil" style="display:none;">
           <div class="flex items-center justify-between mb-4 gap-2 flex-wrap">
             <h2 class="text-sm font-bold flex items-center gap-2">
-              <i data-lucide="pencil" class="text-blue-500 w-4 h-4"></i> Editar Perfil
+              <i data-lucide="pencil" class="text-orange-500 w-4 h-4"></i> Editar Perfil
             </h2>
             <button onclick="cancelarEdicaoPerfil()" class="btn-secondary" style="padding:.45rem .9rem;font-size:.8rem;">Cancelar</button>
           </div>
@@ -357,7 +352,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <div>
               <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Telefone *</label>
-              <input id="edit-telefone" class="input-field" type="tel" placeholder="(11) 99999-9999">
+              <input id="edit-telefone" class="input-field" type="tel" placeholder="(11) 99999-9999" maxlength="15" oninput="maskTelefone(this)">
             </div>
             <div>
               <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Data de Nascimento</label>

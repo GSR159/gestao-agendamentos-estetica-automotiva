@@ -17,7 +17,7 @@
     sucesso: { bg: 'rgba(22,163,74,0.12)',  border: 'rgba(22,163,74,0.35)',  text: '#4ade80', icon: '#22c55e' },
     erro:    { bg: 'rgba(220,38,38,0.12)',  border: 'rgba(220,38,38,0.35)',  text: '#f87171', icon: '#ef4444' },
     aviso:   { bg: 'rgba(217,119,6,0.12)',  border: 'rgba(217,119,6,0.35)',  text: '#fbbf24', icon: '#f59e0b' },
-    info:    { bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.35)', text: '#93c5fd', icon: '#3b82f6' },
+    info:    { bg: 'rgba(255,107,53,0.12)', border: 'rgba(255,107,53,0.35)', text: '#ffcba8', icon: '#ff6b35' },
   };
 
   function injetarEstilos() {

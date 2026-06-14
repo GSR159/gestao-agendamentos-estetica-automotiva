@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Confirmar Email — Smart System</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
+  <style>h1,h2,h3,.logo,.btn-primary,.stat-value,.modal-titulo{font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em}
     :root {
-      --bg-deep: #020617; --bg-surface: #0f172a;
-      --border: #334155; --primary: #3b82f6;
+      --bg-deep: #0c0a08; --bg-surface: #17120f;
+      --border: #3a2f29; --primary: #ff6b35;
       --success: #22c55e; --danger: #ef4444;
-      --text-main: #f8fafc; --text-muted: #94a3b8;
+      --text-main: #fdf6f0; --text-muted: #a8978c;
     }
     body {
       margin: 0;
@@ -35,7 +36,7 @@
       margin: 0 auto 24px;
       display: flex; align-items: center; justify-content: center;
     }
-    .icon-loading  { background: rgba(59,130,246,.12); color: #60a5fa; }
+    .icon-loading  { background: rgba(255,107,53,.12); color: #ffb088; }
     .icon-sucesso  { background: rgba(34,197,94,.12);  color: #22c55e; }
     .icon-erro     { background: rgba(239,68,68,.12);  color: #ef4444; }
     h1 { margin: 0 0 8px; font-size: 1.75rem; font-weight: 800; }
@@ -47,7 +48,7 @@
       border-radius: 12px; font-weight: 700; font-size: .95rem;
       border: none; cursor: pointer; transition: all .2s;
     }
-    .btn:hover { background: #2563eb; transform: translateY(-1px); }
+    .btn:hover { background: #e85a2a; transform: translateY(-1px); }
     .btn-outline {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
       background: transparent; color: var(--primary);
@@ -56,11 +57,11 @@
       border-radius: 12px; font-weight: 700; font-size: .95rem;
       cursor: pointer; transition: all .2s; margin-top: 12px;
     }
-    .btn-outline:hover { background: rgba(59,130,246,.08); }
+    .btn-outline:hover { background: rgba(255,107,53,.08); }
     .spinner {
       width: 36px; height: 36px;
       border: 3px solid rgba(96,165,250,.2);
-      border-top-color: #60a5fa;
+      border-top-color: #ffb088;
       border-radius: 50%;
       animation: spin .8s linear infinite;
     }

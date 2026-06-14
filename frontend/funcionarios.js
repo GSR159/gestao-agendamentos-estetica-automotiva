@@ -1,8 +1,5 @@
-// =====================================================
-//  funcionarios.js
-// =====================================================
 
-// ── Formulário ────────────────────────────────────────
+// Formulário
 function abrirForm() {
   document.getElementById('funcId').value    = '';
   document.getElementById('funcNome').value  = '';
@@ -56,7 +53,7 @@ async function salvarFuncionario() {
   }
 }
 
-// ── Listar ────────────────────────────────────────────
+// Listar
 async function carregarFuncionarios() {
   try {
     const res   = await fetch(`${API}/funcionarios`, { headers: getHeaders() });
@@ -92,7 +89,7 @@ async function carregarFuncionarios() {
           <td class="text-right">
             <div class="flex items-center justify-end gap-2">
               <button onclick="editarFuncionario(${f.id}, '${f.nome.replace(/'/g,"\\'")}', ${f.ativo})"
-                class="text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors border border-blue-500/20">
+                class="text-xs font-bold px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors border border-orange-500/20">
                 Editar
               </button>
               <button onclick="confirmarExclusao(${f.id}, '${f.nome.replace(/'/g,"\\'")}' )"
@@ -112,7 +109,7 @@ async function carregarFuncionarios() {
   }
 }
 
-// ── Modal de exclusão ─────────────────────────────────
+// Modal de exclusão 
 let _funcParaExcluir = null;
 
 function confirmarExclusao(id, nome) {
@@ -148,5 +145,5 @@ async function executarExclusao() {
   }
 }
 
-// ── Init ──────────────────────────────────────────────
+// INIT
 carregarFuncionarios();

@@ -5,19 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart System - Agendamentos</title>
   <!-- Tailwind CSS para utilitários de layout -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   
-  <style>
+  <style>h1,h2,h3,.logo,.btn-primary,.stat-value,.modal-titulo{font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em}
     :root {
-      --bg-deep: #020617;
-      --bg-surface: #0f172a;
-      --bg-card: #1e293b;
-      --border: #334155;
-      --primary: #3b82f6;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
+      --bg-deep: #0c0a08;
+      --bg-surface: #17120f;
+      --bg-card: #221b17;
+      --border: #3a2f29;
+      --primary: #ff6b35;
+      --text-main: #fdf6f0;
+      --text-muted: #a8978c;
     }
 
     body {
@@ -106,7 +107,7 @@
 
     .btn-primary {
       background: var(--primary);
-      color: white;
+      color: var(--primary-ink);
       padding: 0.75rem 1.5rem;
       border-radius: 0.75rem;
       font-weight: 600;
@@ -117,7 +118,7 @@
     }
 
     .btn-primary:hover {
-      background: #2563eb;
+      background: #e85a2a;
       transform: translateY(-2px);
     }
 

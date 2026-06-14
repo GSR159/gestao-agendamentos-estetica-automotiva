@@ -19,19 +19,58 @@ const obterRelatorios = async (req, res) => {
     const qtd = Number(totalAgendamentos.rows[0].qtd);
     const ticketMedio = qtd > 0 ? receitaTotal / qtd : 0;
 
-    // Fidelização
-    const fidelizacaoResult = await pool.query(`
-      SELECT ROUND(
-        100.0 * COUNT(*) FILTER (WHERE total > 1) / NULLIF(COUNT(*), 0)
-      , 0) AS pct
-      FROM (
-        SELECT cliente_id, COUNT(*) AS total
-        FROM agendamentos
-        WHERE status IN ('concluido')
-        GROUP BY cliente_id
-      ) sub
+    // Fidelização (RFM simplificado: Recência + Frequência + Valor)
+    // Classifica cada cliente em um segmento com base em quando voltou,
+    // quantas vezes voltou e quanto gastou. Mais robusto que "voltou ou não".
+    const rfmResult = await pool.query(`
+      WITH base AS (
+        SELECT
+          a.cliente_id,
+          COUNT(*)                                   AS freq,
+          COALESCE(SUM(s.preco), 0)                  AS valor,
+          MAX(a.data)                                AS ultima,
+          NOW() - MAX(a.data)                        AS recencia
+        FROM agendamentos a
+        JOIN servicos s ON s.id = a.servico_id
+        WHERE a.status = 'concluido'
+        GROUP BY a.cliente_id
+      ),
+      segmentado AS (
+        SELECT *,
+          CASE
+            WHEN freq = 1 AND recencia <= INTERVAL '60 days' THEN 'novo'
+            WHEN freq >= 2 AND recencia <= INTERVAL '45 days' THEN 'fiel'
+            WHEN freq >= 2 AND recencia <= INTERVAL '90 days' THEN 'ativo'
+            WHEN recencia <= INTERVAL '180 days' THEN 'em_risco'
+            ELSE 'inativo'
+          END AS segmento
+        FROM base
+      )
+      SELECT
+        segmento,
+        COUNT(*)                AS qtd,
+        COALESCE(SUM(valor), 0) AS ltv_total,
+        COALESCE(AVG(valor), 0) AS ltv_medio
+      FROM segmentado
+      GROUP BY segmento
     `);
-    const fidelizacao = Number(fidelizacaoResult.rows[0].pct || 0);
+
+    const totalClientesBase = rfmResult.rows.reduce((acc, r) => acc + Number(r.qtd), 0);
+    const segmentos = { novo: 0, ativo: 0, fiel: 0, em_risco: 0, inativo: 0 };
+    let ltvTotalGeral = 0;
+    rfmResult.rows.forEach(r => {
+      segmentos[r.segmento] = Number(r.qtd);
+      ltvTotalGeral += Number(r.ltv_total);
+    });
+
+    // Taxa de fidelização = % de clientes recorrentes (ativo + fiel) entre os que já voltaram pelo menos 1x
+    const recorrentes = segmentos.ativo + segmentos.fiel;
+    const baseRecorrencia = totalClientesBase - segmentos.novo;
+    const fidelizacao = baseRecorrencia > 0
+      ? Math.round(100 * recorrentes / baseRecorrencia)
+      : 0;
+
+    const ltvMedio = totalClientesBase > 0 ? ltvTotalGeral / totalClientesBase : 0;
 
     // Evolução temporal (últimos 30 dias)
     const evolucaoResult = await pool.query(`
@@ -104,6 +143,8 @@ const obterRelatorios = async (req, res) => {
       receitaTotal,
       ticketMedio,
       fidelizacao,
+      ltvMedio,
+      segmentos,
       evolucao,
       servicos,
       clientes

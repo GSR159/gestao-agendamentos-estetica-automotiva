@@ -12,14 +12,14 @@ let veiculoEditando = null;
   overlay.id = 'modal-confirmar-delete';
   overlay.style.cssText = 'display:none;position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.85);backdrop-filter:blur(6px);align-items:center;justify-content:center;';
   overlay.innerHTML = `
-    <div style="background:#0f172a;border:1px solid #334155;border-radius:1.25rem;padding:2rem;width:100%;max-width:420px;box-shadow:0 25px 60px rgba(0,0,0,.6);">
+    <div style="background:#17120f;border:1px solid #3a2f29;border-radius:1.25rem;padding:2rem;width:100%;max-width:420px;box-shadow:0 25px 60px rgba(0,0,0,.6);">
       <div style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;background:rgba(239,68,68,.12);color:#f87171;">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
       </div>
-      <p style="font-size:1.125rem;font-weight:800;color:#f8fafc;text-align:center;margin-bottom:.5rem;">Deletar veículo?</p>
-      <p style="font-size:.875rem;color:#94a3b8;text-align:center;line-height:1.6;margin-bottom:1.75rem;">Esta ação é irreversível.</p>
+      <p style="font-size:1.125rem;font-weight:800;color:#fdf6f0;text-align:center;margin-bottom:.5rem;">Deletar veículo?</p>
+      <p style="font-size:.875rem;color:#a8978c;text-align:center;line-height:1.6;margin-bottom:1.75rem;">Esta ação é irreversível.</p>
       <div style="display:flex;gap:.75rem;">
-        <button id="btn-cancelar-delete" style="flex:1;padding:.7rem 1rem;border-radius:.75rem;border:1px solid #334155;background:transparent;color:#94a3b8;font-weight:700;font-size:.875rem;cursor:pointer;font-family:inherit;">Cancelar</button>
+        <button id="btn-cancelar-delete" style="flex:1;padding:.7rem 1rem;border-radius:.75rem;border:1px solid #3a2f29;background:transparent;color:#a8978c;font-weight:700;font-size:.875rem;cursor:pointer;font-family:inherit;">Cancelar</button>
         <button id="btn-confirmar-delete" style="flex:1;padding:.7rem 1rem;border-radius:.75rem;background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.25);font-weight:700;font-size:.875rem;cursor:pointer;font-family:inherit;">Deletar</button>
       </div>
     </div>`;
@@ -89,7 +89,7 @@ window.carregarVeiculos = async function (offset = 0) {
         <td class="text-right">
           <div class="flex items-center justify-end gap-2">
             <button onclick="editarVeiculo(${v.id})"
-              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors border border-blue-500/20">
+              class="text-xs font-bold px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors border border-orange-500/20">
               Editar
             </button>
             <button onclick="deletarVeiculo(${v.id})"
@@ -206,5 +206,3 @@ async function executarDeleteVeiculo(id) {
     carregarVeiculos(_offsetVeic);
   } catch { toast.erro('Erro de conexão.'); }
 }
-
-// INIT (chamado pelo window.onload do HTML)
