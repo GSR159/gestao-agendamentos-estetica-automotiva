@@ -9,9 +9,9 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>h1,h2,h3,.logo,.btn-primary,.stat-value,.modal-titulo{font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em}
     :root {
-      --bg-deep: #0c0a08; --bg-surface: #17120f; --bg-card: #221b17;
-      --border: #3a2f29; --primary: #ff6b35;
-      --text-main: #fdf6f0; --text-muted: #a8978c;
+      --bg-deep: #061412; --bg-surface: #0c211d; --bg-card: #11302a;
+      --border: #1e4a40; --primary: #16a34a;
+      --text-main: #f1f8f5; --text-muted: #87a69c;
     }
     * { box-sizing: border-box; }
     body {
@@ -24,7 +24,7 @@
     }
     .bg-glow {
       position: fixed; width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(255,107,53,.15) 0%, rgba(2,6,23,0) 70%);
+      background: radial-gradient(circle, rgba(22,163,74,.15) 0%, rgba(2,6,23,0) 70%);
       border-radius: 50%; z-index: -1; filter: blur(60px);
     }
     .register-container {
@@ -58,7 +58,7 @@
       width: 100%; transition: all .2s;
     }
     .input-with-eye { padding-right: 3.5rem !important; }
-    input:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 2px rgba(255,107,53,.1); }
+    input:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 2px rgba(22,163,74,.1); }
     .toggle-password {
       position: absolute; right: 1rem; top: 50%;
       transform: translateY(-50%); color: var(--text-muted);
@@ -76,7 +76,7 @@
       display: flex; align-items: center; justify-content: center; gap: .5rem;
       margin-top: 1.5rem; border: none; cursor: pointer; font-family: inherit;
     }
-    .btn-register:hover { background: #e85a2a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,107,53,.3); }
+    .btn-register:hover { background: #15803d; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(22,163,74,.3); }
     .btn-register:disabled { opacity: .6; cursor: not-allowed; transform: none; }
     .login-link { text-align: center; margin-top: 1.5rem; font-size: .875rem; color: var(--text-muted); }
     .login-link a { color: var(--primary); font-weight: 600; text-decoration: none; }
@@ -87,7 +87,7 @@
 
     /* Link de termos — parece link normal mas abre modal */
     .link-termos {
-      color: #ff6b35; cursor: pointer;
+      color: #16a34a; cursor: pointer;
       text-decoration: none; font-weight: 500;
       background: none; border: none; padding: 0;
       font-size: inherit; font-family: inherit;
@@ -105,7 +105,7 @@
     }
     .modal-doc-overlay.aberto { display: flex; }
     .modal-doc-box {
-      background: #17120f; border: 1px solid #3a2f29;
+      background: #0c211d; border: 1px solid #1e4a40;
       border-radius: 1.25rem; width: 100%; max-width: 680px;
       max-height: 85vh; display: flex; flex-direction: column;
       box-shadow: 0 30px 70px rgba(0,0,0,.7);
@@ -117,25 +117,25 @@
     }
     .modal-doc-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 1.25rem 1.5rem; border-bottom: 1px solid #3a2f29; flex-shrink: 0;
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid #1e4a40; flex-shrink: 0;
     }
     .modal-doc-titulo {
       display: flex; align-items: center; gap: .75rem;
-      font-size: 1rem; font-weight: 800; color: #fdf6f0;
+      font-size: 1rem; font-weight: 800; color: #f1f8f5;
     }
     .modal-doc-titulo-icone {
       width: 36px; height: 36px; border-radius: 10px;
-      background: #e85a2a; display: flex; align-items: center; justify-content: center;
+      background: #15803d; display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
     .btn-fechar-modal {
       width: 32px; height: 32px; border-radius: 8px;
-      border: 1px solid #3a2f29; background: transparent;
-      color: #a8978c; cursor: pointer; display: flex;
+      border: 1px solid #1e4a40; background: transparent;
+      color: #87a69c; cursor: pointer; display: flex;
       align-items: center; justify-content: center;
       transition: all .2s; flex-shrink: 0;
     }
-    .btn-fechar-modal:hover { background: rgba(255,255,255,.06); color: #fdf6f0; }
+    .btn-fechar-modal:hover { background: rgba(255,255,255,.06); color: #f1f8f5; }
     .modal-doc-body {
       overflow-y: auto; padding: 1.5rem;
       flex: 1; scroll-behavior: smooth;
@@ -143,39 +143,39 @@
     /* Scrollbar discreta */
     .modal-doc-body::-webkit-scrollbar { width: 6px; }
     .modal-doc-body::-webkit-scrollbar-track { background: transparent; }
-    .modal-doc-body::-webkit-scrollbar-thumb { background: #3a2f29; border-radius: 9999px; }
+    .modal-doc-body::-webkit-scrollbar-thumb { background: #1e4a40; border-radius: 9999px; }
     .modal-doc-body::-webkit-scrollbar-thumb:hover { background: #5a4b43; }
 
     /* Conteúdo dentro do modal — mesmo estilo das páginas originais */
     .doc-content .highlight {
-      background: rgba(255,107,53,.08); border: 1px solid rgba(255,107,53,.18);
+      background: rgba(22,163,74,.08); border: 1px solid rgba(22,163,74,.18);
       color: #dbeafe; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px;
       font-size: .9rem; line-height: 1.65;
     }
     .doc-content h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 4px; }
-    .doc-content .subtitulo { color: #a8978c; font-size: .85rem; margin-bottom: 20px; }
+    .doc-content .subtitulo { color: #87a69c; font-size: .85rem; margin-bottom: 20px; }
     .doc-content h2 { font-size: .95rem; font-weight: 700; color: #fff; margin: 20px 0 6px; }
     .doc-content p, .doc-content li { color: #cbd5e1; line-height: 1.75; font-size: .9rem; margin: 0 0 6px; }
     .doc-content ul { padding-left: 20px; margin: 6px 0 10px; }
     .doc-content li { margin-bottom: 3px; }
     .doc-content strong { color: #fff; }
     .doc-content .footer-note {
-      margin-top: 24px; padding-top: 16px; border-top: 1px solid #3a2f29;
-      color: #a8978c; font-size: .85rem; line-height: 1.6;
+      margin-top: 24px; padding-top: 16px; border-top: 1px solid #1e4a40;
+      color: #87a69c; font-size: .85rem; line-height: 1.6;
     }
 
     .modal-doc-footer {
-      padding: 1rem 1.5rem; border-top: 1px solid #3a2f29;
+      padding: 1rem 1.5rem; border-top: 1px solid #1e4a40;
       display: flex; justify-content: flex-end; gap: .75rem; flex-shrink: 0;
     }
     .btn-entendido {
-      background: #ff6b35; color: white;
+      background: #16a34a; color: white;
       border: none; border-radius: .75rem;
       padding: .65rem 1.5rem; font-weight: 700;
       font-size: .875rem; cursor: pointer;
       font-family: inherit; transition: background .2s;
     }
-    .btn-entendido:hover { background: #e85a2a; }
+    .btn-entendido:hover { background: #15803d; }
 
     #btn-topo {
       position: fixed; bottom: 1.5rem; right: 1.5rem;
@@ -184,7 +184,7 @@
       border: none; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; z-index: 9000;
-      box-shadow: 0 4px 12px rgba(255,107,53,.4);
+      box-shadow: 0 4px 12px rgba(22,163,74,.4);
       opacity: 0; pointer-events: none;
       transition: opacity .3s, transform .3s;
     }
@@ -204,7 +204,7 @@
 
   <div class="register-container">
     <div class="text-center mb-6">
-      <div class="inline-flex items-center justify-center p-3 bg-orange-600 rounded-2xl shadow-lg shadow-orange-900/20 mb-4">
+      <div class="inline-flex items-center justify-center p-3 bg-emerald-600 rounded-2xl shadow-lg shadow-emerald-900/20 mb-4">
         <i data-lucide="user-plus" class="w-8 h-8 text-white"></i>
       </div>
       <h1 class="text-3xl font-extrabold tracking-tight text-white mb-1">Criar Conta</h1>

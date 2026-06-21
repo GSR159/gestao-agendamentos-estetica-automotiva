@@ -1,5 +1,7 @@
 // config.js
-window.API = "https://gestao-agendamentos-estetica-automotiva.onrender.com";
+window.API = "http://localhost:3000";
+// produção (Render):
+//https://gestao-agendamentos-estetica-automotiva.onrender.com
 // backup
 //https://gestao-agendamentos-estetica-automotiva-production.up.railway.app
 

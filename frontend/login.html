@@ -9,9 +9,9 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>h1,h2,h3,.logo,.btn-primary,.stat-value,.modal-titulo{font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em}
     :root {
-      --bg-deep: #0c0a08; --bg-surface: #17120f; --bg-card: #221b17;
-      --border: #3a2f29; --primary: #ff6b35;
-      --text-main: #fdf6f0; --text-muted: #a8978c;
+      --bg-deep: #061412; --bg-surface: #0c211d; --bg-card: #11302a;
+      --border: #1e4a40; --primary: #16a34a;
+      --text-main: #f1f8f5; --text-muted: #87a69c;
     }
     * { box-sizing: border-box; }
     body {
@@ -23,7 +23,7 @@
     }
     .bg-glow {
       position: fixed; width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(255,107,53,.15) 0%, rgba(2,6,23,0) 70%);
+      background: radial-gradient(circle, rgba(22,163,74,.15) 0%, rgba(2,6,23,0) 70%);
       border-radius: 50%; z-index: -1; filter: blur(60px);
     }
     .login-container { width: 100%; max-width: 400px; animation: fadeIn .5s ease-out; }
@@ -54,7 +54,7 @@
       width: 100%; transition: all .2s;
     }
     .input-with-eye { padding-right: 3.5rem !important; }
-    input:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 2px rgba(255,107,53,.1); }
+    input:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 2px rgba(22,163,74,.1); }
     input.input-erro { border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239,68,68,.1); }
     .toggle-password {
       position: absolute; right: 1rem; top: 50%;
@@ -70,7 +70,7 @@
       display: flex; align-items: center; justify-content: center; gap: .5rem;
       margin-top: 1rem; border: none; cursor: pointer; font-family: inherit;
     }
-    .btn-login:hover { background: #e85a2a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,107,53,.3); }
+    .btn-login:hover { background: #15803d; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(22,163,74,.3); }
     .btn-login:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
     /* Caixa de erro — visível por padrão quando tem conteúdo */
@@ -115,7 +115,7 @@
       background: transparent; cursor: pointer; font-size: .875rem;
       font-weight: 600; transition: all .2s; font-family: inherit;
     }
-    .btn-reenviar:hover { background: rgba(255,107,53,.08); }
+    .btn-reenviar:hover { background: rgba(22,163,74,.08); }
 
     @media (max-width: 480px) {
       .login-box { padding: 1.75rem 1.25rem; }
@@ -128,7 +128,7 @@
 
   <div class="login-container">
     <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center p-3 bg-orange-600 rounded-2xl shadow-lg shadow-orange-900/20 mb-4">
+      <div class="inline-flex items-center justify-center p-3 bg-emerald-600 rounded-2xl shadow-lg shadow-emerald-900/20 mb-4">
         <i data-lucide="car" class="w-8 h-8 text-white"></i>
       </div>
       <h1 class="text-3xl font-extrabold tracking-tight text-white mb-1">Smart System</h1>

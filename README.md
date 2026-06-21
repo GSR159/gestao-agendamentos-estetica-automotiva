@@ -233,4 +233,4 @@ Estudante de Engenharia de Software
 
 ## 📄 Licença
 
-Este projeto é de caráter acadêmico e educacional — Trabalho de Conclusão de Curso.
+Este projeto é de caráter acadêmico e educacional — Trabalho de Conclusão de Curso.# gestao-automotiva
