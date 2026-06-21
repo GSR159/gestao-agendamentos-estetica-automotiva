@@ -27,6 +27,7 @@ const allowedOrigins = (process.env.FRONT_URL || 'http://127.0.0.1:5500')
 
 app.use(cors({
   origin: (origin, callback) => {
+    logger.info(`[CORS-DEBUG] origin recebida: "${origin}" | NODE_ENV: "${process.env.NODE_ENV}" | FRONT_URL: "${process.env.FRONT_URL}" | permitidas: ${JSON.stringify(allowedOrigins)}`);
     if (!origin && process.env.NODE_ENV !== 'production') return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
     callback(new Error('Origem não permitida pelo CORS'));
@@ -71,13 +72,14 @@ app.use('/funcionarios', funcionarioRoutes);
 app.use('/agenda',       agendaRoutes);
 app.use('/admins',       adminRoutes);
 
-app.use(cors({
-  origin: (origin, callback) => {
-    logger.info(`[CORS-DEBUG] origin recebida: "${origin}" | NODE_ENV: "${process.env.NODE_ENV}" | FRONT_URL: "${process.env.FRONT_URL}" | permitidas: ${JSON.stringify(allowedOrigins)}`);
-    if (!origin && process.env.NODE_ENV !== 'production') return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error('Origem não permitida pelo CORS'));
-  },
-  credentials: true,
-}));
+app.use((err, req, res, next) => {
+  if (process.env.NODE_ENV !== 'test') {
+    logger.error(`[ERRO] ${err.message}`);
+  }
+  if (err.message === 'Origem não permitida pelo CORS') {
+    return res.status(403).json({ erro: 'Origem não permitida.' });
+  }
+  res.status(500).json({ erro: 'Erro interno no servidor.' });
+});
+
 module.exports = app;
