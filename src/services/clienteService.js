@@ -9,6 +9,11 @@ const listar = async ({ limit, offset, busca }) => {
   return ClienteModel.listar({ limit: l, offset: o, busca: busca || null });
 };
 
+// CRM Kanban — clientes agrupados por estágio do funil
+const listarFunil = async () => {
+  return ClienteModel.listarFunil();
+};
+
 const buscarPorId = async (id) => {
   const cliente = await ClienteModel.buscarPorId(id);
   if (!cliente) throw { status: 404, mensagem: 'Cliente não encontrado.' };
@@ -109,4 +114,6 @@ const exportarDados = async (clienteId) => {
   };
 };
 
-module.exports = { listar, buscarPorId, criar, atualizar, remover, exportarDados, atualizarCRM, buscarHistorico };
+module.exports = {
+  listar, listarFunil, buscarPorId, criar, atualizar, remover, exportarDados, atualizarCRM, buscarHistorico,
+};

@@ -14,6 +14,17 @@ const listar = async ({ limit, offset, busca }) => {
   return { dados: dados.rows, total: parseInt(total.rows[0].count) };
 };
 
+// CRM Kanban — todos os clientes ativos com seus dados de funil
+const listarFunil = async () => {
+  const r = await pool.query(`
+    SELECT id, nome, email, telefone, status_funil, tags
+    FROM clientes
+    WHERE ativo = true
+    ORDER BY id ASC
+  `);
+  return r.rows;
+};
+
 const buscarPorId = async (id) => {
   const r = await pool.query('SELECT * FROM clientes WHERE id = $1 AND ativo = true', [id]);
   return r.rows[0] || null;
@@ -77,6 +88,6 @@ const historicoAgendamentos = async (clienteId) => {
 };
 
 module.exports = {
-  listar, buscarPorId, buscarPorEmail, criar, atualizar, anonimizar, buscarUsuarioId,
+  listar, listarFunil, buscarPorId, buscarPorEmail, criar, atualizar, anonimizar, buscarUsuarioId,
   atualizarCRM, historicoVeiculos, historicoAgendamentos,
 };

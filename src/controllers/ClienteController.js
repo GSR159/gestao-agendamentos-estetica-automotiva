@@ -11,6 +11,16 @@ const listarClientes = async (req, res) => {
   }
 };
 
+// CRM Kanban — clientes agrupados por estágio do funil
+const listarFunil = async (req, res) => {
+  try {
+    res.status(200).json(await ClienteService.listarFunil());
+  } catch (e) {
+    logger.error(`[listarFunil] ${e.message || e}`);
+    res.status(e.status || 500).json({ erro: e.mensagem || 'Erro ao listar funil de clientes.' });
+  }
+};
+
 const buscarClientePorId = async (req, res) => {
   try {
     res.status(200).json(await ClienteService.buscarPorId(req.params.id));
@@ -72,6 +82,6 @@ const exportarDados = async (req, res) => {
 };
 
 module.exports = {
-  listarClientes, buscarClientePorId, criarCliente, atualizarCliente, deletarCliente, exportarDados,
+  listarClientes, listarFunil, buscarClientePorId, criarCliente, atualizarCliente, deletarCliente, exportarDados,
   atualizarCRM, buscarHistorico,
 };

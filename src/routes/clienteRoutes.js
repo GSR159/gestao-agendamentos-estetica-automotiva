@@ -12,7 +12,7 @@ const {
   exportarDados,
   atualizarCRM,
   buscarHistorico,
-  listarFunil, 
+  listarFunil, // <-- precisa existir no ClienteController
 } = require('../controllers/ClienteController');
 
 router.use(verificarToken, verificarAdmin);
