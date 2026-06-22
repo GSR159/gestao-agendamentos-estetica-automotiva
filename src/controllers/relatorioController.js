@@ -53,8 +53,7 @@ const obterRelatorios = async (req, res) => {
     const ticketMedio = qtd > 0 ? receitaTotal / qtd : 0;
 
     // Fidelização (RFM simplificado: Recência + Frequência + Valor)
-    // Classifica cada cliente em um segmento com base em quando voltou,
-    // quantas vezes voltou e quanto gastou. Mais robusto que "voltou ou não".
+    // Classifica cada cliente em um segmento com base em quando voltou
     const rfmResult = await pool.query(`
       WITH base AS (
         SELECT
@@ -159,7 +158,7 @@ const obterRelatorios = async (req, res) => {
       LEFT JOIN funcionarios f ON f.id = a.funcionario_id
       LEFT JOIN veiculos     v ON v.id = a.veiculo_id
       WHERE a.status IN ('concluido') ${whereExtra}
-      GROUP BY c.nome
+      GROUP BY c.id, c.nome
       ORDER BY total DESC
     `, paramsPeriodo);
 

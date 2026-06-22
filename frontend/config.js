@@ -19,3 +19,10 @@ window.maskTelefone = function (input) {
   }
   input.value = v;
 };
+window.formatarTelefone = function (telefone) {
+  if (!telefone) return '—';
+  const v = String(telefone).replace(/\D/g, '');
+  if (v.length === 11) return v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+  if (v.length === 10) return v.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
+  return telefone;
+};

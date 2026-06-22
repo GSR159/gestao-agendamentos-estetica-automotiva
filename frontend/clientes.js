@@ -74,7 +74,7 @@ function criarLinhaCliente(c) {
 
   const tdTelefone = document.createElement('td');
   tdTelefone.className = 'text-slate-400';
-  tdTelefone.textContent = c.telefone ?? '—';
+  tdTelefone.textContent = formatarTelefone(c.telefone);
 
   const tdFunil = document.createElement('td');
   const funil = FUNIL_LABEL[c.status_funil] ?? FUNIL_LABEL.novo;
@@ -252,10 +252,9 @@ async function carregarKanban() {
     document.getElementById(`kanban-${s}`).innerHTML = `<p class="kanban-empty">Carregando...</p>`;
   });
   try {
-    const res = await fetch(`${API}/clientes?limit=1000`, { headers: getHeaders() });
+    const res = await fetch(`${API}/clientes/funil`, { headers: getHeaders() });
     if (!res.ok) throw new Error('Falha na requisição');
-    const body  = await res.json();
-    const dados = (body.dados ?? body).filter(c => c.nome !== 'Usuário Removido' && c.email !== null);
+    const dados = await res.json();
 
     const grupos = { novo: [], ativo: [], recorrente: [], inativo: [] };
     dados.forEach(c => {
@@ -296,7 +295,7 @@ function renderizarColunaKanban(status, clientes) {
 
     const contato = document.createElement('p');
     contato.className = 'kanban-card-contato';
-    contato.textContent = [c.email, c.telefone].filter(Boolean).join(' · ') || '—';
+    contato.textContent = [c.email, c.telefone ? formatarTelefone(c.telefone) : null].filter(Boolean).join(' · ') || '—';
 
     card.append(nome, contato);
 
