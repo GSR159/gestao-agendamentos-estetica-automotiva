@@ -1,14 +1,14 @@
-// services/veiculoService.js — lógica de negócio de veículos
 const VeiculoModel = require('../models/veiculoModel');
 const { PAGE_LIMIT_DEFAULT, PAGE_LIMIT_MAX } = require('../config/constants');
 
 const listar = async ({ usuario, limit, offset }) => {
   const l = Math.min(parseInt(limit) || PAGE_LIMIT_DEFAULT, PAGE_LIMIT_MAX);
   const o = Math.max(parseInt(offset) || 0, 0);
-  if (usuario.tipo === 'cliente') {
-    return VeiculoModel.listar({ tipo: 'cliente', cliente_id: usuario.cliente_id, limit: l, offset: o });
-  }
-  return VeiculoModel.listar({ limit: l, offset: o });
+  const args = usuario.tipo === 'cliente'
+    ? { tipo: 'cliente', cliente_id: usuario.cliente_id, limit: l, offset: o }
+    : { limit: l, offset: o };
+  const { rows, total } = await VeiculoModel.listar(args);
+  return { dados: rows, total, pagina: Math.floor(o / l) + 1, totalPaginas: Math.ceil(total / l) };
 };
 
 const buscarPorId = async (id) => {

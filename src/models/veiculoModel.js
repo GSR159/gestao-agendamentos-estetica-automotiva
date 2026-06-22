@@ -1,15 +1,23 @@
-// models/veiculoModel.js — apenas queries SQL
 const pool = require('../config/db');
 
 const listar = async ({ tipo, cliente_id, limit, offset }) => {
-  let query  = `SELECT v.id, v.cliente_id, v.marca, v.modelo, v.placa, v.cor, v.ano, c.nome AS cliente
-                FROM veiculos v JOIN clientes c ON c.id = v.cliente_id`;
-  const params = [];
-  if (tipo === 'cliente') { query += ` WHERE v.cliente_id = $1`; params.push(cliente_id); }
-  query += ` ORDER BY v.id ASC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-  params.push(limit, offset);
+  const where = tipo === 'cliente' ? ' WHERE v.cliente_id = $1' : '';
+  const whereParams = tipo === 'cliente' ? [cliente_id] : [];
+
+  const totalR = await pool.query(
+    `SELECT COUNT(*) FROM veiculos v${where}`, whereParams
+  );
+  const total = parseInt(totalR.rows[0].count, 10);
+
+  const params = [...whereParams];
+  let query = `SELECT v.id, v.cliente_id, v.marca, v.modelo, v.placa, v.cor, v.ano, c.nome AS cliente
+               FROM veiculos v JOIN clientes c ON c.id = v.cliente_id${where} ORDER BY v.id ASC`;
+  if (limit != null) {
+    query += ` LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    params.push(limit, offset || 0);
+  }
   const r = await pool.query(query, params);
-  return r.rows;
+  return { rows: r.rows, total };
 };
 
 const buscarPorId = async (id) => {
