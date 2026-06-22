@@ -1,8 +1,8 @@
 // config.js
-window.API = "http://localhost:3000";
-// produção (Render):
-//https://gestao-agendamentos-estetica-automotiva.onrender.com
-// backup
+window.API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000'
+  : 'https://gestao-agendamentos-estetica-automotiva.onrender.com';
+// backup (Railway):
 //https://gestao-agendamentos-estetica-automotiva-production.up.railway.app
 
 // Máscara de telefone BR: (00) 0000-0000 ou (00) 00000-0000
