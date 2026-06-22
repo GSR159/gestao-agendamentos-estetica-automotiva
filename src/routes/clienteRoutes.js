@@ -12,6 +12,7 @@ const {
   exportarDados,
   atualizarCRM,
   buscarHistorico,
+  listarFunil, 
 } = require('../controllers/ClienteController');
 
 router.use(verificarToken, verificarAdmin);
@@ -33,6 +34,18 @@ router.use(verificarToken, verificarAdmin);
  *               items: { $ref: '#/components/schemas/Cliente' }
  */
 router.get('/', listarClientes);
+
+/**
+ * @openapi
+ * /clientes/funil:
+ *   get:
+ *     tags: [Clientes]
+ *     summary: Lista clientes agrupados por estágio do funil (CRM Kanban)
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200: { description: Clientes com status_funil }
+ */
+router.get('/funil', listarFunil);
 
 /**
  * @openapi
