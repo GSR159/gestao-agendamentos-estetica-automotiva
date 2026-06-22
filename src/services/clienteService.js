@@ -25,6 +25,41 @@ const atualizar = async (id, { nome, telefone, email }) => {
   return atualizado;
 };
 
+const STATUS_FUNIL_VALIDOS = ['novo', 'ativo', 'recorrente', 'inativo'];
+
+// Atualização parcial: campos omitidos mantêm o valor atual (ex: drag-and-drop do Kanban
+// envia só status_funil e não deve apagar tags/notas já salvas).
+const atualizarCRM = async (id, { status_funil, tags, notas }) => {
+  if (status_funil && !STATUS_FUNIL_VALIDOS.includes(status_funil)) {
+    throw { status: 400, mensagem: 'Status de funil inválido.' };
+  }
+
+  const atual = await ClienteModel.buscarPorId(id);
+  if (!atual) throw { status: 404, mensagem: 'Cliente não encontrado.' };
+
+  const tagsLimpa = Array.isArray(tags)
+    ? tags.map(t => String(t).trim()).filter(Boolean).slice(0, 10)
+    : atual.tags ?? [];
+
+  const atualizado = await ClienteModel.atualizarCRM(id, {
+    status_funil: status_funil || atual.status_funil || 'novo',
+    tags: tagsLimpa,
+    notas: notas !== undefined ? (notas ? String(notas).slice(0, 2000) : null) : atual.notas,
+  });
+  if (!atualizado) throw { status: 404, mensagem: 'Cliente não encontrado.' };
+  return atualizado;
+};
+
+const buscarHistorico = async (id) => {
+  const cliente = await ClienteModel.buscarPorId(id);
+  if (!cliente) throw { status: 404, mensagem: 'Cliente não encontrado.' };
+  const [veiculos, agendamentos] = await Promise.all([
+    ClienteModel.historicoVeiculos(id),
+    ClienteModel.historicoAgendamentos(id),
+  ]);
+  return { cliente, veiculos, agendamentos };
+};
+
 // LGPD — anonimiza dados e deleta login
 const remover = async (id) => {
   const cliente = await ClienteModel.buscarPorId(id);
@@ -74,4 +109,4 @@ const exportarDados = async (clienteId) => {
   };
 };
 
-module.exports = { listar, buscarPorId, criar, atualizar, remover, exportarDados };
+module.exports = { listar, buscarPorId, criar, atualizar, remover, exportarDados, atualizarCRM, buscarHistorico };

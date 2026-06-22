@@ -50,8 +50,8 @@
   <aside class="sidebar">
     <div class="logo"><i data-lucide="car"></i><span>AutoGestão</span></div>
     <nav class="nav-links">
-      <a href="dashboard.html" class="nav-item active"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
       <a href="clientes.html" class="nav-item"><i data-lucide="users"></i><span>Clientes</span></a>
+      <a href="dashboard.html" class="nav-item active"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
       <a href="veiculos.html" class="nav-item"><i data-lucide="car-front"></i><span>Veículos</span></a>
       <a href="agendamentos.html" class="nav-item"><i data-lucide="calendar-check"></i><span>Agendamentos</span></a>
       <a href="agenda.html" class="nav-item"><i data-lucide="calendar-range"></i><span>Calendário</span></a>
@@ -82,6 +82,16 @@
       <div class="stat-card"><div class="stat-icon bg-amber-500/10 text-amber-500"><i data-lucide="clock"></i></div><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pendentes</span><div class="stat-value" id="pendentes">0</div></div>
       <div class="stat-card"><div class="stat-icon bg-green-500/10 text-green-500"><i data-lucide="check-circle"></i></div><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Aprovados</span><div class="stat-value" id="aprovados">0</div></div>
       <div class="stat-card"><div class="stat-icon bg-red-500/10 text-red-500"><i data-lucide="x-circle"></i></div><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Recusados</span><div class="stat-value" id="recusados">0</div></div>
+    </div>
+    <div class="chart-container mb-8">
+      <h2 class="text-lg font-bold mb-4 flex items-center gap-2"><i data-lucide="users" class="text-emerald-500 w-5 h-5"></i> Funil de Clientes</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="funil-clientes">
+        <div class="stat-card"><span class="text-xs font-bold text-slate-500 uppercase">Novos</span><div class="stat-value" id="funil-novo">0</div></div>
+        <div class="stat-card"><span class="text-xs font-bold text-slate-500 uppercase">Ativos</span><div class="stat-value" id="funil-ativo">0</div></div>
+        <div class="stat-card"><span class="text-xs font-bold text-slate-500 uppercase">Recorrentes</span><div class="stat-value" id="funil-recorrente">0</div></div>
+        <div class="stat-card"><span class="text-xs font-bold text-slate-500 uppercase">Inativos</span><div class="stat-value" id="funil-inativo">0</div></div>
+      </div>
+      <button onclick="window.location.href='clientes.html'" class="w-full mt-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-bold transition-all">Ver todos os Clientes →</button>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">

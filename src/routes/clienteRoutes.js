@@ -9,7 +9,9 @@ const {
   criarCliente,
   atualizarCliente,
   deletarCliente,
-  exportarDados
+  exportarDados,
+  atualizarCRM,
+  buscarHistorico,
 } = require('../controllers/ClienteController');
 
 router.use(verificarToken, verificarAdmin);
@@ -138,5 +140,52 @@ router.delete('/:id', deletarCliente);
  *       404: { description: Cliente não encontrado }
  */
 router.get('/:id/exportar', exportarDados);
+
+/**
+ * @openapi
+ * /clientes/{id}/historico:
+ *   get:
+ *     tags: [Clientes]
+ *     summary: Histórico completo do cliente (veículos e agendamentos) para visão 360 do CRM
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200: { description: Histórico do cliente }
+ *       404: { description: Cliente não encontrado }
+ */
+router.get('/:id/historico', buscarHistorico);
+
+/**
+ * @openapi
+ * /clientes/{id}/crm:
+ *   patch:
+ *     tags: [Clientes]
+ *     summary: Atualiza status de funil, tags e notas internas do cliente
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status_funil: { type: string, enum: [novo, ativo, recorrente, inativo] }
+ *               tags:         { type: array, items: { type: string } }
+ *               notas:        { type: string }
+ *     responses:
+ *       200: { description: Cliente atualizado }
+ *       400: { description: Status de funil inválido }
+ *       404: { description: Cliente não encontrado }
+ */
+router.patch('/:id/crm', atualizarCRM);
 
 module.exports = router;

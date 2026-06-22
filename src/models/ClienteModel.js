@@ -52,4 +52,31 @@ const buscarUsuarioId = async (id) => {
   return r.rows[0]?.usuario_id || null;
 };
 
-module.exports = { listar, buscarPorId, buscarPorEmail, criar, atualizar, anonimizar, buscarUsuarioId };
+const atualizarCRM = async (id, { status_funil, tags, notas }) => {
+  const r = await pool.query(
+    'UPDATE clientes SET status_funil=$1, tags=$2, notas=$3 WHERE id=$4 AND ativo=true RETURNING *',
+    [status_funil, tags, notas, id]
+  );
+  return r.rows[0] || null;
+};
+
+const historicoVeiculos = async (clienteId) => {
+  const r = await pool.query('SELECT * FROM veiculos WHERE cliente_id = $1 ORDER BY id DESC', [clienteId]);
+  return r.rows;
+};
+
+const historicoAgendamentos = async (clienteId) => {
+  const r = await pool.query(`
+    SELECT a.id, a.data, a.status, s.nome AS servico, s.preco, v.modelo AS veiculo, v.placa
+    FROM agendamentos a
+    JOIN servicos s ON s.id = a.servico_id
+    JOIN veiculos v ON v.id = a.veiculo_id
+    WHERE a.cliente_id = $1 ORDER BY a.data DESC
+  `, [clienteId]);
+  return r.rows;
+};
+
+module.exports = {
+  listar, buscarPorId, buscarPorEmail, criar, atualizar, anonimizar, buscarUsuarioId,
+  atualizarCRM, historicoVeiculos, historicoAgendamentos,
+};

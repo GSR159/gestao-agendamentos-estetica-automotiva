@@ -45,6 +45,22 @@ const deletarCliente = async (req, res) => {
   }
 };
 
+const atualizarCRM = async (req, res) => {
+  try {
+    res.status(200).json(await ClienteService.atualizarCRM(req.params.id, req.body));
+  } catch (e) {
+    res.status(e.status || 500).json({ erro: e.mensagem || 'Erro ao atualizar dados de CRM.' });
+  }
+};
+
+const buscarHistorico = async (req, res) => {
+  try {
+    res.status(200).json(await ClienteService.buscarHistorico(req.params.id));
+  } catch (e) {
+    res.status(e.status || 500).json({ erro: e.mensagem || 'Erro ao buscar histórico do cliente.' });
+  }
+};
+
 // LGPD art. 18 — portabilidade de dados
 const exportarDados = async (req, res) => {
   try {
@@ -55,4 +71,7 @@ const exportarDados = async (req, res) => {
   }
 };
 
-module.exports = { listarClientes, buscarClientePorId, criarCliente, atualizarCliente, deletarCliente, exportarDados };
+module.exports = {
+  listarClientes, buscarClientePorId, criarCliente, atualizarCliente, deletarCliente, exportarDados,
+  atualizarCRM, buscarHistorico,
+};

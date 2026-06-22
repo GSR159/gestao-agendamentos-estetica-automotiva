@@ -92,20 +92,24 @@ function baixarICS(agendamento) {
   a.click();
 }
 
-function getBotoesCalendario(agendamento) {
-  if ((agendamento.status ?? '').toLowerCase() !== 'aprovado') return '';
-  const dados = encodeURIComponent(JSON.stringify(agendamento));
-  return `
-    <div class="flex items-center gap-2 mt-1">
-      <button onclick='abrirGoogleCalendar(JSON.parse(decodeURIComponent("${dados}")))'
-        class="flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 transition-colors border border-orange-500/20 hover:border-orange-400/40 rounded-lg px-2 py-1">
-        <i data-lucide="calendar-plus" style="width:12px;height:12px"></i> Google
-      </button>
-      <button onclick='baixarICS(JSON.parse(decodeURIComponent("${dados}")))'
-        class="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition-colors border border-slate-600/30 hover:border-slate-400/40 rounded-lg px-2 py-1">
-        <i data-lucide="apple" style="width:12px;height:12px"></i> Apple
-      </button>
-    </div>`;
+function criarBotoesCalendario(agendamento) {
+  if ((agendamento.status ?? '').toLowerCase() !== 'aprovado') return document.createDocumentFragment();
+
+  const wrap = document.createElement('div');
+  wrap.className = 'flex items-center gap-2 mt-1';
+
+  const btnGoogle = document.createElement('button');
+  btnGoogle.className = 'flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 transition-colors border border-orange-500/20 hover:border-orange-400/40 rounded-lg px-2 py-1';
+  btnGoogle.innerHTML = '<i data-lucide="calendar-plus" style="width:12px;height:12px"></i> Google';
+  btnGoogle.addEventListener('click', () => abrirGoogleCalendar(agendamento));
+
+  const btnApple = document.createElement('button');
+  btnApple.className = 'flex items-center gap-1 text-xs text-slate-400 hover:text-white transition-colors border border-slate-600/30 hover:border-slate-400/40 rounded-lg px-2 py-1';
+  btnApple.innerHTML = '<i data-lucide="apple" style="width:12px;height:12px"></i> Apple';
+  btnApple.addEventListener('click', () => baixarICS(agendamento));
+
+  wrap.append(btnGoogle, btnApple);
+  return wrap;
 }
 
 //  AGENDAMENTOS 
@@ -119,20 +123,34 @@ async function carregarAgendamentos() {
     document.getElementById('stat-concluidos').textContent = data.filter(a => ['aprovado','concluido'].includes(a.status?.toLowerCase())).length;
 
     const tabela = document.getElementById('listaAgendamentos');
+    tabela.textContent = '';
     if (!data.length) {
-      tabela.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500 italic">Nenhum agendamento encontrado.</td></tr>`;
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 5;
+      td.className = 'py-10 text-center text-slate-500 italic';
+      td.textContent = 'Nenhum agendamento encontrado.';
+      tr.appendChild(td);
+      tabela.appendChild(tr);
       return;
     }
-    tabela.innerHTML = data.map(a => {
+    data.forEach(a => {
       const data_fmt = a.data ? new Date(a.data).toLocaleDateString('pt-BR') : '—';
       const hora     = a.hora ?? '—';
-      return `<tr>
-        <td>${data_fmt}</td><td>${hora}</td>
-        <td>${a.servico ?? '—'}</td>
-        <td>${a.veiculo ? `${a.veiculo.modelo} · ${a.veiculo.placa}` : '—'}</td>
-        <td>${getBadge(a.status)}${getBotoesCalendario(a)}</td>
-      </tr>`;
-    }).join('');
+
+      const tr = document.createElement('tr');
+      const tdData = document.createElement('td'); tdData.textContent = data_fmt;
+      const tdHora = document.createElement('td'); tdHora.textContent = hora;
+      const tdServico = document.createElement('td'); tdServico.textContent = a.servico ?? '—';
+      const tdVeiculo = document.createElement('td');
+      tdVeiculo.textContent = a.veiculo ? `${a.veiculo.modelo} · ${a.veiculo.placa}` : '—';
+      const tdStatus = document.createElement('td');
+      tdStatus.innerHTML = getBadge(a.status);
+      tdStatus.appendChild(criarBotoesCalendario(a));
+
+      tr.append(tdData, tdHora, tdServico, tdVeiculo, tdStatus);
+      tabela.appendChild(tr);
+    });
     lucide.createIcons();
   } catch (err) {
     console.error(err);
@@ -160,9 +178,13 @@ function chatBot(html) {
   chatScroll();
 }
 
-function chatUser(html) {
+// Mensagens do usuário são sempre texto puro vindo de seleções do próprio chat — sem HTML.
+function chatUser(texto) {
   const b = chatBody();
-  b.insertAdjacentHTML('beforeend', `<div class="msg msg-user">${html}</div>`);
+  const div = document.createElement('div');
+  div.className = 'msg msg-user';
+  div.textContent = texto;
+  b.appendChild(div);
   chatScroll();
 }
 
@@ -181,6 +203,23 @@ function chatQuickReplies(html) {
   lucide.createIcons();
 }
 
+// Monta quick-replies a partir de elementos DOM (sem HTML interpolado) — evita XSS.
+function chatQuickRepliesEls(elementos) {
+  const qr = chatQR();
+  qr.textContent = '';
+  elementos.forEach(el => qr.appendChild(el));
+  lucide.createIcons();
+}
+
+function criarBotaoQR(label, onClick, opts = {}) {
+  const btn = document.createElement('button');
+  btn.className = `qr-btn${opts.primary ? ' qr-primary' : ''}`;
+  btn.textContent = label;
+  if (opts.title) btn.title = opts.title;
+  btn.addEventListener('click', onClick);
+  return btn;
+}
+
 //  PASSO 1 — VEÍCULO 
 async function carregarVeiculosParaAgendamento() {
   try {
@@ -196,10 +235,11 @@ function chatPassoVeiculo() {
     return;
   }
   chatBot('Olá! 👋 Vamos marcar seu serviço. Pra qual veículo é o agendamento?');
-  chatQuickReplies(
-    listaVeiculosCliente.map(v =>
-      `<button class="qr-btn" onclick="chatEscolheVeiculo('${v.id}','${v.modelo} · ${v.placa}')">${v.modelo} · ${v.placa}</button>`
-    ).join('')
+  chatQuickRepliesEls(
+    listaVeiculosCliente.map(v => {
+      const label = `${v.modelo} · ${v.placa}`;
+      return criarBotaoQR(label, () => chatEscolheVeiculo(v.id, label));
+    })
   );
 }
 
@@ -220,10 +260,11 @@ async function carregarServicosParaAgendamento() {
 
 function chatPassoServico() {
   chatBot('Boa escolha! Qual serviço você quer fazer?');
-  chatQuickReplies(
-    listaServicosCliente.map(s =>
-      `<button class="qr-btn" onclick="chatEscolheServico('${s.id}','${s.nome}')">${s.nome} · R$ ${Number(s.preco).toFixed(2).replace('.',',')}</button>`
-    ).join('')
+  chatQuickRepliesEls(
+    listaServicosCliente.map(s => {
+      const label = `${s.nome} · R$ ${Number(s.preco).toFixed(2).replace('.',',')}`;
+      return criarBotaoQR(label, () => chatEscolheServico(s.id, s.nome));
+    })
   );
 }
 
@@ -278,11 +319,11 @@ async function chatPassoHorario() {
     }
 
     chatBot('Aqui estão os horários disponíveis hoje:');
-    chatQuickReplies(
-      disponiveis.map(s =>
-        `<button class="qr-btn" title="${s.livres} de ${s.total} livre(s)" onclick="chatEscolheHorario('${s.horario}')">${s.horario}</button>`
-      ).join('') + `<button class="qr-btn" onclick="chatTyping(0,chatPassoData)">📅 Trocar data</button>`
+    const botoesHorario = disponiveis.map(s =>
+      criarBotaoQR(s.horario, () => chatEscolheHorario(s.horario), { title: `${s.livres} de ${s.total} livre(s)` })
     );
+    botoesHorario.push(criarBotaoQR('📅 Trocar data', () => chatTyping(0, chatPassoData)));
+    chatQuickRepliesEls(botoesHorario);
   } catch (e) {
     console.error(e);
     chatBot('❌ Não consegui buscar os horários agora. Tente novamente.');
@@ -303,18 +344,30 @@ function chatPassoResumo() {
   const [y,m,d] = _chatEscolha.data.split('-');
 
   chatBot('Tudo certo, só confirmar:');
-  chatBody().insertAdjacentHTML('beforeend', `
-    <div class="msg-summary">
-      <div><span>Veículo</span><span>${veiculo ? veiculo.modelo+' · '+veiculo.placa : '—'}</span></div>
-      <div><span>Serviço</span><span>${servico ? servico.nome : '—'}</span></div>
-      <div><span>Preço</span><span>R$ ${servico ? Number(servico.preco).toFixed(2).replace('.',',') : '—'}</span></div>
-      <div><span>Data</span><span>${d}/${m}/${y}</span></div>
-      <div><span>Horário</span><span>${_horarioSelecionado}</span></div>
-    </div>`);
+  const resumo = document.createElement('div');
+  resumo.className = 'msg-summary';
+  const linha = (label, valor) => {
+    const div = document.createElement('div');
+    const spanLabel = document.createElement('span'); spanLabel.textContent = label;
+    const spanValor = document.createElement('span'); spanValor.textContent = valor;
+    div.append(spanLabel, spanValor);
+    return div;
+  };
+  resumo.append(
+    linha('Veículo', veiculo ? `${veiculo.modelo} · ${veiculo.placa}` : '—'),
+    linha('Serviço', servico ? servico.nome : '—'),
+    linha('Preço', `R$ ${servico ? Number(servico.preco).toFixed(2).replace('.',',') : '—'}`),
+    linha('Data', `${d}/${m}/${y}`),
+    linha('Horário', _horarioSelecionado),
+  );
+  chatBody().appendChild(resumo);
   chatScroll();
-  chatQuickReplies(`
-    <button class="qr-btn qr-primary" id="btn-confirmar-agend-real" onclick="enviarAgendamento()"><i data-lucide="check" style="width:14px;height:14px"></i> Confirmar agendamento</button>
-    <button class="qr-btn" onclick="reiniciarChatAgendamento()">Recomeçar</button>`);
+
+  const btnConfirmar = criarBotaoQR('Confirmar agendamento', enviarAgendamento, { primary: true });
+  btnConfirmar.id = 'btn-confirmar-agend-real';
+  btnConfirmar.innerHTML = '<i data-lucide="check" style="width:14px;height:14px"></i> Confirmar agendamento';
+  const btnRecomecar = criarBotaoQR('Recomeçar', reiniciarChatAgendamento);
+  chatQuickRepliesEls([btnConfirmar, btnRecomecar]);
 }
 
 function reiniciarChatAgendamento() {
@@ -397,29 +450,41 @@ async function carregarVeiculos() {
       return;
     }
 
-    lista.innerHTML = data.map(v => `
-      <div class="vehicle-card">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-orange-500/10 text-orange-500 flex-shrink-0" style="display:flex;align-items:center;justify-content:center;">
-            <i data-lucide="car-front" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <p class="font-bold text-sm text-white">${v.modelo ?? '—'}</p>
-            <p class="text-xs text-slate-500">${v.placa ?? '—'}${v.ano ? ' · ' + v.ano : ''}</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="abrirEdicaoVeiculo(${v.id},'${(v.marca||'').replace(/'/g,"\\'")}','${(v.modelo||'').replace(/'/g,"\\'")}','${(v.placa||'').replace(/'/g,"\\'")}','${(v.cor||'').replace(/'/g,"\\'")}','${v.ano||''}')"
-            class="text-slate-500 hover:text-orange-400 transition-colors flex-shrink-0" title="Editar">
-            <i data-lucide="pencil" class="w-4 h-4"></i>
-          </button>
-          <button onclick="confirmarExcluirVeiculo('${v.id}')"
-            class="text-slate-500 hover:text-red-400 transition-colors flex-shrink-0" title="Remover">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-    `).join('');
+    lista.textContent = '';
+    data.forEach(v => {
+      const card = document.createElement('div');
+      card.className = 'vehicle-card';
+
+      const esq = document.createElement('div');
+      esq.className = 'flex items-center gap-3';
+      const icone = document.createElement('div');
+      icone.className = 'w-9 h-9 rounded-lg bg-orange-500/10 text-orange-500 flex-shrink-0';
+      icone.style.display = 'flex'; icone.style.alignItems = 'center'; icone.style.justifyContent = 'center';
+      icone.innerHTML = '<i data-lucide="car-front" class="w-5 h-5"></i>';
+      const info = document.createElement('div');
+      const pModelo = document.createElement('p'); pModelo.className = 'font-bold text-sm text-white'; pModelo.textContent = v.modelo ?? '—';
+      const pPlaca  = document.createElement('p'); pPlaca.className = 'text-xs text-slate-500';
+      pPlaca.textContent = (v.placa ?? '—') + (v.ano ? ' · ' + v.ano : '');
+      info.append(pModelo, pPlaca);
+      esq.append(icone, info);
+
+      const dir = document.createElement('div');
+      dir.className = 'flex items-center gap-2';
+      const btnEditar = document.createElement('button');
+      btnEditar.className = 'text-slate-500 hover:text-orange-400 transition-colors flex-shrink-0';
+      btnEditar.title = 'Editar';
+      btnEditar.innerHTML = '<i data-lucide="pencil" class="w-4 h-4"></i>';
+      btnEditar.addEventListener('click', () => abrirEdicaoVeiculo(v.id, v.marca, v.modelo, v.placa, v.cor, v.ano));
+      const btnExcluir = document.createElement('button');
+      btnExcluir.className = 'text-slate-500 hover:text-red-400 transition-colors flex-shrink-0';
+      btnExcluir.title = 'Remover';
+      btnExcluir.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i>';
+      btnExcluir.addEventListener('click', () => confirmarExcluirVeiculo(v.id));
+      dir.append(btnEditar, btnExcluir);
+
+      card.append(esq, dir);
+      lista.appendChild(card);
+    });
     lucide.createIcons();
   } catch (err) {
     console.error(err);

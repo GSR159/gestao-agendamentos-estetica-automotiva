@@ -215,64 +215,31 @@ async function carregarDashboard() {
         div.style.borderColor = '#221b17';
       };
 
-      div.innerHTML = `
-        <div style="min-width:44px;text-align:center;">
-          <span style="
-            font-size:.8rem;
-            font-weight:800;
-            color:#ff6b35;
-          ">
-            ${hora}
-          </span>
-        </div>
+      const colHora = document.createElement('div');
+      colHora.style.cssText = 'min-width:44px;text-align:center;';
+      const spanHora = document.createElement('span');
+      spanHora.style.cssText = 'font-size:.8rem;font-weight:800;color:#ff6b35;';
+      spanHora.textContent = hora;
+      colHora.appendChild(spanHora);
 
-        <div style="
-          width:1px;
-          height:32px;
-          background:#3a2f29;
-          flex-shrink:0;
-        "></div>
+      const divisor = document.createElement('div');
+      divisor.style.cssText = 'width:1px;height:32px;background:#3a2f29;flex-shrink:0;';
 
-        <div style="flex:1;min-width:0;">
-          <p style="
-            margin:0;
-            font-size:.875rem;
-            font-weight:600;
-            color:#fdf6f0;
-            white-space:nowrap;
-            overflow:hidden;
-            text-overflow:ellipsis;
-          ">
-            ${a.cliente || 'Cliente não informado'}
-          </p>
+      const colInfo = document.createElement('div');
+      colInfo.style.cssText = 'flex:1;min-width:0;';
+      const pCliente = document.createElement('p');
+      pCliente.style.cssText = 'margin:0;font-size:.875rem;font-weight:600;color:#fdf6f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+      pCliente.textContent = a.cliente || 'Cliente não informado';
+      const pDetalhe = document.createElement('p');
+      pDetalhe.style.cssText = 'margin:2px 0 0;font-size:.75rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+      pDetalhe.textContent = `${a.servico || '-'} · ${a.veiculo || '-'}`;
+      colInfo.append(pCliente, pDetalhe);
 
-          <p style="
-            margin:2px 0 0;
-            font-size:.75rem;
-            color:#64748b;
-            white-space:nowrap;
-            overflow:hidden;
-            text-overflow:ellipsis;
-          ">
-            ${a.servico || '-'} · ${a.veiculo || '-'}
-          </p>
-        </div>
+      const spanBadge = document.createElement('span');
+      spanBadge.style.cssText = `display:inline-flex;align-items:center;padding:3px 10px;border-radius:9999px;flex-shrink:0;font-size:.7rem;font-weight:700;background:${badge.bg};color:${badge.color};`;
+      spanBadge.textContent = badge.label;
 
-        <span style="
-          display:inline-flex;
-          align-items:center;
-          padding:3px 10px;
-          border-radius:9999px;
-          flex-shrink:0;
-          font-size:.7rem;
-          font-weight:700;
-          background:${badge.bg};
-          color:${badge.color};
-        ">
-          ${badge.label}
-        </span>
-      `;
-
+      div.append(colHora, divisor, colInfo, spanBadge);
       container.appendChild(div);
     });
 
@@ -281,4 +248,28 @@ async function carregarDashboard() {
   }
 }
 
+// FUNIL DE CLIENTES
+async function carregarFunilClientes() {
+  try {
+    const res = await fetch(`${API}/clientes?limit=1000`, { headers: getHeaders() });
+    if (!res.ok) return;
+    const body = await res.json();
+    const dados = (body.dados ?? body).filter(c => c.nome !== 'Usuário Removido');
+
+    const contagem = { novo: 0, ativo: 0, recorrente: 0, inativo: 0 };
+    dados.forEach(c => {
+      const status = c.status_funil ?? 'novo';
+      if (contagem[status] !== undefined) contagem[status]++;
+    });
+
+    document.getElementById('funil-novo').textContent       = contagem.novo;
+    document.getElementById('funil-ativo').textContent      = contagem.ativo;
+    document.getElementById('funil-recorrente').textContent = contagem.recorrente;
+    document.getElementById('funil-inativo').textContent     = contagem.inativo;
+  } catch (erro) {
+    console.error('Erro ao carregar funil de clientes:', erro);
+  }
+}
+
 carregarDashboard();
+carregarFunilClientes();

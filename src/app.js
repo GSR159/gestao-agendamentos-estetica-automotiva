@@ -27,7 +27,6 @@ const allowedOrigins = (process.env.FRONT_URL || 'http://127.0.0.1:5500')
 
 app.use(cors({
   origin: (origin, callback) => {
-    logger.info(`[CORS-DEBUG] origin recebida: "${origin}" | NODE_ENV: "${process.env.NODE_ENV}" | FRONT_URL: "${process.env.FRONT_URL}" | permitidas: ${JSON.stringify(allowedOrigins)}`);
     if (!origin && process.env.NODE_ENV !== 'production') return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
     callback(new Error('Origem não permitida pelo CORS'));

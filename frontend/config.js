@@ -1,12 +1,9 @@
 // config.js
-const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-
-window.API = isLocal
-  ? "http://localhost:3000"
-  : "https://gestao-agendamentos-estetica-automotiva.onrender.com";
-
-// backup (Railway), caso precise trocar manualmente:
-// https://gestao-agendamentos-estetica-automotiva-production.up.railway.app
+window.API = "http://localhost:3000";
+// produção (Render):
+//https://gestao-agendamentos-estetica-automotiva.onrender.com
+// backup
+//https://gestao-agendamentos-estetica-automotiva-production.up.railway.app
 
 // Máscara de telefone BR: (00) 0000-0000 ou (00) 00000-0000
 window.maskTelefone = function (input) {

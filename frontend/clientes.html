@@ -54,7 +54,35 @@
     .input-label{font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
     .badge-ativo{background:rgba(34,197,94,.12);color:#22c55e;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700}
     .badge-inativo{background:rgba(239,68,68,.12);color:#ef4444;padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700}
-    @media(max-width:1024px){.sidebar{width:80px;padding:1.5rem .75rem}.sidebar span,.logo span{display:none}.main-content{margin-left:80px}}
+    .funil-badge{padding:.2rem .65rem;border-radius:9999px;font-size:.72rem;font-weight:700;display:inline-block}
+    .funil-novo{background:rgba(59,130,246,.12);color:#3b82f6}
+    .funil-ativo{background:rgba(34,197,94,.12);color:#22c55e}
+    .funil-recorrente{background:rgba(251,191,36,.12);color:#fbbf24}
+    .funil-inativo{background:rgba(148,163,184,.12);color:#94a3b8}
+
+    /* TOGGLE LISTA / KANBAN */
+    .view-toggle{display:inline-flex;background:var(--bg-surface);border:1px solid var(--border);border-radius:.75rem;padding:.25rem}
+    .view-toggle button{padding:.5rem 1rem;border-radius:.5rem;border:none;background:transparent;color:var(--text-muted);font-weight:700;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:.4rem;font-family:inherit;transition:all .15s}
+    .view-toggle button.active{background:var(--primary);color:#fff}
+
+    /* KANBAN */
+    #vista-kanban{display:none}
+    .kanban-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;align-items:start}
+    .kanban-col{background:var(--bg-surface);border:1px solid var(--border);border-radius:.75rem;padding:.85rem;min-height:120px}
+    .kanban-col.drag-over{border-color:var(--primary);background:rgba(22,163,74,.06)}
+    .kanban-col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;padding:0 .25rem}
+    .kanban-col-titulo{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+    .kanban-col-count{font-size:.7rem;font-weight:700;color:var(--text-muted);background:var(--bg-card);padding:.1rem .55rem;border-radius:9999px}
+    .kanban-cards{display:flex;flex-direction:column;gap:.6rem;min-height:60px}
+    .kanban-card{background:var(--bg-card);border:1px solid var(--border);border-radius:.6rem;padding:.75rem .85rem;cursor:grab;transition:border-color .15s,transform .1s}
+    .kanban-card:hover{border-color:var(--primary)}
+    .kanban-card.dragging{opacity:.4}
+    .kanban-card-nome{font-weight:700;font-size:.85rem;color:var(--text-main);margin-bottom:.2rem}
+    .kanban-card-contato{font-size:.72rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .kanban-card-tags{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem}
+    .kanban-tag{font-size:.65rem;font-weight:700;background:rgba(59,130,246,.12);color:#3b82f6;padding:.1rem .5rem;border-radius:9999px}
+    .kanban-empty{font-size:.72rem;color:var(--text-muted);font-style:italic;text-align:center;padding:1rem 0}
+    @media(max-width:1024px){.sidebar{width:80px;padding:1.5rem .75rem}.sidebar span,.logo span{display:none}.main-content{margin-left:80px}.kanban-board{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -62,8 +90,8 @@
   <aside class="sidebar">
     <div class="logo"><i data-lucide="car"></i><span>AutoGestão</span></div>
     <nav class="nav-links">
-      <a href="dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
       <a href="clientes.html" class="nav-item active"><i data-lucide="users"></i><span>Clientes</span></a>
+      <a href="dashboard.html" class="nav-item"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
       <a href="veiculos.html" class="nav-item"><i data-lucide="car-front"></i><span>Veículos</span></a>
       <a href="agendamentos.html" class="nav-item"><i data-lucide="calendar-check"></i><span>Agendamentos</span></a>
       <a href="agenda.html" class="nav-item"><i data-lucide="calendar-range"></i><span>Calendário</span></a>
@@ -90,9 +118,15 @@
         <h1 class="text-3xl font-bold tracking-tight">Clientes</h1>
         <p class="text-slate-400 text-sm">Base de dados e contactos dos seus clientes.</p>
       </div>
-      <button onclick="abrirFormCliente()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-900/20 transition-all active:scale-95">
-        <i data-lucide="user-plus" class="w-5 h-5"></i> Novo Cliente
-      </button>
+      <div class="flex items-center gap-3">
+        <div class="view-toggle">
+          <button id="btn-vista-lista" class="active" onclick="trocarVista('lista')"><i data-lucide="list" class="w-3.5 h-3.5"></i> Lista</button>
+          <button id="btn-vista-kanban" onclick="trocarVista('kanban')"><i data-lucide="kanban-square" class="w-3.5 h-3.5"></i> Funil</button>
+        </div>
+        <button onclick="abrirFormCliente()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-900/20 transition-all active:scale-95">
+          <i data-lucide="user-plus" class="w-5 h-5"></i> Novo Cliente
+        </button>
+      </div>
     </header>
     <div id="formCliente" class="form-card">
       <h2 class="text-lg font-bold mb-6 flex items-center gap-2"><i data-lucide="user-cog" class="text-emerald-500"></i> Informações do Cliente</h2>
@@ -117,12 +151,45 @@
           onfocus="this.style.borderColor='#16a34a'" onblur="this.style.borderColor='#1e4a40'">
       </div>
     </div>
-    <div class="data-card ">
+    <div id="vista-lista" class="data-card ">
       <table>
-        <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th class="text-right">Ações</th></tr></thead>
-        <tbody id="tabela"><tr><td colspan="4" class="py-20 text-center text-slate-500"><div class="flex flex-col items-center gap-3"><i data-lucide="database" class="w-10 h-10 opacity-10"></i><p>A carregar base de dados...</p></div></td></tr></tbody>
+        <thead><tr><th>Nome</th><th>Email</th><th>Telefone</th><th>Funil</th><th class="text-right">Ações</th></tr></thead>
+        <tbody id="tabela"><tr><td colspan="5" class="py-20 text-center text-slate-500"><div class="flex flex-col items-center gap-3"><i data-lucide="database" class="w-10 h-10 opacity-10"></i><p>A carregar base de dados...</p></div></td></tr></tbody>
       </table>
       <div id="paginacao-clientes"></div>
+    </div>
+
+    <div id="vista-kanban">
+      <div class="kanban-board">
+        <div class="kanban-col" data-status="novo">
+          <div class="kanban-col-head">
+            <span class="kanban-col-titulo funil-novo" style="padding:.15rem .5rem;border-radius:.4rem">Novo</span>
+            <span class="kanban-col-count" id="count-novo">0</span>
+          </div>
+          <div class="kanban-cards" id="kanban-novo"></div>
+        </div>
+        <div class="kanban-col" data-status="ativo">
+          <div class="kanban-col-head">
+            <span class="kanban-col-titulo funil-ativo" style="padding:.15rem .5rem;border-radius:.4rem">Ativo</span>
+            <span class="kanban-col-count" id="count-ativo">0</span>
+          </div>
+          <div class="kanban-cards" id="kanban-ativo"></div>
+        </div>
+        <div class="kanban-col" data-status="recorrente">
+          <div class="kanban-col-head">
+            <span class="kanban-col-titulo funil-recorrente" style="padding:.15rem .5rem;border-radius:.4rem">Recorrente</span>
+            <span class="kanban-col-count" id="count-recorrente">0</span>
+          </div>
+          <div class="kanban-cards" id="kanban-recorrente"></div>
+        </div>
+        <div class="kanban-col" data-status="inativo">
+          <div class="kanban-col-head">
+            <span class="kanban-col-titulo funil-inativo" style="padding:.15rem .5rem;border-radius:.4rem">Inativo</span>
+            <span class="kanban-col-count" id="count-inativo">0</span>
+          </div>
+          <div class="kanban-cards" id="kanban-inativo"></div>
+        </div>
+      </div>
     </div>
   </main>
 </div>
