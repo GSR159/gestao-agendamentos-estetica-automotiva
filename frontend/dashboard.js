@@ -1,6 +1,6 @@
 async function carregarDashboard() {
   try {
-    const res = await fetch(`${API}/agendamentos`, {
+    const res = await fetch(`${API}/agendamentos?limit=100`, {
       headers: getHeaders()
     });
 
